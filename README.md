@@ -80,9 +80,11 @@ slide.addText('Hello world', { style: 'Title' });
 await deck.save('output.deck');
 ```
 
-→ High-level API: [docs/figmatk-api-spec.md](docs/figmatk-api-spec.md)
-→ Low-level FigDeck API: [docs/library.md](docs/library.md)
-→ File format internals: [docs/format/](docs/format/)
+| Docs | |
+|------|---|
+| High-level API | [docs/figmatk-api-spec.md](docs/figmatk-api-spec.md) |
+| Low-level FigDeck API | [docs/library.md](docs/library.md) |
+| File format internals | [docs/format/](docs/format/) |
 
 ## License
 

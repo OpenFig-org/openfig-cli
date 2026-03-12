@@ -6,7 +6,7 @@ description: >
   clone or remove slides, or produce a .deck file for Figma Slides.
   Powered by FigmaTK under the hood.
 metadata:
-  version: "0.0.17"
+  version: "0.0.18"
 ---
 
 # Figma Slides Creator
@@ -27,6 +27,12 @@ To let the user view the result: tell them to **open the file in Figma Desktop**
 | Edit text or images in an existing deck | Use MCP tools (`figmatk_update_text`, `figmatk_insert_image`) |
 | Clone, remove, or restructure slides | Use MCP tools (`figmatk_clone_slide`, `figmatk_remove_slide`) |
 | Inspect structure or read content | Use MCP tools (`figmatk_inspect`, `figmatk_list_text`) |
+
+---
+
+## File locations — always use /tmp
+
+**All files go in `/tmp/`** — scripts, output decks, images, everything. Never write to the Desktop, Documents, Downloads, or any user directory. Never create intermediate notes or reference markdown files. Just build and save the deck.
 
 ---
 

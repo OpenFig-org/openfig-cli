@@ -1,10 +1,11 @@
 {
   "name": "figmatoolkit",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "FigmaToolKit — Swiss-army knife CLI for Figma .deck and .fig files",
   "type": "module",
   "bin": {
-    "figmatk": "cli.mjs"
+    "figmatk": "cli.mjs",
+    "figmatk-mcp": "mcp-server.mjs"
   },
   "exports": {
     "./deck": "./lib/fig-deck.mjs",
@@ -14,8 +15,12 @@
   },
   "files": [
     "cli.mjs",
+    "mcp-server.mjs",
     "lib/",
     "commands/",
+    "skills/",
+    ".claude-plugin/",
+    ".mcp.json",
     "LICENSE",
     "README.md"
   ],
@@ -35,12 +40,22 @@
   },
   "author": "rcoenen",
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
     "archiver": "^7.0.1",
     "fzstd": "^0.1.1",
     "kiwi-schema": "^0.5.0",
     "pako": "^2.1.0",
     "zstd-codec": "^0.1.5"
   },
-  "keywords": ["figma", "deck", "fig", "slides", "presentation", "kiwi", "binary", "cli"],
+  "keywords": [
+    "figma",
+    "deck",
+    "fig",
+    "slides",
+    "presentation",
+    "kiwi",
+    "binary",
+    "cli"
+  ],
   "license": "MIT"
 }

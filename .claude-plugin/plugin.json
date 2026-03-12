@@ -1,0 +1,11 @@
+{
+  "name": "figmatk",
+  "version": "0.0.3",
+  "description": "Inspect and modify Figma Slides .deck files natively — no lossy .pptx conversion",
+  "author": {
+    "name": "FigmaTK Contributors"
+  },
+  "repository": "https://github.com/rcoenen/figmatk",
+  "license": "MIT",
+  "keywords": ["figma", "deck", "slides", "presentation"]
+}

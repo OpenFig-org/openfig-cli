@@ -6,7 +6,7 @@ description: >
   clone or remove slides, or produce a .deck file for Figma Slides.
   Powered by FigmaTK under the hood.
 metadata:
-  version: "0.1.0"
+  version: "0.1.1"
 ---
 
 # Figma Slides Creator
@@ -45,7 +45,7 @@ Use this when the user wants a new presentation. Follow these steps **in order, 
 The environment has no `node_modules`. **Before writing any script**, run this exact command:
 
 ```bash
-mkdir -p /tmp/figmatk-ws && cd /tmp/figmatk-ws && npm init -y && npm install figmatk
+[ -d /tmp/figmatk-ws/node_modules ] || (mkdir -p /tmp/figmatk-ws && cd /tmp/figmatk-ws && npm init -y && npm install figmatk)
 ```
 
 Do not proceed to Step 2 until this command succeeds.

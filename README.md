@@ -172,11 +172,11 @@ Decodes and re-encodes with zero changes. If Figma opens the output, your pipeli
 
 FigmaTK ships as a **Cowork plugin** with an MCP server. This lets Claude manipulate `.deck` files directly as tool calls.
 
-### Install as Cowork plugin
+### Install as plugin
 
 ```bash
 claude plugin marketplace add rcoenen/figmatk
-claude plugin install figmatk@figmatk
+claude plugin install figmatk
 ```
 
 ### Or add as MCP server manually

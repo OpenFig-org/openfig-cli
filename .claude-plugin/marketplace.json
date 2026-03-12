@@ -1,11 +1,24 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "figmatk",
   "description": "FigmaTK — Inspect and modify Figma Slides .deck files",
+  "metadata": {
+    "description": "FigmaTK — Inspect and modify Figma Slides .deck files natively"
+  },
+  "owner": {
+    "name": "FigmaTK Contributors",
+    "email": "shove-tank-malt@duck.com"
+  },
   "plugins": [
     {
       "name": "figmatk",
-      "source": ".",
-      "description": "Inspect and modify Figma Slides .deck files natively"
+      "description": "Inspect and modify Figma Slides .deck files natively",
+      "version": "0.0.5",
+      "author": {
+        "name": "FigmaTK Contributors"
+      },
+      "source": "./",
+      "category": "development"
     }
   ]
 }

@@ -6,7 +6,7 @@ description: >
   clone or remove slides, or produce a .deck file for Figma Slides.
   Powered by FigmaTK under the hood.
 metadata:
-  version: "0.0.15"
+  version: "0.0.16"
 ---
 
 # Figma Slides Creator
@@ -145,7 +145,7 @@ slide.addDiamond(x, y, width, height, opts)
 slide.addTriangle(x, y, width, height, opts)
 slide.addStar(x, y, width, height, opts)
 slide.addLine(x1, y1, x2, y2, opts)             // opts: color, weight
-slide.addImage(path, opts)                        // opts: x, y, width, height
+slide.addImage(x, y, width, height, pathOrBuf, opts) // opts: cornerRadius, opacity
 slide.addTable(data, opts)                        // 2D string array; opts: x, y, width, colWidths, rowHeight
 slide.addSVG(x, y, width, svgPathOrBuf, opts)
 ```

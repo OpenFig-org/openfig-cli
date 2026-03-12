@@ -13,7 +13,7 @@
     {
       "name": "figmatk",
       "description": "Swiss Army Knife for Figma Files (.deck)",
-      "version": "0.0.15",
+      "version": "0.0.16",
       "author": {
         "name": "FigmaTK Contributors"
       },

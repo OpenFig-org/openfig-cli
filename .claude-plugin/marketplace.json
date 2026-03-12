@@ -3,7 +3,7 @@
   "name": "figmatk",
   "description": "FigmaTK — Inspect and modify Figma Slides .deck files",
   "metadata": {
-    "description": "FigmaTK — Inspect and modify Figma Slides .deck files natively"
+    "description": "FigmaTK — Swiss Army Knife for Figma Files (.deck)"
   },
   "owner": {
     "name": "FigmaTK Contributors",
@@ -12,7 +12,7 @@
   "plugins": [
     {
       "name": "figmatk",
-      "description": "Inspect and modify Figma Slides .deck files natively",
+      "description": "Swiss Army Knife for Figma Files (.deck)",
       "version": "0.0.9",
       "author": {
         "name": "FigmaTK Contributors"

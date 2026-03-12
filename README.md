@@ -241,9 +241,9 @@ The `canvas.fig` binary layout:
 
 The message contains `nodeChanges[]` (every node in the document) and `blobs[]` (binary data for paths, etc.). Nodes form a tree via `parentIndex.guid`. Each node has a `type` (DOCUMENT, CANVAS, SLIDE, INSTANCE, TEXT, SYMBOL, etc.) and optionally `symbolData` with `symbolOverrides` for component instances.
 
-## Hard-Won Rules
+## Format Rules
 
-These rules were discovered through reverse engineering. Violating any of them produces silent failures or crashes:
+Important constraints discovered while building this toolkit. Violating any of them produces silent failures or crashes:
 
 | Rule | Detail |
 |------|--------|

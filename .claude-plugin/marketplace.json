@@ -13,7 +13,7 @@
     {
       "name": "figmatk",
       "description": "Inspect and modify Figma Slides .deck files natively",
-      "version": "0.0.6",
+      "version": "0.0.8",
       "author": {
         "name": "FigmaTK Contributors"
       },

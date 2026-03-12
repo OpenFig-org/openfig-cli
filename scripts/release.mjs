@@ -43,4 +43,7 @@ run(`npm publish --access public`);
 run(`git tag v${version}`);
 run(`git push && git push --tags`);
 
+// 6. Update local global install
+run(`npm install -g figmatk`);
+
 console.log(`\n✅ Released figmatk v${version}\n`);

@@ -1,4 +1,4 @@
-# FigmaTK — Figma Toolkit (v0.0.6)
+# FigmaTK — Figma Toolkit
 
 Swiss-army knife CLI for Figma Slides `.deck` files. Parse, inspect, modify, and rebuild presentations programmatically — no Figma API required.
 
@@ -67,7 +67,7 @@ Or add manually in Claude Desktop → Settings → Developer → Edit Config:
 }
 ```
 
-Available MCP tools: `figmatk_inspect`, `figmatk_list_text`, `figmatk_list_overrides`, `figmatk_update_text`, `figmatk_insert_image`, `figmatk_clone_slide`, `figmatk_remove_slide`, `figmatk_roundtrip`.
+Available MCP tools: `figmatk_create_deck`, `figmatk_inspect`, `figmatk_list_text`, `figmatk_list_overrides`, `figmatk_update_text`, `figmatk_insert_image`, `figmatk_clone_slide`, `figmatk_remove_slide`, `figmatk_roundtrip`.
 
 ## Programmatic API
 

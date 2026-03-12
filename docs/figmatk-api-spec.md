@@ -354,10 +354,13 @@ slide.addRectangle(x, y, w, h, { fill: { r: 0.5, g: 0, b: 0 } })
 
 **Status:**
 - `addRectangle` — ✅ validated, ROUNDED_RECTANGLE node
-- `addText` — ✅ validated (named styles, custom fonts, colors, alignment)
+- `addText` — ✅ validated (named styles, custom fonts, colors, alignment, runs, lists)
 - `addFrame` — ✅ validated (auto-layout vertical/horizontal)
-- `addEllipse` — ❓ needs reference deck
-- `addLine` — ❓ needs reference deck
+- `addEllipse` — ✅ validated, SHAPE_WITH_TEXT with ELLIPSE type
+- `addDiamond` — ✅ validated, SHAPE_WITH_TEXT with DIAMOND type
+- `addTriangle` — ✅ validated, SHAPE_WITH_TEXT with TRIANGLE_UP type
+- `addStar` — ✅ validated, SHAPE_WITH_TEXT with STAR type
+- `addLine` — ✅ validated, LINE node with point-to-point transform
 - `addImage` (freestanding) — ✅ validated, ROUNDED_RECTANGLE with IMAGE fillPaint
 
 ---

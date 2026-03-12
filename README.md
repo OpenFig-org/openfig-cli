@@ -2,6 +2,21 @@
 
 Swiss-army knife CLI for Figma `.deck` and `.fig` files. Parse, inspect, modify, and rebuild Figma Slides decks programmatically — no Figma API required.
 
+## Figma File Formats
+
+Each Figma product has its own native file format:
+
+| Product | Extension |
+|---------|-----------|
+| Figma Design | `.fig` |
+| Figma Slides | `.deck` |
+| Figma Jam (whiteboard) | `.jam` |
+| Figma Buzz | `.buzz` |
+| Figma Sites | `.site` |
+| Figma Make | `.make` |
+
+The `.deck` format borrows heavily from `.fig` — a `.deck` is essentially a ZIP containing a `.fig`-encoded canvas plus metadata and images. FigmaTK v0.0.1 focuses on `.deck` files. We'll evaluate expanding to other formats as we go.
+
 ## Why native `.deck`?
 
 Figma Slides lets you download presentations as `.deck` files — and re-upload them. This is the **native** round-trip format. The alternative, exporting to `.pptx`, is lossy: vectors get rasterized to bitmaps, fonts fall back to system defaults, and precise layout breaks. By staying in `.deck`, you preserve everything — fonts, vector shapes, component overrides, styles — exactly as Figma renders them.

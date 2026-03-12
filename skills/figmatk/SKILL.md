@@ -5,7 +5,7 @@ description: >
   create a presentation, build a slide deck, edit slides, update text or images,
   clone or remove slides, or produce a .deck file for Figma Slides.
 metadata:
-  version: "0.0.6"
+  version: "0.0.7"
 ---
 
 # FigmaTK Skill
@@ -25,17 +25,48 @@ metadata:
 
 Use this when the user wants a new presentation. Write a Node.js script and execute it.
 
+> **Import path:** `figmatk` is an npm package. Import from the installed package:
+> ```javascript
+> import { Deck } from 'figmatk';
+> ```
+
 ```javascript
 import { Deck } from 'figmatk';
 
 const deck = await Deck.create('My Presentation');
-const slide = deck.addBlankSlide();
 
-slide.setBackground('slate');
-slide.addText('Slide Title', { style: 'Title', color: 'white', x: 64, y: 80, width: 1792 });
-slide.addText('Subtitle or tagline here', { style: 'Body 1', color: 'light-gray', x: 64, y: 240, width: 1200 });
+const slide = deck.addBlankSlide();          // template blank slide auto-removed
+slide.setBackground('Black');                // named color — see list below
+slide.addText('Slide Title', {
+  style: 'Title', color: 'White',
+  x: 64, y: 80, width: 1792, align: 'LEFT'
+});
+slide.addText('Subtitle', {
+  style: 'Body 1', color: 'Grey',
+  x: 64, y: 240, width: 1200, align: 'LEFT'
+});
 
 await deck.save('/path/to/output.deck');
+```
+
+### ⚠️ Critical gotchas
+
+| Issue | Wrong | Right |
+|-------|-------|-------|
+| `setBackground` with hex | `s.setBackground('#1A1A1A')` | `s.setBackground('Black')` |
+| `setBackground` with raw RGB | `s.setBackground({ r:0.1, g:0.1, b:0.1 })` | `s.setBackground('Black')` — raw RGB silently renders white |
+| Shape method signature | `s.addRectangle({ x:0, y:0, width:100 })` | `s.addRectangle(0, 0, 100, 100, opts)` |
+| Shape fill color | `{ fill: '#F4900C' }` | `{ fill: hex('#F4900C') }` — use the hex() helper |
+| `addLine` options | `{ strokeColor: ..., strokeWeight: 2 }` | `{ color: 'Black', weight: 2 }` |
+| `align` value | `align: 'left'` | `align: 'LEFT'` (uppercase) |
+
+### Hex color helper (for shape fills)
+
+```javascript
+function hex(h) {
+  return { r: parseInt(h.slice(1,3),16)/255, g: parseInt(h.slice(3,5),16)/255, b: parseInt(h.slice(5,7),16)/255 };
+}
+// Usage: s.addRectangle(0, 0, 200, 50, { fill: hex('#F4900C') })
 ```
 
 ### Text styles
@@ -51,37 +82,33 @@ await deck.save('/path/to/output.deck');
 | `Body 3` | 24pt | Regular | Captions, labels |
 | `Note` | 20pt | Regular | Footnotes, sources |
 
-### Colors
+### Named colors for `setBackground()`
 
-Use **names** — never RGB values. The API accepts:
+> **Case-sensitive.** `'Black'` works, `'black'` does not.
 
-| Type | Example |
-|------|---------|
-| Designer name | `'teal'`, `'coral'`, `'navy'`, `'midnight'`, `'forest'`, `'charcoal'`, `'cream'`, `'gold'`, `'terracotta'`, `'sage'`, `'cobalt'`, `'rose'`, `'indigo'`, `'burgundy'`, `'sand'`... |
-| Hex string | `'#E63946'` |
-| Light Slides theme | `'Blue'`, `'Red'`, `'Green'`, `'Yellow'`, `'Orange'`, `'Pink'`, `'Purple'`, `'Slate'`, `'White'`, `'Black'` |
+`'Black'`, `'White'`, `'Grey'`, `'Blue'`, `'Red'`, `'Yellow'`, `'Green'`, `'Orange'`, `'Pink'`, `'Purple'`, `'Teal'`, `'Violet'`, `'Persimmon'`, `'Pale Pink'`, `'Pale Blue'`, `'Pale Green'`, `'Pale Teal'`, `'Pale Purple'`, `'Pale Persimmon'`, `'Pale Violet'`, `'Pale Red'`, `'Pale Yellow'`
 
-Pick colors by feeling: "warm terracotta on cream", "midnight blue with coral accent". Let the design drive the choice, then pick the closest name.
+Use `'Black'` for dark backgrounds, `'White'` for light. For custom slide backgrounds, use the closest named color — **not hex**.
 
 ### Slide dimensions
 
-1920 × 1080px. Position and size all elements in pixels.
+1920 × 1080px. All positions and sizes in pixels.
 
-### Available slide methods
+### Slide methods (correct signatures)
 
 ```javascript
-slide.setBackground(color)                        // named color or hex
-slide.addText(text, opts)                         // opts: style, color, x, y, width, align, bold, italic, fontSize
-slide.addFrame(opts)                              // auto-layout frame: stackMode, spacing, x, y, width, height
-slide.addRectangle(opts)                          // opts: x, y, width, height, fill, opacity, cornerRadius
-slide.addEllipse(opts)                            // circle/ellipse: x, y, width, height, fill
-slide.addDiamond(opts)                            // diamond shape
-slide.addTriangle(opts)                           // triangle
-slide.addStar(opts)                               // 5-pointed star
-slide.addLine(x1, y1, x2, y2, opts)             // line: strokeColor, strokeWeight
-slide.addImage(path, opts)                        // freestanding image: x, y, width, height
-slide.addTable(data, opts)                        // 2D array of strings: x, y, width, colWidths, rowHeight
-slide.addSVG(x, y, width, svgPathOrBuf, opts)   // import SVG vector graphic
+slide.setBackground(namedColor)                   // named color only — hex/raw RGB render white
+slide.addText(text, opts)                         // opts: style, color (named or hex('#...')), x, y, width, align, bold, italic, fontSize
+slide.addFrame(opts)                              // auto-layout: stackMode, spacing, x, y, width, height
+slide.addRectangle(x, y, width, height, opts)    // opts: fill (named or {r,g,b}), opacity, cornerRadius
+slide.addEllipse(x, y, width, height, opts)      // opts: fill, opacity
+slide.addDiamond(x, y, width, height, opts)
+slide.addTriangle(x, y, width, height, opts)
+slide.addStar(x, y, width, height, opts)
+slide.addLine(x1, y1, x2, y2, opts)             // opts: color, weight
+slide.addImage(path, opts)                        // opts: x, y, width, height
+slide.addTable(data, opts)                        // 2D string array; opts: x, y, width, colWidths, rowHeight
+slide.addSVG(x, y, width, svgPathOrBuf, opts)
 ```
 
 ---
@@ -118,71 +145,60 @@ Use this when the user provides a `.deck` file to modify.
 
 ## Design Philosophy
 
-Every deck must look **intentionally designed**, not AI-generated. Follow these rules on every presentation task.
+Every deck must look **intentionally designed**, not AI-generated.
 
 ### Colour
 
-- Pick a bold palette that reflects the **specific topic**. If the same palette would suit a completely different presentation, it's not specific enough.
-- Use **one dominant colour** (60–70% visual weight) + 1–2 supporting tones + one sharp accent.
-- Use dark backgrounds on title and conclusion slides, light on content slides ("sandwich" structure) — or commit fully to dark for a premium feel.
+- Pick a bold palette for the **specific topic** — not a generic one.
+- One dominant colour (60–70%) + 1–2 supporting tones + one sharp accent.
+- Dark backgrounds on title/conclusion slides, light on content ("sandwich") — or fully dark for premium feel.
 
-**Starter palettes:**
+**Starter palettes** (use nearest named color for `setBackground`, hex helper for shapes):
 
-| Theme | Background | Accent | Text |
-|-------|-----------|--------|------|
-| Midnight | `navy` | `sky` | `white` |
-| Forest | `forest` | `sage` | `white` |
-| Coral | `coral` | `indigo` | `white` |
-| Terracotta | `terracotta` | `sand` | `white` |
-| Ocean | `cobalt` | `midnight` | `white` |
-| Minimal | `smoke` | `charcoal` | `black` |
+| Theme | Background | Shape accent | Text |
+|-------|-----------|-------------|------|
+| Midnight | `'Black'` | `hex('#CADCFC')` | `'White'` |
+| Forest | `'Green'` | `hex('#97BC62')` | `'White'` |
+| Coral | `'Persimmon'` | `hex('#2F3C7E')` | `'White'` |
+| Terracotta | `'Persimmon'` | `hex('#E7E8D1')` | `'White'` |
+| Ocean | `'Blue'` | `hex('#21295C')` | `'White'` |
+| Minimal | `'White'` | `hex('#36454F')` | `'Black'` |
 
 ### Layout
 
-- Every slide needs at least **one visual element** — shape, image, SVG icon, or table. Text-only slides are forgettable.
-- **Vary layouts** — never use the same structure slide after slide.
-- Pick one visual motif (e.g. rounded image frames, coloured icon circles, thick side accent bars) and carry it through every slide.
+- Every slide needs at least **one visual element** — shape, image, SVG, or table.
+- **Vary layouts** — never repeat the same structure slide after slide.
+- Carry one visual motif through every slide (coloured accent bar, icon circles, etc.).
 
-**Layout options per slide:**
-
-- Two-column (text left, visual right)
-- Icon + text rows (icon in coloured circle, bold header, description)
-- 2×2 or 2×3 grid of cards
-- Large stat callout (big number + small label)
-- Half-background image with text overlay
-- Timeline / numbered steps
+**Layout options:** two-column, icon+text rows, 2×2/2×3 grid, large stat callout, half-background image, timeline/steps.
 
 ### Typography
 
 - Left-align body text. Centre only titles.
-- **Font sizes:** titles use `Title` style (96pt); section headers `Header 1` (60pt); body `Body 1` or `Body 2`; captions `Body 3` or `Note`.
-- Minimum 64px margin from slide edges. 24–48px gap between content blocks.
+- Minimum 64px margin from slide edges. 24–48px between content blocks.
 
-### Things to never do
+### Never do
 
 - Repeat the same layout slide after slide
 - Centre body text
-- Use accent lines under slide titles (hallmark of AI-generated slides — use colour or whitespace instead)
-- Create text-only slides
-- Use low-contrast text — always check text against its background
-- Default to generic blue — pick colours that reflect the topic
+- Use accent lines under slide titles (hallmark of AI-generated slides)
+- Text-only slides
+- Low-contrast text against background
 
 ---
 
 ## QA
 
-After generating or editing a deck:
-
-1. **Self-check:** confirm all placeholder text has been replaced, no `lorem ipsum` or `[title here]` remains
-2. **Tell the user** to upload the `.deck` to Figma Slides and review visually — this is the only way to catch rendering issues
-3. **Offer to fix** any issues the user reports after upload
+1. Self-check: no placeholder text (`lorem ipsum`, `[title here]`) remains
+2. Tell the user to open the `.deck` in Figma Desktop to catch rendering issues
+3. Offer to fix anything they report
 
 ---
 
 ## Critical Format Rules
 
-- Blank text fields must use `" "` (space), **never** empty string — empty string crashes Figma
-- Image overrides require both a full-image hash and a ~320px thumbnail hash (40-char hex SHA-1)
-- Removed nodes use `phase: 'REMOVED'` — never delete from `nodeChanges`
-- Chunk 1 of `canvas.fig` must be zstd-compressed — Figma silently rejects deflateRaw
+- Blank text must be `" "` (space), never `""` — empty string crashes Figma
+- Image overrides need both a full-image hash and thumbnail hash (40-char hex SHA-1)
+- Removed nodes: set `phase: 'REMOVED'`, never delete from `nodeChanges`
+- Chunk 1 of `canvas.fig` must be zstd-compressed
 - `thumbHash` must be `new Uint8Array(0)`, never `{}`

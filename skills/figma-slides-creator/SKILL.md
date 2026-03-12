@@ -6,7 +6,7 @@ description: >
   clone or remove slides, or produce a .deck file for Figma Slides.
   Powered by FigmaTK under the hood.
 metadata:
-  version: "0.1.1"
+  version: "0.2.0"
 ---
 
 # Figma Slides Creator
@@ -23,10 +23,10 @@ To let the user view the result: tell them to **open the file in Figma Desktop**
 
 | Task | Approach |
 |------|----------|
-| Create a new deck from scratch | Use the high-level JS API (`lib/api.mjs`) |
-| Edit text or images in an existing deck | Use MCP tools (`figmatk_update_text`, `figmatk_insert_image`) |
-| Clone, remove, or restructure slides | Use MCP tools (`figmatk_clone_slide`, `figmatk_remove_slide`) |
-| Inspect structure or read content | Use MCP tools (`figmatk_inspect`, `figmatk_list_text`) |
+| Create a new deck from scratch | **`figmatk_create_deck` MCP tool** — no npm install needed |
+| Edit text or images in an existing deck | `figmatk_update_text`, `figmatk_insert_image` |
+| Clone, remove, or restructure slides | `figmatk_clone_slide`, `figmatk_remove_slide` |
+| Inspect structure or read content | `figmatk_inspect`, `figmatk_list_text` |
 
 ---
 
@@ -36,25 +36,60 @@ To let the user view the result: tell them to **open the file in Figma Desktop**
 
 ---
 
-## Path A — Create from Scratch (High-Level API)
+## Path A — Create from Scratch (MCP tool — preferred)
 
-Use this when the user wants a new presentation. Follow these steps **in order, every time, no exceptions**.
+**Always use this path.** No npm install, no scripts, no workspace setup.
 
-### Step 1 — Set up workspace (MANDATORY FIRST STEP — never skip)
+Call `figmatk_create_deck` with a structured slide description:
 
-The environment has no `node_modules`. **Before writing any script**, run this exact command:
+```json
+{
+  "output": "/tmp/my-deck.deck",
+  "title": "My Presentation",
+  "theme": "midnight",
+  "slides": [
+    { "type": "title",   "title": "My Presentation", "subtitle": "A subtitle" },
+    { "type": "bullets", "title": "Key Points", "bullets": ["Point one", "Point two", "Point three"] },
+    { "type": "two-column", "title": "Comparison", "leftText": "Left side content", "rightText": "Right side content" },
+    { "type": "stat",    "title": "By the numbers", "stat": "42%", "caption": "of users prefer this" },
+    { "type": "image-full", "image": "/tmp/photo.jpg", "title": "Caption text" },
+    { "type": "closing", "title": "Thank you", "subtitle": "Questions?" }
+  ]
+}
+```
+
+### Slide types
+
+| Type | Fields |
+|------|--------|
+| `title` | `title`, `subtitle` |
+| `bullets` | `title`, `bullets` (array) |
+| `two-column` | `title`, `leftText`, `rightText`, `image` (right side) |
+| `stat` | `title`, `stat` (big number), `caption` |
+| `image-full` | `image` (path), `title`, `body` (overlay text) |
+| `closing` | `title`, `subtitle` |
+
+### Themes
+
+`midnight` · `ocean` · `forest` · `coral` · `terracotta` · `minimal`
+
+Each theme handles backgrounds, accent colors, and text colors automatically.
+
+---
+
+## Path A2 — Create from Scratch (Node.js script fallback)
+
+Only use this if `figmatk_create_deck` is unavailable or you need layout control beyond what the MCP tool offers.
+
+### Step 1 — Set up workspace (MANDATORY — never skip)
 
 ```bash
 [ -d /tmp/figmatk-ws/node_modules ] || (mkdir -p /tmp/figmatk-ws && cd /tmp/figmatk-ws && npm init -y && npm install figmatk)
 ```
 
-Do not proceed to Step 2 until this command succeeds.
+### Step 2 — Write script to `/tmp/figmatk-ws/deck.mjs`
 
-### Step 2 — Write the script to `/tmp/figmatk-ws/deck.mjs`
-
-**Always write the script to `/tmp/figmatk-ws/deck.mjs`** — not to the current directory, not to any other path.
-
-**Always use the bare specifier** `import { Deck } from 'figmatk'` — never a file path import.
+**Always use bare specifier** `import { Deck } from 'figmatk'` — never a file path.
 
 ```javascript
 import { Deck } from 'figmatk';
@@ -64,31 +99,18 @@ function hex(h) {
 }
 
 const deck = await Deck.create('My Presentation');
-
-// Each call to addBlankSlide() returns a new blank slide.
-// The template blank slide is auto-removed on the first call.
 const slide = deck.addBlankSlide();
-slide.setBackground('Black');                // named color — see list below
-slide.addText('Slide Title', {
-  style: 'Title', color: 'White',
-  x: 64, y: 80, width: 1792, align: 'LEFT'
-});
-slide.addText('Subtitle', {
-  style: 'Body 1', color: 'Grey',
-  x: 64, y: 240, width: 1200, align: 'LEFT'
-});
-
+slide.setBackground('Black');
+slide.addText('Slide Title', { style: 'Title', color: 'White', x: 64, y: 80, width: 1792, align: 'LEFT' });
 await deck.save('/tmp/my-presentation.deck');
-console.log('Done — open /tmp/my-presentation.deck in Figma Desktop');
+console.log('Done');
 ```
 
-### Step 3 — Run the script
+### Step 3 — Run
 
 ```bash
 node /tmp/figmatk-ws/deck.mjs
 ```
-
-If this fails, check the error and fix the script — **do not change the workspace setup or the import path**.
 
 ### ⚠️ Critical gotchas
 
@@ -179,6 +201,7 @@ Use this when the user provides a `.deck` file to modify.
 
 | Tool | Purpose |
 |------|---------|
+| `figmatk_create_deck` | **Create a new deck from scratch** — no npm install needed |
 | `figmatk_inspect` | Node hierarchy tree — structure, node IDs, slide count |
 | `figmatk_list_text` | All text strings and image hashes per slide |
 | `figmatk_list_overrides` | Editable override keys per symbol (component) |

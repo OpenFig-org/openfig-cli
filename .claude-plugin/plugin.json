@@ -1,6 +1,6 @@
 {
   "name": "figmatk",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Create and edit Figma Slides .deck files programmatically — no Figma API required",
   "author": {
     "name": "FigmaTK Contributors"

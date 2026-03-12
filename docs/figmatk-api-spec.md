@@ -196,37 +196,32 @@ Document failures explicitly — a known-broken feature is better than a silent 
 
 ---
 
-### 2.1 — Shape geometry (read + write) 🔬
+### 2.1 — Shape geometry (read + write) ✅ Validated
 
 ```js
-const shape = slide.shapes[0]   // all shapes on slide
+slide.shapes                     // Shape[] — all direct children
+const shape = slide.shapes[0]
 
-shape.x                          // read
-shape.y
-shape.width
-shape.height
-shape.rotation                   // degrees
+shape.x                          // read — transform.m02
+shape.y                          // transform.m12
+shape.width                      // size.x
+shape.height                     // size.y
+shape.rotation                   // degrees (from transform matrix)
 
 shape.x = 100                    // write
 shape.width = 500
 shape.rotation = 45
 ```
 
-**Investigate:** Which node fields map to x/y/width/height?
-Likely `transform.m02` / `transform.m12` for position,
-`size.x` / `size.y` for dimensions. Confirm write works.
-
 ---
 
-### 2.2 — Shape visibility + opacity 🔬
+### 2.2 — Shape visibility + opacity ✅ Validated
 
 ```js
-shape.visible = false
-shape.opacity = 0.5
+shape.visible = false            // hides node
+shape.opacity = 0.5              // 50% transparent
+shape.name = 'New Name'          // rename
 ```
-
-**Investigate:** `visible` and `opacity` fields exist on nodes —
-confirm write round-trips correctly.
 
 ---
 

@@ -10,6 +10,14 @@ metadata:
 
 # FigmaTK Skill
 
+## ⚠️ Never open .deck files directly
+
+`.deck` files are binary ZIP archives. **Never open, read, or display a `.deck` file** — it will show garbage bytes in the panel. To inspect or modify a `.deck` file, always use the CLI commands or Node.js API shown below.
+
+To let the user view the result: tell them to **open the file in Figma Desktop** (`File → Open` or double-click the `.deck` file).
+
+---
+
 ## Quick Reference
 
 | Task | Approach |

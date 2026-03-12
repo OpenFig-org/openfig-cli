@@ -6,7 +6,7 @@ description: >
   clone or remove slides, or produce a .deck file for Figma Slides.
   Powered by FigmaTK under the hood.
 metadata:
-  version: "0.0.16"
+  version: "0.0.17"
 ---
 
 # Figma Slides Creator
@@ -184,7 +184,32 @@ Use this when the user provides a `.deck` file to modify.
 
 ## Design Philosophy
 
-Every deck must look **intentionally designed**, not AI-generated.
+Think like a **professional PowerPoint designer**, not an AI generating slides. Every deck must feel like it was made by a human who spent a day on it.
+
+### Deck structure — use this template every time
+
+A proper deck has a clear spine. Follow this slide order:
+
+| # | Slide type | Purpose |
+|---|-----------|---------|
+| 1 | **Title** | Dark bg, big title, subtitle, presenter name |
+| 2 | **Agenda / Overview** | 3–5 bullet topics, light bg |
+| 3–N | **Content slides** | Vary layout each slide — see below |
+| N+1 | **Section divider** (optional) | Bold colour block to signal a new chapter |
+| Last | **Closing / CTA** | Dark bg mirrors title slide — "Thank you", next steps, contact |
+
+The title and closing slides must use the **same dark background** — this creates the "sandwich" effect that makes decks feel complete.
+
+### Consistent visual motif — pick one and use it on every slide
+
+Choose one repeating element and place it consistently across all content slides:
+
+- **Top accent bar**: `addRectangle(0, 0, 1920, 8, { fill: hex('#...') })` — full-width coloured strip at top
+- **Left colour panel**: tall rectangle on the left third, text floats right
+- **Corner badge**: small filled circle or square in bottom-right with slide number or logo
+- **Bottom rule**: thin full-width line at y=1040
+
+Without a motif, slides look unrelated. With one, the deck feels designed.
 
 ### Colour
 
@@ -203,18 +228,27 @@ Every deck must look **intentionally designed**, not AI-generated.
 | Ocean | `'Blue'` | `hex('#21295C')` | `'White'` |
 | Minimal | `'White'` | `hex('#36454F')` | `'Black'` |
 
-### Layout
+### Layout — vary every slide
 
-- Every slide needs at least **one visual element** — shape, image, SVG, or table.
-- **Vary layouts** — never repeat the same structure slide after slide.
-- Carry one visual motif through every slide (coloured accent bar, icon circles, etc.).
+Each content slide should use a **different layout type**. Never repeat the same structure back-to-back.
 
-**Layout options:** two-column, icon+text rows, 2×2/2×3 grid, large stat callout, half-background image, timeline/steps.
+| Layout | When to use |
+|--------|------------|
+| Two-column | Comparison, pros/cons, text + image |
+| 2×2 or 2×3 grid | Features, icons, categories |
+| Large stat callout | One big number + explanation |
+| Half-background image | Photo-rich slides |
+| Timeline / steps | Process, history, roadmap |
+| Icon + text rows | Lists that need visual weight |
+| Full-bleed image | Impact moment, section break |
+
+Every slide needs at least **one visual element** — shape, image, SVG, or table. No text-only slides.
 
 ### Typography
 
-- Left-align body text. Centre only titles.
+- Left-align body text. Centre only titles on title/closing slides.
 - Minimum 64px margin from slide edges. 24–48px between content blocks.
+- Use `Header 2` or `Header 3` for slide titles on content slides (not `Title` — that's for the title slide only).
 
 ### Never do
 
@@ -223,6 +257,7 @@ Every deck must look **intentionally designed**, not AI-generated.
 - Use accent lines under slide titles (hallmark of AI-generated slides)
 - Text-only slides
 - Low-contrast text against background
+- Skip the closing slide — it makes the deck feel unfinished
 
 ---
 

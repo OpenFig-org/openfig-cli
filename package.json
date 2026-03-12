@@ -1,6 +1,6 @@
 {
   "name": "figmatoolkit",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "FigmaToolKit — Swiss-army knife CLI for Figma .deck and .fig files",
   "type": "module",
   "bin": {

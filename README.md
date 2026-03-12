@@ -2,13 +2,18 @@
 
 Swiss-army knife CLI for Figma `.deck` and `.fig` files. Parse, inspect, modify, and rebuild Figma Slides decks programmatically — no Figma API required.
 
-Figma's `.deck` (Slides) and `.fig` (Design) files are binary archives with no official tooling for programmatic editing. **FigmaTK** cracks them open: read the node tree, discover every editable field, override text and images, clone slides from templates, and write valid files that Figma imports cleanly.
+## Why native `.deck`?
 
-## Why
+Figma Slides lets you download presentations as `.deck` files — and re-upload them. This is the **native** round-trip format. The alternative, exporting to `.pptx`, is lossy: vectors get rasterized to bitmaps, fonts fall back to system defaults, and precise layout breaks. By staying in `.deck`, you preserve everything — fonts, vector shapes, component overrides, styles — exactly as Figma renders them.
 
-- **Batch-produce decks** from a template — feed in data, get branded slides out
-- **Inspect** any `.deck` or `.fig` to understand its internal structure
-- **Automate** text and image placement without touching Figma's UI
+**FigmaTK** makes this round-trip programmable. Download a `.deck`, modify it with these utilities, re-upload to Figma. Everything stays native.
+
+## Use Cases
+
+- **AI agent for presentations** — let an LLM read slide content, rewrite copy, insert images, and produce a ready-to-upload `.deck` without ever touching the Figma UI
+- **Batch-produce branded decks** — start from a company template, feed in data per client/project, get pixel-perfect slides out
+- **Inspect and audit** — understand the internal structure of any `.deck` or `.fig` file
+- **Automate** text and image placement across dozens of slides in seconds
 - **Validate** your pipeline with lossless roundtrip encode/decode
 
 ## Install

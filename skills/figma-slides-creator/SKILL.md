@@ -1,9 +1,10 @@
 ---
 name: figma-slides-creator
 description: >
-  Create, edit, and inspect Figma Slides .deck files. Use when the user asks to
-  create a presentation, build a slide deck, edit slides, update text or images,
-  clone or remove slides, or produce a .deck file for Figma Slides.
+  Create, populate, edit, and inspect Figma Slides .deck files. Use when the
+  user wants a finished presentation deck, wants to fill an existing template
+  with content, or wants to edit a non-template deck's text, images, or slide
+  order. Do not use this skill to author reusable templates themselves.
   Powered by FigmaTK under the hood.
 metadata:
   version: "0.3.0"
@@ -12,6 +13,17 @@ metadata:
 # Figma Slides Creator
 
 Use this skill for the default workflow: take an existing template and build a new presentation from it. For authoring reusable templates themselves, use `skills/figma-template-builder/SKILL.md`.
+
+## Skill Boundary
+
+Use this skill when the outcome is a finished deck for immediate use.
+
+Switch to `skills/figma-template-builder/SKILL.md` when the user wants to:
+
+- build a reusable template
+- define layouts or placeholders
+- rename slots for future sessions
+- derive a new template system from references or examples
 
 ## ⚠️ Never open .deck files directly
 
@@ -37,6 +49,14 @@ To let the user view the result: tell them to **open the file in Figma Desktop**
 ## File locations — always use /tmp
 
 **All files go in `/tmp/`** — scripts, output decks, images, everything. Never write to the Desktop, Documents, Downloads, or any user directory. Never create intermediate notes or reference markdown files. Just build and save the deck.
+
+## Default Workflow
+
+1. Inspect the template or deck.
+2. Pick the minimum set of layouts or edits needed.
+3. Populate text slots first, then image slots.
+4. Save to a new `/tmp/` output path.
+5. Sanity-check the result with `figmatk_list_text` or by opening it in Figma Desktop.
 
 ---
 
@@ -255,6 +275,14 @@ Use this when the user provides a `.deck` file to modify.
 | `figmatk_clone_slide` | Deep-clone a slide with new text and images |
 | `figmatk_remove_slide` | Mark slides as REMOVED (never deleted) |
 | `figmatk_roundtrip` | Decode + re-encode for pipeline validation |
+
+## Final Checks
+
+Before finishing, prefer at least one of these:
+
+- `figmatk_list_text` on the output deck
+- `figmatk_roundtrip` if the deck went through multiple edits
+- a manual open check in Figma Desktop when the user is validating upload/render behavior
 
 ---
 

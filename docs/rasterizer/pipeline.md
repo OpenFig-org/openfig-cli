@@ -289,7 +289,8 @@ binary layout.
 ## INSTANCE Nodes (Symbol Resolution)
 
 INSTANCE nodes reference a SYMBOL definition and optionally override child
-properties (text, fills). The rendering process:
+properties (text, fills). This pattern is used for template-based slides —
+simple slides with direct content have no INSTANCE node.
 
 ### 1. Symbol Resolution
 
@@ -318,6 +319,14 @@ library-original ID via `overrideKey`. The renderer builds a recursive
 
 `node.derivedSymbolData[]` contains Figma-computed layout (size, transform,
 derivedTextData) for children as they appear in this specific INSTANCE.
+
+**This data is critical for correct rendering.** Without it:
+- SYMBOL children render at their original size, not scaled to INSTANCE dimensions
+- Text glyphs use wrong positions, causing misalignment
+- Auto-layout resizing is lost
+
+The derivedSymbolData entries are keyed by `guidPath.guids` — a path from the
+SYMBOL root to each descendant node. Each entry provides:
 
 - **Auto-layout symbols** (`symbol.stackMode` is set): Apply per-node
   `size` + `transform` from derivedSymbolData. Skip global scale.

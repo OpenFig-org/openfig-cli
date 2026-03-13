@@ -32,9 +32,10 @@ Known node types:
 | `CANVAS` | Page / canvas |
 | `SLIDE_GRID` | Container for all slides |
 | `SLIDE_ROW` | Row container within the grid |
+| `MODULE` | Published template wrapper for a slide |
 | `SLIDE` | Individual slide |
-| `INSTANCE` | Component instance (the main content container on a slide) |
-| `SYMBOL` | Component definition (master) |
+| `INSTANCE` | Component instance referencing a SYMBOL |
+| `SYMBOL` | Component definition (reusable template) |
 | `COMPONENT_SET` | Set of component variants |
 | `TEXT` | Text node — see [text.md](text.md) |
 | `RECTANGLE` | Rectangle shape |
@@ -67,21 +68,108 @@ Encodes the tree structure:
 - **guid** — Points to the parent node's GUID
 - **position** — Single ASCII character for sibling ordering. Children of the same parent are sorted by this character. Use sequential ASCII starting from `!` (0x21).
 
+## Node Hierarchy (Design — .fig)
+
+Design files use CANVAS nodes as pages. Each page contains top-level FRAMEs
+(the exportable objects visible in Figma's layers panel).
+
+```
+DOCUMENT (0:0)
+  ├─ CANVAS "Great Seal Page" (position: " ~")
+  │    └─ FRAME "GreatSeal" (731×609)
+  ├─ CANVAS "Page 2" (position: "!")
+  │    ├─ FRAME "how-to" (1247×1024)
+  │    └─ FRAME "Lady" (413×626)
+  ├─ CANVAS "Page 3" (position: "~!")
+  │    ├─ FRAME "User Bio" (675×384)
+  │    ├─ FRAME "bike lady" (1102×952)
+  │    └─ TEXT "RANDOM" (loose on canvas)
+  └─ CANVAS "Internal Only Canvas" (position: "~")
+       └─ ... SYMBOL definitions (component library)
+```
+
+**Page ordering**: Pages are sorted by `parentIndex.position`, not by creation
+order or array index. `getPages()` returns them in Figma's display order.
+
+**Internal Only Canvas**: Figma's hidden page for component/symbol storage.
+Filtered out by `getPages()` — always present in raw data.
+
+**Top-level children** fall into two categories:
+
+- **Frames** — FRAME nodes are the exportable objects (what you'd export as PNG
+  in Figma). These are the primary units of work on a page.
+- **Loose nodes** — TEXT, VECTOR, INSTANCE, etc. sitting directly on the canvas.
+  Visible in Figma but not individually exportable. Should still be listed
+  (e.g. annotations, labels, sticky notes) but are not "objects" in the
+  export sense.
+
+When listing page contents, distinguish frames from loose nodes:
+```javascript
+const children = fd.getChildren(nid(page))
+  .filter(c => c.phase !== 'REMOVED')
+  .sort((a, b) => (a.parentIndex?.position ?? '').localeCompare(b.parentIndex?.position ?? ''));
+const frames = children.filter(c => c.type === 'FRAME');
+const loose  = children.filter(c => c.type !== 'FRAME');
+```
+
+---
+
 ## Node Hierarchy (Slides)
+
+### Pattern 1: Direct Content
+
+Slides contain their visual content directly:
 
 ```
 DOCUMENT (0:0)
   └─ CANVAS "Page 1" (0:1)
        └─ SLIDE_GRID "Presentation" (0:3)
             └─ SLIDE_ROW "Row" (1:1563)
-                 ├─ SLIDE "1" (1:1559)
-                 │    └─ INSTANCE (1:1564) ← component instance with overrides
-                 ├─ SLIDE "2" (1:1570)
-                 │    └─ INSTANCE (1:1572)
-                 └─ ...
+                 └─ SLIDE "1" (1:1559)
+                      ├─ TEXT "Title"
+                      ├─ FRAME "Content"
+                      └─ ROUNDED_RECTANGLE "Shape"
 ```
 
-Each SLIDE has exactly one INSTANCE child. The INSTANCE references a SYMBOL (component master) and carries `symbolOverrides` for customization.
+Used for: simple decks, one-off presentations, non-templated content.
+
+### Pattern 2: Template-Based (INSTANCE → SYMBOL)
+
+Slides reference a reusable template via INSTANCE nodes:
+
+```
+DOCUMENT (0:0)
+  └─ CANVAS "Page 1" (0:1)
+       └─ SLIDE_GRID "Presentation" (0:3)
+            └─ SLIDE_ROW "Row" (1:1563)
+                 └─ SLIDE "1" (1:1559)
+                      └─ INSTANCE (1:1564) → references SYMBOL
+```
+
+SYMBOL definitions live elsewhere (often in the Internal Only Canvas):
+
+```
+CANVAS "Internal Only Canvas"
+  └─ FRAME "Template Library"
+       └─ SYMBOL "Cover Slide"
+            ├─ TEXT "Title"
+            └─ FRAME "Content"
+```
+
+The INSTANCE carries `symbolOverrides` to customize text, fills, and images for that specific slide.
+
+### Pattern 3: Published Templates (MODULE wrapper)
+
+Published templates wrap slides in MODULE nodes:
+
+```
+SLIDE_ROW "Row"
+  └─ MODULE "1" (200:644)
+       └─ SLIDE "1" (200:645)
+            └─ ... slide content
+```
+
+MODULE nodes indicate a slide derived from a published template. The MODULE's GUID encodes the template origin.
 
 ---
 

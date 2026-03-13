@@ -14,9 +14,11 @@ they share a common binary codec and rendering pipeline.
 | 5 | Site | unknown | Out of scope |
 | 6 | Make | unknown | Out of scope |
 
-All products share the same kiwi binary schema under the hood. A `.deck` is a
-ZIP containing a `canvas.fig` + metadata. A `.fig` is the raw binary. FigJam
-uses the `fig-jam.` prelude. The codec already parses all three.
+All products share the same kiwi binary schema under the hood. Both `.deck` and
+`.fig` are ZIP archives containing `canvas.fig` + `meta.json` + `thumbnail.png`
++ `images/`. The only difference is the prelude inside `canvas.fig`: `fig-deck`
+for Slides, `fig-kiwi` for Design. FigJam uses the `fig-jam.` prelude. The
+codec already parses all formats via `fromDeckFile()`.
 
 ## Layer Architecture
 
@@ -78,7 +80,7 @@ Everything below the product layer is format-agnostic:
 
 ### Design-specific (.fig) — future
 
-- Raw `.fig` binary I/O (no ZIP wrapper — or possibly ZIP with different structure)
+- ZIP archive with same structure as .deck (canvas.fig + meta.json + thumbnail + images)
 - Node types: PAGE (top-level container, like SLIDE but for design)
 - Component/variant system (similar to SYMBOL but with properties)
 - `File`, `Page`, `Component` high-level API classes

@@ -36,13 +36,16 @@ same kiwi schema + zstd pipeline.
 
 ### .deck vs .fig
 
-A `.deck` file is a ZIP containing `canvas.fig` + `meta.json` + `thumbnail.png`
-+ `images/`. The `canvas.fig` inside uses the same binary format as standalone
-`.fig` files. `FigDeck` already has both `fromDeckFile()` (ZIP) and
-`fromFigFile()` (raw binary).
+Both `.deck` and `.fig` files are ZIP archives with the same internal structure:
+`canvas.fig` + `meta.json` + `thumbnail.png` + `images/`. The only differences
+are the file extension and the binary prelude inside `canvas.fig`:
 
-When adding `.fig` support, build parallel high-level classes (e.g. `FigFile`,
-`Page`) — the codec and rasterizer need no changes.
+| Format | Extension | Prelude | Top-level containers |
+|--------|-----------|---------|---------------------|
+| Figma Slides | `.deck` | `fig-deck` | SLIDE nodes inside SLIDE_GRID |
+| Figma Design | `.fig` | `fig-kiwi` | CANVAS nodes (pages) containing FRAMEs |
+
+`fromDeckFile()` works for both formats. The codec is fully format-agnostic.
 
 ## Key directories
 
@@ -51,7 +54,8 @@ lib/core/               Shared codec, helpers (format-agnostic)
 lib/slides/             Slides-specific API, templates (.deck)
 lib/rasterizer/         SVG builder + PNG renderer + font resolution
 commands/               CLI command implementations
-decks/reference/        Ground-truth decks from Figma (for format learning + SSIM tests)
+decks/reference/        .deck fixtures (Figma Slides)
+figs/reference/         .fig fixtures (Figma Design)
 decks/generated-for-validation/  Decks our code produces (user tests in Figma)
 docs/format/            Binary format specification
 docs/rasterizer/        Rendering pipeline, fonts, testing
@@ -68,15 +72,23 @@ test/                   Vitest test suites
 Unknown format features must go through this loop before implementing. Never guess
 at undocumented format behavior.
 
-## Slide access is 1-indexed
+## Access is 1-indexed
 
 ```javascript
-deck.getSlide(1)   // first slide (FigDeck low-level)
-deck.slide(1)      // first slide (Deck high-level API)
-deck.getActiveSlides()  // all slides as array (for iteration)
+// Slides (.deck)
+deck.getSlide(1)        // first slide
+deck.slide(1)           // first slide (Deck high-level API)
+deck.getActiveSlides()  // all slides as array
+
+// Pages (.fig)
+fd.getPage(1)           // first page (sorted by Figma's display order)
+fd.getPages()           // all user-facing pages (excludes Internal Only Canvas)
+
+// Page contents (.fig) — top-level children are exportable frames
+fd.getChildren(nid(page))  // FRAMEs, TEXT, etc. on a page
 ```
 
-There is no slide 0.
+There is no slide 0 or page 0.
 
 ## Format rules (crash if violated)
 

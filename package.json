@@ -59,7 +59,9 @@
   },
   "devDependencies": {
     "@anthropic-ai/mcpb": "^2.1.2",
+    "@fontsource/darker-grotesque": "^5.2.8",
     "@fontsource/inter": "^5.2.8",
+    "@fontsource/irish-grover": "^5.2.7",
     "vitest": "^4.1.0"
   },
   "keywords": [

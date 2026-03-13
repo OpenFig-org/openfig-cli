@@ -1,5 +1,9 @@
 # FigmaTK CLI Reference
 
+The CLI is focused on inspection, override-based editing, and roundtrip validation.
+
+For Claude/MCP workflows such as template authoring and template instantiation, see [mcp.md](mcp.md) and [template-workflows.md](template-workflows.md).
+
 ## `inspect` — Document structure
 
 ```bash

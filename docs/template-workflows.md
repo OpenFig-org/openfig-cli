@@ -1,5 +1,7 @@
 # Template Workflows
 
+This page documents the reusable-template workflow implemented in the MCP server and the internal `lib/template-deck.mjs` helpers.
+
 FigmaTK supports two related template states and one downstream instantiation flow.
 
 ## States
@@ -51,6 +53,27 @@ If a layout contains any explicit slot metadata, FigmaTK will only promote expli
 3. `figmatk_annotate_template_layout`
 4. Repeat until the draft layout names and slots are stable
 
+Example annotation payload:
+
+```json
+{
+  "path": "/tmp/product-template.deck",
+  "output": "/tmp/product-template-annotated.deck",
+  "slideId": "1:42",
+  "layoutName": "cover",
+  "textSlots": {
+    "1:120": "title",
+    "1:121": "subtitle"
+  },
+  "imageSlots": {
+    "1:144": "hero_image"
+  },
+  "fixedImages": {
+    "1:199": "background_texture"
+  }
+}
+```
+
 ### Publish-wrap the draft
 
 1. `figmatk_publish_template_draft`
@@ -66,6 +89,42 @@ If a layout contains any explicit slot metadata, FigmaTK will only promote expli
 
 - `text`: map of slot name, node ID, or fallback node name to string value
 - `images`: map of slot name, node ID, or fallback node name to absolute image path
+
+Example:
+
+```json
+{
+  "template": "/tmp/product-template-published.deck",
+  "output": "/tmp/q2-review.deck",
+  "slides": [
+    {
+      "slideId": "1:42",
+      "text": {
+        "title": "Q2 Product Review",
+        "subtitle": "What shipped, what changed, what is next"
+      },
+      "images": {
+        "hero_image": "/tmp/launch-photo.png"
+      }
+    }
+  ]
+}
+```
+
+## Heuristics vs Explicit Metadata
+
+Explicit slot metadata is preferred.
+
+Without explicit metadata:
+
+- text fields fall back to direct `TEXT` nodes and `SHAPE_WITH_TEXT` content
+- image fields fall back to large image-bearing or empty frame-like nodes
+
+With any explicit slot metadata present on a layout:
+
+- explicit text slots replace fallback text naming for those nodes
+- only explicit image slots are treated as editable placeholders
+- unmarked image fills remain decorative by default
 
 ## Multi-Row Discovery
 

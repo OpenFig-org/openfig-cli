@@ -21,7 +21,7 @@ Figma Slides lets you download presentations as `.deck` files and re-upload them
 
 FigmaTK makes this round-trip programmable. Download a `.deck`, modify it, re-upload. Everything stays native.
 
-Plug in [Claude Code](https://claude.ai/code) or any coding agent and you have an AI that can read and edit Figma presentations end-to-end — without ever opening the Figma UI.
+Plug in Claude Cowork or any coding agent and you have an AI that can read and edit Figma presentations end-to-end — without ever opening the Figma UI.
 
 ## Use Cases
 
@@ -48,9 +48,9 @@ figmatk list-overrides my-presentation.deck # editable fields per symbol
 
 → Full CLI reference: [docs/cli.md](docs/cli.md)
 
-## Claude Code / MCP Integration
+## Claude Cowork / MCP Integration
 
-FigmaTK ships as a **Cowork plugin** with an MCP server — Claude can manipulate `.deck` files directly as tool calls.
+FigmaTK ships as a **Claude Cowork plugin** with an MCP server — Claude can manipulate `.deck` files directly as tool calls.
 
 ```bash
 claude plugin marketplace add rcoenen/figmatk
@@ -67,7 +67,14 @@ Or add manually in Claude Desktop → Settings → Developer → Edit Config:
 }
 ```
 
-Available MCP tools: `figmatk_create_deck`, `figmatk_create_template_draft`, `figmatk_annotate_template_layout`, `figmatk_publish_template_draft`, `figmatk_list_template_layouts`, `figmatk_create_from_template`, `figmatk_inspect`, `figmatk_list_text`, `figmatk_list_overrides`, `figmatk_update_text`, `figmatk_insert_image`, `figmatk_clone_slide`, `figmatk_remove_slide`, `figmatk_roundtrip`.
+The MCP server covers four high-level workflows:
+
+- create a new deck from scratch
+- author a reusable Slides template
+- instantiate a new deck from a template
+- inspect or edit an existing deck
+
+→ MCP tool reference: [docs/mcp.md](docs/mcp.md)
 
 ## Template Workflows
 
@@ -76,14 +83,9 @@ FigmaTK supports two related template states:
 - Draft templates: `SLIDE_ROW -> SLIDE -> ...`
 - Published templates: `SLIDE_ROW -> MODULE -> SLIDE -> ...`
 
-Use explicit naming conventions when authoring reusable templates:
+Reusable template authoring is built around explicit layout and slot naming, then a publish-like wrapping step before later instantiation.
 
-- Layouts: `layout:<name>`
-- Text slots: `slot:text:<name>`
-- Image slots: `slot:image:<name>`
-- Decorative fixed imagery: `fixed:image:<name>`
-
-`figmatk_list_template_layouts` understands those conventions and only falls back to heuristic image placeholders when a layout has not been explicitly annotated yet.
+→ Template workflow guide: [docs/template-workflows.md](docs/template-workflows.md)
 
 ## Programmatic API
 
@@ -98,6 +100,7 @@ await deck.save('output.deck');
 
 | Docs | |
 |------|---|
+| MCP / Claude workflows | [docs/mcp.md](docs/mcp.md) |
 | High-level API | [docs/figmatk-api-spec.md](docs/figmatk-api-spec.md) |
 | Low-level FigDeck API | [docs/library.md](docs/library.md) |
 | Template workflows | [docs/template-workflows.md](docs/template-workflows.md) |

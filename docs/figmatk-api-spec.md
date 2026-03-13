@@ -8,6 +8,7 @@ Analogous to python-pptx in scope and design philosophy.
 
 See `docs/feature-map.md` for the full python-pptx → figmatk feature mapping
 that drives this spec. See `docs/format/` for the `.deck` file format specification.
+Reusable template authoring and module-backed template instantiation are documented separately in [mcp.md](mcp.md) and [template-workflows.md](template-workflows.md); this page focuses on the higher-level `Deck` / `Slide` editing API.
 
 ---
 

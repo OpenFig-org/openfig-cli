@@ -2,6 +2,8 @@
 
 For the high-level programmatic API (`Deck`, `Slide`, `addText`, `addImage`, etc.) see [figmatk-api-spec.md](figmatk-api-spec.md).
 
+For reusable-template authoring and instantiation workflows, see [mcp.md](mcp.md) and [template-workflows.md](template-workflows.md). Those workflows are currently driven through the MCP layer and internal helpers, not this low-level `FigDeck` page.
+
 This page covers the low-level `FigDeck` class and helper utilities — useful when you need direct access to the node graph.
 
 ## Install

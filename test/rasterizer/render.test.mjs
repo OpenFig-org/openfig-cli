@@ -12,10 +12,10 @@ import { describe, it, expect, afterAll } from 'vitest';
 import { writeFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { FigDeck } from '../fig-deck.mjs';
-import { slideToSvg } from './svg-builder.mjs';
-import { svgToPng } from './deck-rasterizer.mjs';
-import { buildReportRow, writeRenderReport, computeSsim } from './render-report-lib.mjs';
+import { FigDeck } from '../../lib/fig-deck.mjs';
+import { slideToSvg } from '../../lib/rasterizer/svg-builder.mjs';
+import { svgToPng } from '../../lib/rasterizer/deck-rasterizer.mjs';
+import { buildReportRow, writeRenderReport, computeSsim } from '../../lib/rasterizer/render-report-lib.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DECK_PATH   = join(__dirname, '../../decks/reference/oil-machinations.deck');
@@ -86,14 +86,8 @@ describe('oil-machinations deck rendering', () => {
   }
 });
 
-afterAll(() => {
-  if (!reportRows.length) return;
-  writeRenderReport({ outHtml: REPORT_OUT, rows: reportRows, title: 'FigmaTK Render Report' });
-  console.log(`\nReport → ${REPORT_OUT}`);
-});
-
 describe('just-fonts deck rendering', () => {
-  it('slide 1 SSIM ≥ 0.70', async () => {
+  it('slide 1 SSIM ≥ 0.99', async () => {
     const deck    = await FigDeck.fromDeckFile(JUST_FONTS_DECK);
     const slides  = deck.getActiveSlides();
     expect(slides.length).toBe(1);
@@ -108,7 +102,14 @@ describe('just-fonts deck rendering', () => {
       return;
     }
     const score = await computeSsim(Buffer.from(png), refPath);
+    reportRows.push(await buildReportRow({ slideNumber: 'fonts-1', renderedPng: Buffer.from(png), refPath, score }));
     console.log(`  slide 1  SSIM=${score.toFixed(4)}  →  ${outPath}`);
     expect(score).toBeGreaterThanOrEqual(0.99);
   });
+});
+
+afterAll(() => {
+  if (!reportRows.length) return;
+  writeRenderReport({ outHtml: REPORT_OUT, rows: reportRows, title: 'FigmaTK Render Report' });
+  console.log(`\nReport → ${REPORT_OUT}`);
 });

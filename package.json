@@ -1,6 +1,6 @@
 {
   "name": "figmatk",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "description": "Figma Toolkit — Swiss-army knife CLI for Figma .deck and .fig files",
   "type": "module",
   "bin": {

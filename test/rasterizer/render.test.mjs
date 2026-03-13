@@ -39,6 +39,9 @@ const SSIM_THRESHOLDS = {
 const JUST_FONTS_DECK = join(__dirname, '../../decks/reference/just-fonts.deck');
 const JUST_FONTS_REF  = join(__dirname, '../../decks/reference/just-fonts');
 
+const SVG_DECK = join(__dirname, '../../decks/reference/svg-deck.deck');
+const SVG_REF  = join(__dirname, '../../decks/reference/svg-deck');
+
 /** Render a slide to PNG bytes at native 1920×1080. */
 async function renderSlide(deck, slide) {
   const svg = slideToSvg(deck, slide);
@@ -105,6 +108,28 @@ describe('just-fonts deck rendering', () => {
     reportRows.push(await buildReportRow({ slideNumber: 'fonts-1', renderedPng: Buffer.from(png), refPath, score }));
     console.log(`  slide 1  SSIM=${score.toFixed(4)}  →  ${outPath}`);
     expect(score).toBeGreaterThanOrEqual(0.99);
+  });
+});
+
+describe('svg-deck rendering (VECTOR nodes)', () => {
+  it('slide 1 SSIM ≥ 0.90', async () => {
+    const deck    = await FigDeck.fromDeckFile(SVG_DECK);
+    const slides  = deck.getActiveSlides();
+    expect(slides.length).toBe(1);
+
+    const refPath = join(SVG_REF, 'page-1.png');
+    const png     = await renderSlide(deck, slides[0]);
+    const outPath = join('/tmp', 'figmatk-test-svg-deck-1.png');
+    writeFileSync(outPath, Buffer.from(png));
+
+    if (!existsSync(refPath)) {
+      console.warn(`  ⚠ Reference missing: ${refPath} — skipping SSIM`);
+      return;
+    }
+    const score = await computeSsim(Buffer.from(png), refPath);
+    reportRows.push(await buildReportRow({ slideNumber: 'svg-1', renderedPng: Buffer.from(png), refPath, score }));
+    console.log(`  slide 1  SSIM=${score.toFixed(4)}  →  ${outPath}`);
+    expect(score).toBeGreaterThanOrEqual(0.90);
   });
 });
 

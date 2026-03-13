@@ -13,6 +13,16 @@ metadata:
 
 Use this skill when the goal is to build or refine the template itself. For the common workflow of taking an existing template and producing a new presentation, use `skills/figma-slides-creator/SKILL.md`.
 
+## MCP First
+
+In Claude Cowork, keep template authoring inside the MCP plugin.
+
+- Do not inspect the installed `figmatk` package to discover template features.
+- Do not write direct Node.js scripts for draft creation, annotation, wrapping, or instantiation when MCP tools exist for those steps.
+- Prefer `figmatk_create_template_draft`, `figmatk_annotate_template_layout`, `figmatk_publish_template_draft`, and `figmatk_list_template_layouts`.
+
+Only fall back to direct library code if the MCP server is unavailable or the required capability is missing from the MCP surface.
+
 ## Skill Boundary
 
 Use this skill when the deliverable is a reusable template, not a one-off deck.

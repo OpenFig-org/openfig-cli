@@ -14,6 +14,16 @@ metadata:
 
 Use this skill for the default workflow: take an existing template and build a new presentation from it. For authoring reusable templates themselves, use `skills/figma-template-builder/SKILL.md`.
 
+## MCP First
+
+In Claude Cowork, use the MCP tools first and keep the workflow inside the plugin.
+
+- Do not inspect the installed `figmatk` npm package just to discover capabilities.
+- Do not write ad hoc Node.js scripts when an MCP tool already covers the task.
+- Do not fall back to direct library calls for template listing, template instantiation, deck creation, or normal deck editing.
+
+Use direct Node.js or CLI paths only if the MCP server is unavailable or a required capability does not exist in the MCP surface yet.
+
 ## Skill Boundary
 
 Use this skill when the outcome is a finished deck for immediate use.
@@ -27,7 +37,7 @@ Switch to `skills/figma-template-builder/SKILL.md` when the user wants to:
 
 ## ⚠️ Never open .deck files directly
 
-`.deck` files are binary ZIP archives. **Never open, read, or display a `.deck` file** — it will show garbage bytes in the panel. To inspect or modify a `.deck` file, always use the CLI commands or Node.js API shown below.
+`.deck` files are binary ZIP archives. **Never open, read, or display a `.deck` file** — it will show garbage bytes in the panel. To inspect or modify a `.deck` file in Claude Cowork, use the MCP tools below.
 
 To let the user view the result: tell them to **open the file in Figma Desktop** (`File → Open` or double-click the `.deck` file).
 
@@ -139,111 +149,6 @@ Call `figmatk_create_deck` with a structured slide description:
 `midnight` · `ocean` · `forest` · `coral` · `terracotta` · `minimal`
 
 Each theme handles backgrounds, accent colors, and text colors automatically.
-
----
-
-## Path A2 — Create from Scratch (Node.js script fallback)
-
-Only use this if `figmatk_create_deck` is unavailable or you need layout control beyond what the MCP tool offers.
-
-### Step 1 — Set up workspace (MANDATORY — never skip)
-
-```bash
-[ -d /tmp/figmatk-ws/node_modules ] || (mkdir -p /tmp/figmatk-ws && cd /tmp/figmatk-ws && npm init -y && npm install figmatk)
-```
-
-### Step 2 — Write script to `/tmp/figmatk-ws/deck.mjs`
-
-**Always use bare specifier** `import { Deck } from 'figmatk'` — never a file path.
-
-```javascript
-import { Deck } from 'figmatk';
-
-function hex(h) {
-  return { r: parseInt(h.slice(1,3),16)/255, g: parseInt(h.slice(3,5),16)/255, b: parseInt(h.slice(5,7),16)/255 };
-}
-
-const deck = await Deck.create('My Presentation');
-const slide = deck.addBlankSlide();
-slide.setBackground('Black');
-slide.addText('Slide Title', { style: 'Title', color: 'White', x: 64, y: 80, width: 1792, align: 'LEFT' });
-await deck.save('/tmp/my-presentation.deck');
-console.log('Done');
-```
-
-### Step 3 — Run
-
-```bash
-node /tmp/figmatk-ws/deck.mjs
-```
-
-### ⚠️ Critical gotchas
-
-| Issue | Wrong | Right |
-|-------|-------|-------|
-| `setBackground` with hex | `s.setBackground('#1A1A1A')` | `s.setBackground('Black')` |
-| `setBackground` with raw RGB | `s.setBackground({ r:0.1, g:0.1, b:0.1 })` | `s.setBackground('Black')` — raw RGB silently renders white |
-| Shape method signature | `s.addRectangle({ x:0, y:0, width:100 })` | `s.addRectangle(0, 0, 100, 100, opts)` |
-| Shape fill color | `{ fill: { r:1, g:0, b:0 } }` | `{ fill: '#F4900C' }` or `{ fill: 'Red' }` — hex strings and named colors work directly |
-| `addLine` options | `{ strokeColor: ..., strokeWeight: 2 }` | `{ color: 'Black', weight: 2 }` |
-| `align` value | `align: 'left'` | `align: 'LEFT'` (uppercase) |
-| `addImage` without await | `slide.addImage('/tmp/photo.jpg')` | `await slide.addImage('/tmp/photo.jpg')` — async, images silently missing without await |
-| `addImage` old signature | `await slide.addImage(x, y, w, h, path)` | `await slide.addImage(path, { x, y, width, height })` — path is first arg now |
-
-### Hex color helper (for shape fills)
-
-```javascript
-function hex(h) {
-  return { r: parseInt(h.slice(1,3),16)/255, g: parseInt(h.slice(3,5),16)/255, b: parseInt(h.slice(5,7),16)/255 };
-}
-// Usage: s.addRectangle(0, 0, 200, 50, { fill: hex('#F4900C') })
-```
-
-### Text styles
-
-| Style | Size | Weight | Use for |
-|-------|------|--------|---------|
-| `Title` | 96pt | Bold | Slide title |
-| `Header 1` | 60pt | Bold | Section headers |
-| `Header 2` | 48pt | Bold | Sub-headers |
-| `Header 3` | 36pt | Bold | In-slide headings |
-| `Body 1` | 36pt | Regular | Primary body text |
-| `Body 2` | 30pt | Regular | Secondary body text |
-| `Body 3` | 24pt | Regular | Captions, labels |
-| `Note` | 20pt | Regular | Footnotes, sources |
-
-### Colors for `setBackground()`
-
-Accepts named colors, hex strings, or designer aliases — **when using figmatk 0.0.12+ from the workspace install**.
-
-**Named colors** (case-sensitive, from the Light Slides theme):
-
-`'Black'`, `'White'`, `'Grey'`, `'Blue'`, `'Red'`, `'Yellow'`, `'Green'`, `'Orange'`, `'Pink'`, `'Purple'`, `'Teal'`, `'Violet'`, `'Persimmon'`, `'Pale Pink'`, `'Pale Blue'`, `'Pale Green'`, `'Pale Teal'`, `'Pale Purple'`, `'Pale Persimmon'`, `'Pale Violet'`, `'Pale Red'`, `'Pale Yellow'`
-
-**Hex strings** (0.0.12+): `slide.setBackground('#C8102E')`
-
-**Designer aliases** (0.0.12+): `slide.setBackground('navy')`, `slide.setBackground('coral')`, `slide.setBackground('terracotta')` etc.
-
-### Slide dimensions
-
-1920 × 1080px. All positions and sizes in pixels.
-
-### Slide methods (correct signatures)
-
-```javascript
-slide.setBackground(namedColor)                   // named color only — hex/raw RGB render white
-slide.addText(text, opts)                         // opts: style, color (named or hex('#...')), x, y, width, align, bold, italic, fontSize
-slide.addFrame(opts)                              // auto-layout: stackMode, spacing, x, y, width, height
-slide.addRectangle(x, y, width, height, opts)    // opts: fill (named or {r,g,b}), opacity, cornerRadius
-slide.addEllipse(x, y, width, height, opts)      // opts: fill, opacity
-slide.addDiamond(x, y, width, height, opts)
-slide.addTriangle(x, y, width, height, opts)
-slide.addStar(x, y, width, height, opts)
-slide.addLine(x1, y1, x2, y2, opts)             // opts: color, weight
-await slide.addImage(pathOrBuf, opts)    // ⚠️ ASYNC — must use await; opts: x, y, width, height (default: full slide 1920×1080), cornerRadius, opacity
-slide.addTable(x, y, data, opts)                  // 2D string array; opts: width, colWidths, rowHeight
-slide.addSVG(x, y, width, svgPathOrBuf, opts)
-```
 
 ---
 

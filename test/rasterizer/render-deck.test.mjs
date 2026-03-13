@@ -43,6 +43,21 @@ const SSIM_THRESHOLDS = {
   7: 0.98,
 };
 
+// Per-slide max pixel-off percentage — catches localized defects SSIM misses.
+// Default 10%; override per-slide where known rendering gaps exist.
+const DEFAULT_MAX_OFF_PCT = 10.0;
+const OFF_PCT_THRESHOLDS = {
+  4: 15.0,   // 13.88% — gradient/image dithering differences
+  5: 12.0,   // 10.27% — subtle text rendering differences
+};
+
+// Per-slide max mean delta (0–255) — severity-weighted metric.
+// A subpixel shift scores ~1, a missing object scores ~200.
+const DEFAULT_MAX_MEAN_DELTA = 5.0;
+const MEAN_DELTA_THRESHOLDS = {
+  4: 7.0,    // 5.99 — gradient/image dithering
+};
+
 async function renderSlide(deck, slide) {
   const svg = slideToSvg(deck, slide);
   return svgToPng(svg, {});
@@ -75,11 +90,16 @@ describe('oil-machinations deck rendering', () => {
 
       const outPath = join('/tmp', `figmatk-test-slide-${i}.png`);
       writeFileSync(outPath, Buffer.from(png));
-      reportRows.push(await buildReportRow({ slideNumber: i, renderedPng: Buffer.from(png), refPath, score }));
+      const row = await buildReportRow({ slideNumber: i, renderedPng: Buffer.from(png), refPath, score });
+      reportRows.push(row);
 
-      const threshold = SSIM_THRESHOLDS[i] ?? 0.70;
-      console.log(`  slide ${i}  SSIM=${score.toFixed(4)}  threshold=${threshold}  →  ${outPath}`);
-      expect(score).toBeGreaterThanOrEqual(threshold);
+      const ssimThreshold = SSIM_THRESHOLDS[i] ?? 0.70;
+      const maxOffPct = OFF_PCT_THRESHOLDS[i] ?? DEFAULT_MAX_OFF_PCT;
+      const maxMeanDelta = MEAN_DELTA_THRESHOLDS[i] ?? DEFAULT_MAX_MEAN_DELTA;
+      console.log(`  slide ${i}  SSIM=${score.toFixed(4)}  offPct=${row.offPct}%  Δ${row.meanDelta}  severity=${row.offDelta}  →  ${outPath}`);
+      expect(score).toBeGreaterThanOrEqual(ssimThreshold);
+      expect(parseFloat(row.offPct)).toBeLessThanOrEqual(maxOffPct);
+      expect(row.meanDelta).toBeLessThanOrEqual(maxMeanDelta);
     });
   }
 });
@@ -99,9 +119,12 @@ describe('just-fonts deck rendering', () => {
       return;
     }
     const score = await computeSsim(Buffer.from(png), refPath);
-    reportRows.push(await buildReportRow({ slideNumber: 'fonts-1', renderedPng: Buffer.from(png), refPath, score }));
-    console.log(`  slide 1  SSIM=${score.toFixed(4)}  →  ${outPath}`);
+    const row = await buildReportRow({ slideNumber: 'fonts-1', renderedPng: Buffer.from(png), refPath, score });
+    reportRows.push(row);
+    console.log(`  slide 1  SSIM=${score.toFixed(4)}  offPct=${row.offPct}%  Δ${row.meanDelta}  severity=${row.offDelta}  →  ${outPath}`);
     expect(score).toBeGreaterThanOrEqual(0.99);
+    expect(parseFloat(row.offPct)).toBeLessThanOrEqual(DEFAULT_MAX_OFF_PCT);
+    expect(row.meanDelta).toBeLessThanOrEqual(DEFAULT_MAX_MEAN_DELTA);
   });
 });
 
@@ -120,9 +143,12 @@ describe('svg-deck rendering (VECTOR nodes)', () => {
       return;
     }
     const score = await computeSsim(Buffer.from(png), refPath);
-    reportRows.push(await buildReportRow({ slideNumber: 'svg-1', renderedPng: Buffer.from(png), refPath, score }));
-    console.log(`  slide 1  SSIM=${score.toFixed(4)}  →  ${outPath}`);
+    const row = await buildReportRow({ slideNumber: 'svg-1', renderedPng: Buffer.from(png), refPath, score });
+    reportRows.push(row);
+    console.log(`  slide 1  SSIM=${score.toFixed(4)}  offPct=${row.offPct}%  Δ${row.meanDelta}  severity=${row.offDelta}  →  ${outPath}`);
     expect(score).toBeGreaterThanOrEqual(0.90);
+    expect(parseFloat(row.offPct)).toBeLessThanOrEqual(DEFAULT_MAX_OFF_PCT);
+    expect(row.meanDelta).toBeLessThanOrEqual(DEFAULT_MAX_MEAN_DELTA);
   });
 });
 
@@ -141,9 +167,12 @@ describe('4-text-column deck rendering', () => {
       return;
     }
     const score = await computeSsim(Buffer.from(png), refPath);
-    reportRows.push(await buildReportRow({ slideNumber: '4textcol-1', renderedPng: Buffer.from(png), refPath, score }));
-    console.log(`  slide 1  SSIM=${score.toFixed(4)}  →  ${outPath}`);
+    const row = await buildReportRow({ slideNumber: '4textcol-1', renderedPng: Buffer.from(png), refPath, score });
+    reportRows.push(row);
+    console.log(`  slide 1  SSIM=${score.toFixed(4)}  offPct=${row.offPct}%  Δ${row.meanDelta}  severity=${row.offDelta}  →  ${outPath}`);
     expect(score).toBeGreaterThanOrEqual(0.90);
+    expect(parseFloat(row.offPct)).toBeLessThanOrEqual(DEFAULT_MAX_OFF_PCT);
+    expect(row.meanDelta).toBeLessThanOrEqual(DEFAULT_MAX_MEAN_DELTA);
   });
 });
 

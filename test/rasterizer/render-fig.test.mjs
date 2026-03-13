@@ -19,6 +19,12 @@ import { buildReportRow, writeRenderReport, computeSsim } from '../../lib/raster
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPORT_OUT = '/private/tmp/figmatk-render-report-fig.html';
 
+// Max pixel-off percentage — catches localized defects SSIM misses.
+const DEFAULT_MAX_OFF_PCT = 15.0;  // generous for .fig frames (size/crop differences)
+const DEFAULT_MAX_MEAN_DELTA = 5.0;
+// Max severity per off pixel (0–255) — subpixel shifts ≈ 17, missing content ≈ 24+.
+const DEFAULT_MAX_OFF_DELTA = 20.0;
+
 const FIG_PATH = join(__dirname, '../../figs/reference/medium-complex.fig');
 const FIG_REF  = join(__dirname, '../../figs/reference/medium-complex');
 
@@ -36,14 +42,14 @@ describe('medium-complex.fig frame rendering', () => {
   });
 
   const expectedFrames = [
-    { page: 'Great Seal Page', frame: 'GreatSeal' },
+    { page: 'Great Seal Page', frame: 'GreatSeal', minSsim: 0.40, maxOffPct: 70.0, maxDelta: 100.0 },
     { page: 'Page 2', frame: 'how-to' },
     { page: 'Page 2', frame: 'Lady' },
     { page: 'Page 3', frame: 'User Bio' },
     { page: 'Page 3', frame: 'bike lady' },
   ];
 
-  for (const { page, frame } of expectedFrames) {
+  for (const { page, frame, minSsim: frameSsim, maxOffPct: frameOffPct, maxDelta: frameDelta } of expectedFrames) {
     it(`${page} / ${frame} renders`, async () => {
       if (!fig) fig = await FigDeck.fromDeckFile(FIG_PATH);
 
@@ -63,10 +69,13 @@ describe('medium-complex.fig frame rendering', () => {
       const refPath = join(FIG_REF, `${slug}.png`);
       if (existsSync(refPath)) {
         const score = await computeSsim(pngBuf, refPath);
-        reportRows.push(await buildReportRow({ slideNumber: `fig:${frame}`, renderedPng: pngBuf, refPath, score }));
-        console.log(`  ${page}/${frame}  SSIM=${score.toFixed(4)}  →  ${outPath}`);
-        // Low threshold for now — .fig reference exports may differ in size/crop
-        expect(score).toBeGreaterThanOrEqual(0.50);
+        const row = await buildReportRow({ slideNumber: `fig:${frame}`, renderedPng: pngBuf, refPath, score });
+        reportRows.push(row);
+        console.log(`  ${page}/${frame}  SSIM=${score.toFixed(4)}  offPct=${row.offPct}%  Δ${row.meanDelta}  severity=${row.offDelta}  →  ${outPath}`);
+        expect(score).toBeGreaterThanOrEqual(frameSsim ?? 0.50);
+        expect(parseFloat(row.offPct)).toBeLessThanOrEqual(frameOffPct ?? DEFAULT_MAX_OFF_PCT);
+        expect(row.meanDelta).toBeLessThanOrEqual(frameDelta ?? DEFAULT_MAX_MEAN_DELTA);
+        expect(row.offDelta).toBeLessThanOrEqual(DEFAULT_MAX_OFF_DELTA);
       } else {
         // No reference yet — just include in report for visual review
         reportRows.push(await buildReportRow({ slideNumber: `fig:${frame}`, renderedPng: pngBuf, refPath: null }));
@@ -96,9 +105,12 @@ describe('clip-test.fig frame clipping', () => {
       const pngBuf = Buffer.from(png);
       const refPath = join(CLIP_TEST_REF, ref);
       const score = await computeSsim(pngBuf, refPath);
-      reportRows.push(await buildReportRow({ slideNumber: `clip:${frame}`, renderedPng: pngBuf, refPath, score }));
-      console.log(`  ${frame}  SSIM=${score.toFixed(4)}`);
+      const row = await buildReportRow({ slideNumber: `clip:${frame}`, renderedPng: pngBuf, refPath, score });
+      reportRows.push(row);
+      console.log(`  ${frame}  SSIM=${score.toFixed(4)}  offPct=${row.offPct}%  Δ${row.meanDelta}  severity=${row.offDelta}`);
       expect(score).toBeGreaterThanOrEqual(minSsim);
+      expect(parseFloat(row.offPct)).toBeLessThanOrEqual(DEFAULT_MAX_OFF_PCT);
+      expect(row.meanDelta).toBeLessThanOrEqual(DEFAULT_MAX_MEAN_DELTA);
     });
   }
 });

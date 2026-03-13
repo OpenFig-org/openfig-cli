@@ -5,6 +5,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
+import packageJson from './package.json' with { type: 'json' };
 import { FigDeck } from './lib/fig-deck.mjs';
 import { Deck } from './lib/api.mjs';
 import {
@@ -20,7 +21,7 @@ import { deepClone } from './lib/deep-clone.mjs';
 
 const server = new McpServer({
   name: 'figmatk',
-  version: '0.0.3',
+  version: packageJson.version,
 });
 
 // ── inspect ─────────────────────────────────────────────────────────────

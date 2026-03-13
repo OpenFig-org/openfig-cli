@@ -2,7 +2,7 @@
 /**
  * figmatk release script
  * Usage: node scripts/release.mjs [patch|minor|major]
- * Bumps all version numbers in sync, publishes to npm, pushes to GitHub.
+ * Bumps npm + MCPB versions in sync, publishes to npm, pushes to GitHub.
  */
 import { execSync } from 'child_process';
 import { readFileSync, writeFileSync } from 'fs';
@@ -21,12 +21,16 @@ run(`npm version ${bump} --no-git-tag-version`);
 const { version } = read('package.json');
 console.log(`\nBumping all files to ${version}...\n`);
 
-// 2. Sync .claude-plugin/plugin.json
+// 2. Sync MCPB manifest
+const manifest = read('manifest.json');
+manifest.version = version;
+write('manifest.json', manifest);
+
+// 3. Sync Claude plugin metadata used by repo-backed installs/update checks
 const plugin = read('.claude-plugin/plugin.json');
 plugin.version = version;
 write('.claude-plugin/plugin.json', plugin);
 
-// 3. Sync .claude-plugin/marketplace.json
 const market = read('.claude-plugin/marketplace.json');
 market.plugins[0].version = version;
 write('.claude-plugin/marketplace.json', market);
@@ -37,7 +41,7 @@ const skill = readFileSync(skillPath, 'utf8');
 writeFileSync(skillPath, skill.replace(/version: "[\d.]+"/, `version: "${version}"`));
 
 // 5. Commit, tag, publish, push
-run(`git add package.json .claude-plugin/ skills/`);
+run(`git add package.json package-lock.json manifest.json .claude-plugin/ skills/`);
 run(`git commit -m "Release v${version}"`);
 run(`npm publish --access public`);
 run(`git tag v${version}`);

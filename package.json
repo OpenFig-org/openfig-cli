@@ -17,6 +17,7 @@
   "files": [
     "cli.mjs",
     "mcp-server.mjs",
+    "manifest.json",
     "lib/",
     "commands/",
     "skills/",
@@ -28,7 +29,8 @@
   "scripts": {
     "start": "node cli.mjs",
     "pack": "node scripts/pack.mjs",
-    "release": "node scripts/release.mjs"
+    "release": "node scripts/release.mjs",
+    "validate:extension": "mcpb validate manifest.json"
   },
   "engines": {
     "node": ">=18"
@@ -50,6 +52,9 @@
     "pako": "^2.1.0",
     "sharp": "^0.34.5",
     "zstd-codec": "^0.1.5"
+  },
+  "devDependencies": {
+    "@anthropic-ai/mcpb": "^2.1.2"
   },
   "keywords": [
     "figma",

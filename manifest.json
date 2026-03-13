@@ -1,0 +1,21 @@
+{
+  "manifest_version": "0.2",
+  "name": "figmatk",
+  "version": "0.3.1",
+  "description": "Create and edit Figma Slides .deck files programmatically - no Figma API required",
+  "author": {
+    "name": "FigmaTK Contributors"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "mcp-server.mjs",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/mcp-server.mjs"
+      ],
+      "env": {}
+    }
+  },
+  "license": "MIT"
+}

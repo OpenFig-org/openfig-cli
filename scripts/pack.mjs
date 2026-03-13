@@ -1,31 +1,39 @@
 #!/usr/bin/env node
 /**
  * figmatk pack script
- * Creates a local plugin ZIP that can be uploaded via Claude Desktop → Browse plugins → Upload local plugin.
+ * Creates a local MCPB extension bundle for Claude Desktop/Cowork.
  * Usage: node scripts/pack.mjs
- * Output: dist/figmatk-plugin.zip
+ * Output: dist/figmatk.mcpb
  */
-import { execSync } from 'child_process';
-import { existsSync, mkdirSync, rmSync, cpSync } from 'fs';
+import { execFileSync } from 'child_process';
+import { existsSync, mkdirSync, rmSync, cpSync, statSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import archiver from 'archiver';
-import { createWriteStream } from 'fs';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const tmp = join(root, '.pack-tmp');
 const distDir = join(root, 'dist');
-const outZip = join(distDir, 'figmatk-plugin.zip');
+const outBundle = join(distDir, 'figmatk.mcpb');
+
+function bin(name) {
+  return process.platform === 'win32' ? `${name}.cmd` : name;
+}
+
+function run(cmd, args, cwd = root) {
+  execFileSync(bin(cmd), args, { cwd, stdio: 'inherit' });
+}
 
 // Cleanup + prepare
 if (existsSync(tmp)) rmSync(tmp, { recursive: true });
 mkdirSync(tmp, { recursive: true });
 mkdirSync(distDir, { recursive: true });
+if (existsSync(outBundle)) rmSync(outBundle);
 
-console.log('Copying plugin files...');
+console.log('Copying extension files...');
 
 // Files and directories to include
 const include = [
+  'manifest.json',
   'package.json',
   'package-lock.json',
   'mcp-server.mjs',
@@ -33,8 +41,6 @@ const include = [
   'lib',
   'commands',
   'skills',
-  '.claude-plugin',
-  '.mcp.json',
   'LICENSE',
   'README.md',
 ];
@@ -48,23 +54,17 @@ for (const item of include) {
 
 // Install production deps into the tmp dir
 console.log('Installing production dependencies...');
-execSync('npm install --omit=dev --ignore-scripts', { cwd: tmp, stdio: 'inherit' });
+run('npm', ['install', '--omit=dev', '--ignore-scripts'], tmp);
+console.log('Validating staged manifest...');
+run('npx', ['--no-install', 'mcpb', 'validate', 'manifest.json'], tmp);
 
-// Create ZIP
-console.log(`Creating ${outZip}...`);
-await new Promise((resolve, reject) => {
-  const output = createWriteStream(outZip);
-  const archive = archiver('zip', { zlib: { level: 6 } });
-  output.on('close', resolve);
-  archive.on('error', reject);
-  archive.pipe(output);
-  archive.directory(tmp, false);
-  archive.finalize();
-});
+// Create MCPB bundle
+console.log(`Creating ${outBundle}...`);
+run('npx', ['--no-install', 'mcpb', 'pack', tmp, outBundle]);
 
 // Cleanup
 rmSync(tmp, { recursive: true });
 
-const size = Math.round(existsSync(outZip) ? (await import('fs')).statSync(outZip).size / 1024 : 0);
-console.log(`\n✅ dist/figmatk-plugin.zip (${size} KB)`);
-console.log('   Upload via: Claude Desktop → Browse plugins → Upload local plugin\n');
+const size = Math.round(existsSync(outBundle) ? statSync(outBundle).size / 1024 : 0);
+console.log(`\n✅ dist/figmatk.mcpb (${size} KB)`);
+console.log('   Install via: Claude Desktop/Cowork → Settings → Extensions\n');

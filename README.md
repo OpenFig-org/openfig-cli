@@ -50,22 +50,37 @@ figmatk list-overrides my-presentation.deck # editable fields per symbol
 
 ## Claude Cowork / MCP Integration
 
-FigmaTK ships as a **Claude Cowork plugin** with an MCP server — Claude can manipulate `.deck` files directly as tool calls.
+FigmaTK supports two Claude Cowork install paths:
+
+- GitHub-backed personal plugin install, which preserves Claude Cowork's repo update-check behavior
+- Local `.mcpb` bundle install, which matches Anthropic's current desktop-extension packaging model
+
+### Option 1 — Install from GitHub in Claude Cowork
+
+If you want Claude Cowork to keep checking the repo for updates, install `figmatk` from GitHub/personal plugins inside Claude Cowork.
+
+That path uses the checked-in [plugin.json](/Users/rob/Dev/figmatk/.claude-plugin/plugin.json) and [marketplace.json](/Users/rob/Dev/figmatk/.claude-plugin/marketplace.json) metadata.
+
+### Option 2 — Install the local MCPB bundle
+
+Build the extension bundle:
 
 ```bash
-claude plugin marketplace add rcoenen/figmatk
-claude plugin install figmatk
+npm install
+npm run pack
 ```
 
-Or add manually in Claude Desktop → Settings → Developer → Edit Config:
+This creates `dist/figmatk.mcpb`. Install that bundle from Claude Desktop/Cowork's Extensions UI.
 
-```json
-{
-  "mcpServers": {
-    "figmatk": { "command": "figmatk-mcp" }
-  }
-}
-```
+Install in Claude Cowork:
+
+1. Open Claude Cowork or Claude Desktop.
+2. Go to `Settings`.
+3. Open `Extensions`.
+4. Choose the local install/add option.
+5. Select `dist/figmatk.mcpb`.
+
+Use this path when you want a local extension artifact. Unlike the GitHub-backed personal plugin path, local `.mcpb` installs do not poll the repo for updates automatically.
 
 The MCP server covers four high-level workflows:
 

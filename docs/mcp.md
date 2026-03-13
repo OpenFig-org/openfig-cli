@@ -1,6 +1,59 @@
 # MCP / Claude Workflows
 
-This page documents the `figmatk-mcp` tool surface used by Claude Cowork and other MCP-capable clients.
+This page documents the `figmatk-mcp` tool surface and the supported Claude Desktop/Cowork install flow.
+
+## Install in Claude Cowork
+
+### Option 1 — GitHub-backed personal plugin
+
+Use this when you want Claude Cowork's repo-based update checks to keep working.
+
+This path uses the repository metadata in:
+
+- [plugin.json](/Users/rob/Dev/figmatk/.claude-plugin/plugin.json)
+- [marketplace.json](/Users/rob/Dev/figmatk/.claude-plugin/marketplace.json)
+
+### Option 2 — Local MCPB extension bundle
+
+Build the local extension bundle from the repository root:
+
+```bash
+npm install
+npm run pack
+```
+
+That produces `dist/figmatk.mcpb`.
+
+Install the bundle from Claude Desktop/Cowork's Extensions UI.
+
+Click path:
+
+1. Open Claude Cowork or Claude Desktop.
+2. Go to `Settings`.
+3. Open `Extensions`.
+4. Choose the local install/add option.
+5. Select [`dist/figmatk.mcpb`](/Users/rob/Dev/figmatk/dist/figmatk.mcpb).
+
+This is the official Anthropic desktop-extension packaging format, but local `.mcpb` installs are file-based rather than GitHub-polled.
+
+## Local development without a packaged extension
+
+For repository development, you can still run the MCP server directly.
+
+Use the checked-in [`/.mcp.json`](/Users/rob/Dev/figmatk/.mcp.json) or point Claude at:
+
+```json
+{
+  "mcpServers": {
+    "figmatk": {
+      "command": "node",
+      "args": ["/absolute/path/to/mcp-server.mjs"]
+    }
+  }
+}
+```
+
+This manual config is a development path, not the primary end-user install path.
 
 The MCP server is the primary interface for:
 
@@ -80,6 +133,7 @@ See [template-workflows.md](template-workflows.md) for naming conventions and st
 ## Notes
 
 - `.deck` files are binary ZIP archives. Do not open them as text.
+- The repo supports both GitHub-backed plugin metadata and a local `dist/figmatk.mcpb` bundle.
 - Template discovery scans all main-canvas `SLIDE_ROW` nodes, not only the first row.
 - `Internal Only Canvas` assets are preserved during wrapping and instantiation.
 - Special nodes such as device mockups and interactive slide elements are preserved during cloning, even when FigmaTK cannot synthesize them from scratch.

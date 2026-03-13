@@ -6,7 +6,7 @@ description: >
   template from an existing deck, define reusable layouts, mark editable
   text/image slots, or prepare a draft template for later instantiation.
 metadata:
-  version: "0.3.9"
+  version: "0.3.10"
 ---
 
 # Figma Template Builder

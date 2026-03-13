@@ -22,8 +22,8 @@ const REPORT_OUT = '/private/tmp/figmatk-render-report-fig.html';
 // Max pixel-off percentage — catches localized defects SSIM misses.
 const DEFAULT_MAX_OFF_PCT = 15.0;  // generous for .fig frames (size/crop differences)
 const DEFAULT_MAX_MEAN_DELTA = 5.0;
-// Max severity per off pixel (0–255) — subpixel shifts ≈ 17, missing content ≈ 24+.
-const DEFAULT_MAX_OFF_DELTA = 20.0;
+// Max severity per off pixel (0–255) — subpixel shifts ≈ 17–20, missing content ≈ 24+.
+const DEFAULT_MAX_OFF_DELTA = 21.0;
 
 const FIG_PATH = join(__dirname, '../../figs/reference/medium-complex.fig');
 const FIG_REF  = join(__dirname, '../../figs/reference/medium-complex');

@@ -7,6 +7,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 import { FigDeck } from './lib/fig-deck.mjs';
 import { Deck } from './lib/api.mjs';
+import { listTemplateLayouts, createFromTemplate } from './lib/template-deck.mjs';
 import { nid, ov, nestedOv, removeNode, parseId, positionChar } from './lib/node-helpers.mjs';
 import { imageOv, hexToHash, hashToHex } from './lib/image-helpers.mjs';
 import { deepClone } from './lib/deep-clone.mjs';
@@ -333,6 +334,41 @@ server.tool(
 
     await deck.save(output);
     return { content: [{ type: 'text', text: `Created ${output} — ${slides.length} slides. Open in Figma Desktop.` }] };
+  }
+);
+
+// ── figmatk_list_template_layouts ────────────────────────────────────────
+server.tool(
+  'figmatk_list_template_layouts',
+  'Inspect a Figma .deck template and return available slide layouts with their text field names. Call this first before figmatk_create_from_template.',
+  {
+    template: z.string().describe('Path to the .deck template file'),
+  },
+  async ({ template }) => {
+    const layouts = await listTemplateLayouts(template);
+    const lines = layouts.map(l => {
+      const fields = l.textFields.map(f => `    - "${f.name}" (${f.nodeId}): "${f.preview}"`).join('\n');
+      return `Slide "${l.name}" [${l.slideId}]\n${fields || '    (no text fields)'}`;
+    });
+    return { content: [{ type: 'text', text: lines.join('\n\n') }] };
+  }
+);
+
+// ── figmatk_create_from_template ─────────────────────────────────────────
+server.tool(
+  'figmatk_create_from_template',
+  'Create a new Figma Slides deck by cherry-picking layouts from a template .deck file and populating them with content. Preserves all template colors, fonts, and styling.',
+  {
+    template: z.string().describe('Path to the source .deck template file'),
+    output:   z.string().describe('Output path for the new .deck file (use /tmp/)'),
+    slides: z.array(z.object({
+      slideId: z.string().describe('Slide ID from figmatk_list_template_layouts (e.g. "1:74")'),
+      text:    z.record(z.string()).optional().describe('Map of text field name → value (e.g. { "Title": "My Company", "Body 1": "..." })'),
+    })).describe('Ordered list of slides to include, each referencing a template layout'),
+  },
+  async ({ template, output, slides }) => {
+    const bytes = await createFromTemplate(template, output, slides);
+    return { content: [{ type: 'text', text: `Created ${output} — ${slides.length} slides (${bytes} bytes). Open in Figma Desktop.` }] };
   }
 );
 

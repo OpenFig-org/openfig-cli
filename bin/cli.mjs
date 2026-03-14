@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * OpenFig — Open-source tools for Figma .deck / .fig files.
+ * OpenFig — Open-source tools for Figma file parsing and rendering.
  *
  * Usage: openfig <command> [args...]
  *
@@ -36,7 +36,7 @@ const arg2 = process.argv[2];
 let command, rawArgs;
 
 if (!arg2 || arg2 === '--help' || arg2 === '-h') {
-  console.log(`OpenFig — Open-source tools for Figma .deck / .fig files\n`);
+  console.log(`OpenFig — Open-source tools for Figma file parsing and rendering\n`);
   console.log('Usage: openfig <command> [args...]\n');
   console.log('Commands:');
   console.log('  export         Export slides as images (PNG/JPG/WEBP)');

@@ -2,7 +2,7 @@
   "manifest_version": "0.2",
   "name": "openfig",
   "version": "0.3.11",
-  "description": "Open-source tools for parsing and rendering Figma design files",
+  "description": "Open-source tools for Figma file parsing and rendering",
   "author": {
     "name": "OpenFig Contributors"
   },

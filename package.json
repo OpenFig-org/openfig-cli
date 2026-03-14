@@ -4,7 +4,7 @@
   "description": "OpenFig — Open-source tools for parsing and rendering Figma design files",
   "type": "module",
   "bin": {
-    "openfig": "cli.mjs",
+    "openfig": "bin/cli.mjs",
     "openfig-mcp": "mcp-server.mjs"
   },
   "exports": {
@@ -15,19 +15,15 @@
     "./deep-clone": "./lib/core/deep-clone.mjs"
   },
   "files": [
-    "cli.mjs",
+    "bin/",
     "mcp-server.mjs",
     "manifest.json",
     "lib/",
-    "commands/",
-    "skills/",
-    ".claude-plugin/",
-    ".mcp.json",
     "LICENSE",
     "README.md"
   ],
   "scripts": {
-    "start": "node cli.mjs",
+    "start": "node bin/cli.mjs",
     "pack": "node scripts/pack.mjs",
     "release": "node scripts/release.mjs",
     "validate:extension": "mcpb validate manifest.json",
@@ -39,11 +35,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rcoenen/openfig.git"
+    "url": "git+https://github.com/rcoenen/OpenFig.git"
   },
-  "homepage": "https://github.com/rcoenen/openfig",
+  "homepage": "https://github.com/rcoenen/OpenFig",
   "bugs": {
-    "url": "https://github.com/rcoenen/openfig/issues"
+    "url": "https://github.com/rcoenen/OpenFig/issues"
   },
   "author": "rcoenen",
   "dependencies": {

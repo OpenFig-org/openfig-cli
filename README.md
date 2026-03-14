@@ -1,5 +1,7 @@
 <img src="assets/logo.webp" alt="OpenFig" width="320" />
 
+<a href="https://www.buymeacoffee.com/coenenrob9"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="40" /></a>
+
 Open tools for Figma files.
 
 Parse, inspect, and render `.deck` and `.fig` files without the Figma application — including PNG export.

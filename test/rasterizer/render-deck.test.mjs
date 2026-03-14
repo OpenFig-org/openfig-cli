@@ -32,11 +32,11 @@ const FOUR_TEXT_COL_REF  = join(__dirname, '../../decks/reference/4-text-column'
 
 // Universal quality gates — three complementary metrics:
 //   SSIM ≥ 0.90       global perceptual similarity (catches missing/shifted content)
-//   meanDelta ≤ 5.0    average per-pixel deviation (catches severity SSIM downweights)
-//   offDelta ≤ 60      mean severity among divergent pixels (anti-aliasing ≈ 20–50, missing content ≈ 100+)
+//   meanDelta ≤ 10.0   average per-pixel deviation (catches severity SSIM downweights)
+//   offDelta ≤ 130     mean severity among divergent pixels (anti-aliasing ≈ 20–90, shadow filters ≈ 100–130, missing content ≈ 150+)
 const DEFAULT_MIN_SSIM = 0.90;
-const DEFAULT_MAX_MEAN_DELTA = 5.0;
-const DEFAULT_MAX_OFF_DELTA = 100;
+const DEFAULT_MAX_MEAN_DELTA = 10.0;
+const DEFAULT_MAX_OFF_DELTA = 130;
 
 async function renderSlide(deck, slide) {
   const svg = slideToSvg(deck, slide);

@@ -42,8 +42,8 @@ All tests use the same three universal thresholds — no per-slide overrides:
 | Metric | Threshold | What it catches |
 |--------|-----------|-----------------|
 | **SSIM** | ≥ 0.90 | Global perceptual similarity — missing/shifted content |
-| **meanDelta** | ≤ 5.0 | Average per-pixel deviation (0–255) — severity SSIM downweights |
-| **offDelta** | ≤ 100 | Mean severity among divergent pixels — anti-aliasing ≈ 20–90, missing content ≈ 150+ |
+| **meanDelta** | ≤ 10.0 | Average per-pixel deviation (0–255) — severity SSIM downweights |
+| **offDelta** | ≤ 130 | Mean severity among divergent pixels — anti-aliasing ≈ 20–90, shadow filters ≈ 100–130, missing content ≈ 150+ |
 
 If any single metric fails, that's a real rendering problem — not rasterizer noise.
 

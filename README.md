@@ -46,7 +46,7 @@ Plug in Claude Cowork or any coding agent and you have an AI that can read and e
 ## Install
 
 ```bash
-npm install -g openfig
+npm install -g openfig-cli
 ```
 
 Node 18+. No build step. Pure ESM.

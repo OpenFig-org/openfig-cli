@@ -23,10 +23,10 @@ Each Figma product has its own native file format. Active development — status
 
 OpenFig targets **≥99% SSIM** (Structural Similarity Index) against approved compatibility references — and typically achieves it. Render fidelity is tracked with visual regression tests against approved compatibility-reference PNGs.
 
-| Test suite | Reference |
-|------------|-----------|
-| `.deck` slides | [test/rasterizer/render-deck.test.mjs](test/rasterizer/render-deck.test.mjs) |
-| `.fig` design frames | [test/rasterizer/render-fig.test.mjs](test/rasterizer/render-fig.test.mjs) |
+| Test suite | Visual results |
+|------------|----------------|
+| `.deck` slides | [render-report-deck.html](https://rcoenen.github.io/OpenFig/test/rasterizer/reports/openfig-render-report-deck.html) |
+| `.fig` design frames | [render-report-fig.html](https://rcoenen.github.io/OpenFig/test/rasterizer/reports/openfig-render-report-fig.html) |
 
 ## Why native `.deck`?
 

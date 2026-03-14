@@ -37,10 +37,8 @@ const include = [
   'package.json',
   'package-lock.json',
   'mcp-server.mjs',
-  'cli.mjs',
+  'bin',
   'lib',
-  'commands',
-  'skills',
   'LICENSE',
   'README.md',
 ];

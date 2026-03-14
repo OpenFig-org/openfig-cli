@@ -27,17 +27,23 @@ jobs:
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/figmatk-plugin.zip
-          name: figmatk ${{ github.ref_name }}
+          files: dist/openfig.mcpb
+          name: OpenFig ${{ github.ref_name }}
           body: |
-            ## Install via Claude Desktop
+            ## Install
+
+            ```bash
+            npm install -g openfig-cli
+            ```
+
+            ## MCP / Claude Desktop
 
             **Option A — Marketplace (recommended):**
             ```bash
-            claude plugin marketplace add rcoenen/figmatk
-            claude plugin install figmatk
+            claude plugin marketplace add rcoenen/OpenFig
+            claude plugin install openfig
             ```
 
             **Option B — Local upload:**
-            1. Download `figmatk-plugin.zip` below
-            2. Claude Desktop → Browse plugins → Upload local plugin
+            1. Download `openfig.mcpb` below
+            2. Claude Desktop → Settings → Extensions → Upload local plugin

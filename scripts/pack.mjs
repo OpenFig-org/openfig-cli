@@ -52,7 +52,7 @@ for (const item of include) {
 
 // Install production deps into the tmp dir
 console.log('Installing production dependencies...');
-run('npm', ['install', '--omit=dev', '--ignore-scripts'], tmp);
+run('npm', ['install', '--omit=dev'], tmp);
 console.log('Validating staged manifest...');
 run('npx', ['--no-install', 'mcpb', 'validate', 'manifest.json'], tmp);
 

@@ -1,0 +1,10 @@
+node_modules/
+*.deck
+!lib/blank-template.deck
+*.fig
+/tmp/
+.DS_Store
+CLAUDE.md
+.claude/
+.opencode/
+dist/

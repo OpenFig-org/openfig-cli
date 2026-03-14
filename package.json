@@ -1,0 +1,78 @@
+{
+  "name": "openfig",
+  "version": "0.3.11",
+  "description": "OpenFig — Open-source tools for parsing and rendering Figma design files",
+  "type": "module",
+  "bin": {
+    "openfig": "cli.mjs",
+    "openfig-mcp": "mcp-server.mjs"
+  },
+  "exports": {
+    ".": "./lib/slides/api.mjs",
+    "./deck": "./lib/core/fig-deck.mjs",
+    "./node-helpers": "./lib/core/node-helpers.mjs",
+    "./image-helpers": "./lib/core/image-helpers.mjs",
+    "./deep-clone": "./lib/core/deep-clone.mjs"
+  },
+  "files": [
+    "cli.mjs",
+    "mcp-server.mjs",
+    "manifest.json",
+    "lib/",
+    "commands/",
+    "skills/",
+    ".claude-plugin/",
+    ".mcp.json",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "start": "node cli.mjs",
+    "pack": "node scripts/pack.mjs",
+    "release": "node scripts/release.mjs",
+    "validate:extension": "mcpb validate manifest.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rcoenen/openfig.git"
+  },
+  "homepage": "https://github.com/rcoenen/openfig",
+  "bugs": {
+    "url": "https://github.com/rcoenen/openfig/issues"
+  },
+  "author": "rcoenen",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "@resvg/resvg-wasm": "^2.6.2",
+    "archiver": "^7.0.1",
+    "fzstd": "^0.1.1",
+    "kiwi-schema": "^0.5.0",
+    "pako": "^2.1.0",
+    "sharp": "^0.34.5",
+    "ssim.js": "^3.5.0",
+    "zstd-codec": "^0.1.5"
+  },
+  "devDependencies": {
+    "@anthropic-ai/mcpb": "^2.1.2",
+    "@fontsource/darker-grotesque": "^5.2.8",
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/irish-grover": "^5.2.7",
+    "vitest": "^4.1.0"
+  },
+  "keywords": [
+    "figma",
+    "deck",
+    "fig",
+    "slides",
+    "presentation",
+    "kiwi",
+    "binary",
+    "cli"
+  ],
+  "license": "MIT"
+}

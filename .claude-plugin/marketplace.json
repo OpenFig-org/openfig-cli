@@ -1,0 +1,24 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "openfig",
+  "description": "OpenFig — Open-source tools for parsing and rendering Figma design files",
+  "metadata": {
+    "description": "OpenFig — Open-source tools for Figma files"
+  },
+  "owner": {
+    "name": "OpenFig Contributors",
+    "email": "shove-tank-malt@duck.com"
+  },
+  "plugins": [
+    {
+      "name": "openfig",
+      "description": "Open-source tools for Figma files",
+      "version": "0.3.11",
+      "author": {
+        "name": "OpenFig Contributors"
+      },
+      "source": "./",
+      "category": "development"
+    }
+  ]
+}

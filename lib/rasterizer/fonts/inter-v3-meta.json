@@ -1,0 +1,6 @@
+{
+  "source": "Figma.app/Contents/Resources/app.asar /assets/Inter.var.woff2",
+  "version": "Version 3.015;git-7f5c04026",
+  "axes": { "wght": [100, 900], "slnt": [-10, 0] },
+  "instances": ["400-normal", "500-normal", "600-normal", "700-normal", "400-italic", "700-italic"]
+}

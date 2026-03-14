@@ -1,0 +1,16 @@
+{
+  "name": "openfig",
+  "version": "0.3.11",
+  "description": "Open-source tools for parsing and rendering Figma design files",
+  "author": {
+    "name": "OpenFig Contributors"
+  },
+  "repository": "https://github.com/rcoenen/openfig",
+  "license": "MIT",
+  "keywords": [
+    "figma",
+    "deck",
+    "slides",
+    "presentation"
+  ]
+}

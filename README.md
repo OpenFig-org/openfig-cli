@@ -19,6 +19,15 @@ Each Figma product has its own native file format. Active development — status
 | Figma Sites | `.site` | ❌ not yet |
 | Figma Make | `.make` | ❌ not yet |
 
+## Render Quality
+
+OpenFig targets **≥99% SSIM** (Structural Similarity Index) against approved compatibility references — and typically achieves it. Render fidelity is tracked with visual regression tests against approved compatibility-reference PNGs.
+
+| Test suite | Reference |
+|------------|-----------|
+| `.deck` slides | [test/rasterizer/render-deck.test.mjs](test/rasterizer/render-deck.test.mjs) |
+| `.fig` design frames | [test/rasterizer/render-fig.test.mjs](test/rasterizer/render-fig.test.mjs) |
+
 ## Why native `.deck`?
 
 Figma Slides lets you download presentations as `.deck` files and re-upload them. This is the **native** round-trip format. Exporting to `.pptx` is lossy — vectors get rasterized, fonts fall back to system defaults, layout breaks. By staying in `.deck`, you preserve everything exactly as Figma renders it.

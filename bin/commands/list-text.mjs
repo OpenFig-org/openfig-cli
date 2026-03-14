@@ -3,9 +3,9 @@
  *
  * Usage: node cli.mjs list-text <file.deck>
  */
-import { FigDeck } from '../lib/core/fig-deck.mjs';
-import { nid } from '../lib/core/node-helpers.mjs';
-import { hashToHex } from '../lib/core/image-helpers.mjs';
+import { FigDeck } from '../../lib/core/fig-deck.mjs';
+import { nid } from '../../lib/core/node-helpers.mjs';
+import { hashToHex } from '../../lib/core/image-helpers.mjs';
 
 export async function run(args) {
   const file = args[0];

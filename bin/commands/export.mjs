@@ -16,9 +16,9 @@
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'fs';
 import { join, parse, resolve } from 'path';
 import { createInterface } from 'readline';
-import { FigDeck } from '../lib/core/fig-deck.mjs';
-import { renderDeck, registerFontDir } from '../lib/rasterizer/deck-rasterizer.mjs';
-import { resolveFonts } from '../lib/rasterizer/font-resolver.mjs';
+import { FigDeck } from '../../lib/core/fig-deck.mjs';
+import { renderDeck, registerFontDir } from '../../lib/rasterizer/deck-rasterizer.mjs';
+import { resolveFonts } from '../../lib/rasterizer/font-resolver.mjs';
 
 async function confirmOverwrite(dir) {
   const rl = createInterface({ input: process.stdin, output: process.stdout });

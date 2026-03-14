@@ -3,7 +3,7 @@
  *
  * Usage: node cli.mjs roundtrip <file.deck> -o <output.deck>
  */
-import { FigDeck } from '../lib/core/fig-deck.mjs';
+import { FigDeck } from '../../lib/core/fig-deck.mjs';
 
 export async function run(args, flags) {
   const file = args[0];

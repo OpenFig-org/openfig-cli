@@ -3,8 +3,8 @@
  *
  * Usage: node cli.mjs list-overrides <file.deck> [--symbol NAME|ID]
  */
-import { FigDeck } from '../lib/core/fig-deck.mjs';
-import { nid } from '../lib/core/node-helpers.mjs';
+import { FigDeck } from '../../lib/core/fig-deck.mjs';
+import { nid } from '../../lib/core/node-helpers.mjs';
 
 export async function run(args, flags) {
   const file = args[0];

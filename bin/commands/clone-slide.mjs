@@ -5,14 +5,14 @@
  *        --template <slideId|name> --name <newName>
  *        [--after <slideId>] [--set key=value ...] [--set-image key=path ...]
  */
-import { FigDeck } from '../lib/core/fig-deck.mjs';
-import { nid, parseId, positionChar } from '../lib/core/node-helpers.mjs';
-import { imageOv } from '../lib/core/image-helpers.mjs';
-import { deepClone } from '../lib/core/deep-clone.mjs';
+import { FigDeck } from '../../lib/core/fig-deck.mjs';
+import { nid, parseId, positionChar } from '../../lib/core/node-helpers.mjs';
+import { imageOv } from '../../lib/core/image-helpers.mjs';
+import { deepClone } from '../../lib/core/deep-clone.mjs';
 import { readFileSync, copyFileSync, existsSync, mkdirSync } from 'fs';
 import { createHash } from 'crypto';
 import { join, resolve } from 'path';
-import { getImageDimensions, generateThumbnail } from '../lib/core/image-utils.mjs';
+import { getImageDimensions, generateThumbnail } from '../../lib/core/image-utils.mjs';
 
 function sha1Hex(buf) {
   return createHash('sha1').update(buf).digest('hex');

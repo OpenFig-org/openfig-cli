@@ -3,8 +3,8 @@
  *
  * Usage: node cli.mjs remove-slide <file.deck> -o <output.deck> --slide <id|name> [--slide ...]
  */
-import { FigDeck } from '../lib/core/fig-deck.mjs';
-import { nid, removeNode } from '../lib/core/node-helpers.mjs';
+import { FigDeck } from '../../lib/core/fig-deck.mjs';
+import { nid, removeNode } from '../../lib/core/node-helpers.mjs';
 
 export async function run(args, flags) {
   const file = args[0];

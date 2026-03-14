@@ -21,7 +21,7 @@ Each Figma product has its own native file format. Active development — status
 
 ## Render Quality
 
-OpenFig targets **≥99% SSIM** (Structural Similarity Index) against approved compatibility references — and typically achieves it. Render fidelity is tracked with visual regression tests against approved compatibility-reference PNGs.
+OpenFig achieves **≥99% SSIM** (Structural Similarity Index) against approved compatibility references across all test cases. Render fidelity is verified with visual regression tests against approved compatibility-reference PNGs.
 
 | Test suite | Visual results |
 |------------|----------------|

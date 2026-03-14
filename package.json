@@ -45,12 +45,12 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.1",
     "@resvg/resvg-wasm": "^2.6.2",
-    "archiver": "^7.0.1",
     "fzstd": "^0.1.1",
     "kiwi-schema": "^0.5.0",
     "pako": "^2.1.0",
     "sharp": "^0.34.5",
     "ssim.js": "^3.5.0",
+    "yazl": "^3.3.1",
     "zstd-codec": "^0.1.5"
   },
   "devDependencies": {

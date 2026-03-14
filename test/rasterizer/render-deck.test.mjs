@@ -2,7 +2,7 @@
  * .deck (Figma Slides) render quality tests — compare rendered slides against
  * approved compatibility-reference PNGs using SSIM (Structural Similarity Index).
  *
- * Fixtures:  decks/reference/
+ * Fixtures:  test/fixtures/decks/reference/
  * Report:    /tmp/openfig-render-report-deck.html
  */
 
@@ -18,17 +18,17 @@ import { buildReportRow, writeRenderReport, computeSsim } from '../../lib/raster
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPORT_OUT = '/private/tmp/openfig-render-report-deck.html';
 
-const DECK_PATH   = join(__dirname, '../../decks/reference/oil-machinations.deck');
-const REF_DIR     = join(__dirname, '../../decks/reference/oil-machinations');
+const DECK_PATH   = join(__dirname, '../fixtures/decks/reference/oil-machinations.deck');
+const REF_DIR     = join(__dirname, '../fixtures/decks/reference/oil-machinations');
 
-const JUST_FONTS_DECK = join(__dirname, '../../decks/reference/just-fonts.deck');
-const JUST_FONTS_REF  = join(__dirname, '../../decks/reference/just-fonts');
+const JUST_FONTS_DECK = join(__dirname, '../fixtures/decks/reference/just-fonts.deck');
+const JUST_FONTS_REF  = join(__dirname, '../fixtures/decks/reference/just-fonts');
 
-const SVG_DECK = join(__dirname, '../../decks/reference/svg-deck.deck');
-const SVG_REF  = join(__dirname, '../../decks/reference/svg-deck');
+const SVG_DECK = join(__dirname, '../fixtures/decks/reference/svg-deck.deck');
+const SVG_REF  = join(__dirname, '../fixtures/decks/reference/svg-deck');
 
-const FOUR_TEXT_COL_DECK = join(__dirname, '../../decks/reference/4-text-column.deck');
-const FOUR_TEXT_COL_REF  = join(__dirname, '../../decks/reference/4-text-column');
+const FOUR_TEXT_COL_DECK = join(__dirname, '../fixtures/decks/reference/4-text-column.deck');
+const FOUR_TEXT_COL_REF  = join(__dirname, '../fixtures/decks/reference/4-text-column');
 
 // Universal quality gates — three complementary metrics:
 //   SSIM ≥ 0.90       global perceptual similarity (catches missing/shifted content)

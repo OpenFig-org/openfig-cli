@@ -2,7 +2,7 @@
  * .fig (Figma Design) render quality tests — render frames from Design files
  * and compare against approved compatibility-reference PNGs using SSIM.
  *
- * Fixtures:  figs/reference/
+ * Fixtures:  test/fixtures/figs/reference/
  * Report:    /tmp/openfig-render-report-fig.html
  */
 
@@ -27,14 +27,14 @@ const DEFAULT_MIN_SSIM = 0.90;
 const DEFAULT_MAX_MEAN_DELTA = 10.0;
 const DEFAULT_MAX_OFF_DELTA = 130;
 
-const FIG_PATH = join(__dirname, '../../figs/reference/medium-complex.fig');
-const FIG_REF  = join(__dirname, '../../figs/reference/medium-complex');
+const FIG_PATH = join(__dirname, '../fixtures/figs/reference/medium-complex.fig');
+const FIG_REF  = join(__dirname, '../fixtures/figs/reference/medium-complex');
 
-const CLIP_TEST_PATH = join(__dirname, '../../figs/reference/clip-test.fig');
-const CLIP_TEST_REF  = join(__dirname, '../../figs/reference/clip-test');
+const CLIP_TEST_PATH = join(__dirname, '../fixtures/figs/reference/clip-test.fig');
+const CLIP_TEST_REF  = join(__dirname, '../fixtures/figs/reference/clip-test');
 
-const BASIC_SHAPES_PATH = join(__dirname, '../../figs/reference/basic-shapes.fig');
-const BASIC_SHAPES_REF  = join(__dirname, '../../figs/reference/basic-shapes');
+const BASIC_SHAPES_PATH = join(__dirname, '../fixtures/figs/reference/basic-shapes.fig');
+const BASIC_SHAPES_REF  = join(__dirname, '../fixtures/figs/reference/basic-shapes');
 
 const reportRows = [];
 

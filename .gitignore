@@ -1,5 +1,8 @@
 node_modules/
 openspec/
+AGENTS.md
+skills/
+.mcp.json
 *.deck
 !lib/blank-template.deck
 *.fig

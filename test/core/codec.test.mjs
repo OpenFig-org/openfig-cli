@@ -4,8 +4,8 @@
  * + zstd pipeline, same ZIP structure (canvas.fig + meta.json + thumbnail).
  *
  * Fixtures:
- *   decks/reference/   — .deck files (Figma Slides)
- *   figs/reference/    — .fig files (Figma Design)
+ *   test/fixtures/decks/reference/   — .deck files (Figma Slides)
+ *   test/fixtures/figs/reference/    — .fig files (Figma Design)
  */
 
 import { describe, it, expect } from 'vitest';
@@ -15,9 +15,9 @@ import { FigDeck } from '../../lib/core/fig-deck.mjs';
 import { nid } from '../../lib/core/node-helpers.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const DECK_PATH = join(__dirname, '../../decks/reference/oil-machinations.deck');
-const FIG_PATH  = join(__dirname, '../../figs/reference/open-peeps.fig');
-const FIG_SMALL = join(__dirname, '../../figs/reference/medium-complex.fig');
+const DECK_PATH = join(__dirname, '../fixtures/decks/reference/oil-machinations.deck');
+const FIG_PATH  = join(__dirname, '../fixtures/figs/reference/open-peeps.fig');
+const FIG_SMALL = join(__dirname, '../fixtures/figs/reference/medium-complex.fig');
 
 // ── .deck (Figma Slides) ─────────────────────────────────────────────────────
 

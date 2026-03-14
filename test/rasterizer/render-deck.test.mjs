@@ -16,7 +16,7 @@ import { svgToPng } from '../../lib/rasterizer/deck-rasterizer.mjs';
 import { buildReportRow, writeRenderReport, computeSsim } from '../../lib/rasterizer/render-report-lib.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const REPORT_OUT = '/private/tmp/openfig-render-report-deck.html';
+const REPORT_OUT = join(__dirname, 'reports/openfig-render-report-deck.html');
 
 const DECK_PATH   = join(__dirname, '../fixtures/decks/reference/oil-machinations.deck');
 const REF_DIR     = join(__dirname, '../fixtures/decks/reference/oil-machinations');

@@ -13,7 +13,7 @@
     {
       "name": "openfig",
       "description": "Open-source tools for Figma files",
-      "version": "0.3.15",
+      "version": "0.3.16",
       "author": {
         "name": "OpenFig Contributors"
       },

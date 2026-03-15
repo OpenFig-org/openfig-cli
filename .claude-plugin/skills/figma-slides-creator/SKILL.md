@@ -6,7 +6,7 @@ description: >
   clone or remove slides, or produce a .deck file for Figma Slides.
   Powered by OpenFig under the hood.
 metadata:
-  version: "0.3.11"
+  version: "0.3.16"
 ---
 
 # OpenFig Skill

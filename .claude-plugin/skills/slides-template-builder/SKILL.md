@@ -1,5 +1,5 @@
 ---
-name: figma-template-builder
+name: slides-template-builder
 description: >
   Author reusable Figma Slides templates as .deck files. Use when the user
   wants to build a template from reference images or examples, derive a new

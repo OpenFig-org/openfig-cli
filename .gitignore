@@ -2,9 +2,7 @@ node_modules/
 openspec/
 examples/
 AGENTS.md
-skills/
 .mcp.json
-.claude-plugin/
 *.deck
 !lib/blank-template.deck
 *.fig

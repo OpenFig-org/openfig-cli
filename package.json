@@ -36,11 +36,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/OpenFig-org/OpenFig.git"
+    "url": "git+https://github.com/OpenFig-org/openfig-cli.git"
   },
-  "homepage": "https://github.com/OpenFig-org/OpenFig",
+  "homepage": "https://github.com/OpenFig-org/openfig-cli",
   "bugs": {
-    "url": "https://github.com/OpenFig-org/OpenFig/issues"
+    "url": "https://github.com/OpenFig-org/openfig-cli/issues"
   },
   "author": "rcoenen",
   "dependencies": {

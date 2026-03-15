@@ -5,7 +5,7 @@
   "author": {
     "name": "OpenFig.org Contributors"
   },
-  "repository": "https://github.com/OpenFig-org/OpenFig",
+  "repository": "https://github.com/OpenFig-org/openfig-cli",
   "homepage": "https://openfig.org",
   "license": "MIT",
   "keywords": [

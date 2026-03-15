@@ -32,6 +32,7 @@ To let the user view the result: tell them to **open the file in Figma Desktop**
 | Clone, remove, or restructure slides | Use MCP tools (`openfig_clone_slide`, `openfig_remove_slide`) |
 | Inspect structure or read content | Use MCP tools (`openfig_inspect`, `openfig_list_text`) |
 | Find placeholder/filler images | Use `search_images` → `download_image` → review → `openfig_insert_image` |
+| Preview the final deck as PDF | Run `openfig pdf <file.deck> -o <output.pdf>` via Bash |
 
 ## Finding Images for Slides
 
@@ -286,8 +287,13 @@ When you encounter this during visual QA, verify the override is stored correctl
 2. **Render every slide** using `openfig_render_slide` and visually inspect for overflows, clipping, alignment, and color issues
 3. If a slide shows template defaults, check `openfig_list_text` — if overrides are present, it may be a nested override (see Known Rendering Limitations above)
 4. Fix any real issues found and re-render to confirm
-5. Tell the user to open the `.deck` in Figma Desktop for final review
-6. Offer to fix anything they report
+5. **Generate a PDF preview** for the user:
+   ```bash
+   openfig pdf <file.deck> -o <output.pdf>
+   ```
+   This creates a multi-page PDF of all slides — the best way for users to preview the full presentation locally without opening Figma.
+6. Tell the user to open the `.deck` in Figma Desktop for the final, design-accurate version
+7. Offer to fix anything they report
 
 ---
 

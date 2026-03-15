@@ -1,6 +1,6 @@
 {
   "name": "openfig",
-  "version": "0.3.25",
+  "version": "0.3.26",
   "description": "OpenFig — Figma Slides .deck file generator. Create, edit, and build presentations natively in Figma's .deck format.",
   "author": {
     "name": "OpenFig.org Contributors"

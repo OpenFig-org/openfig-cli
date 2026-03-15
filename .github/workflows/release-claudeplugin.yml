@@ -21,6 +21,6 @@ jobs:
           body: |
             ## Claude Cowork plugin release
 
-            Install via Claude Cowork → Customize → Browse plugins → add marketplace `rcoenen/OpenFig`.
+            Install via Claude Cowork → Customize → Browse plugins → add marketplace `OpenFig-org/OpenFig`.
 
             Or sync an existing installation to pick up the latest skills and configuration.

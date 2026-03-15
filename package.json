@@ -36,11 +36,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rcoenen/OpenFig.git"
+    "url": "git+https://github.com/OpenFig-org/OpenFig.git"
   },
-  "homepage": "https://github.com/rcoenen/OpenFig",
+  "homepage": "https://github.com/OpenFig-org/OpenFig",
   "bugs": {
-    "url": "https://github.com/rcoenen/OpenFig/issues"
+    "url": "https://github.com/OpenFig-org/OpenFig/issues"
   },
   "author": "rcoenen",
   "dependencies": {

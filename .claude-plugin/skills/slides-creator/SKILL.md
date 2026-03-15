@@ -304,3 +304,4 @@ When you encounter this during visual QA, verify the override is stored correctl
 - Removed nodes: set `phase: 'REMOVED'`, never delete from `nodeChanges`
 - Chunk 1 of `canvas.fig` must be zstd-compressed
 - `thumbHash` must be `new Uint8Array(0)`, never `{}`
+- **NEVER create new SYMBOL nodes or variant symbols.** Always use existing template symbols. Creating a SYMBOL by cloning an existing one and changing its name produces an invalid variant that Figma cannot render — the `variantPropSpecs` won't include the new values and Figma will show blank slides. Use `openfig_clone_slide` to create new instances of existing symbols instead.

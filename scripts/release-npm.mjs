@@ -26,10 +26,10 @@ const manifest = read('manifest.json');
 manifest.version = version;
 write('manifest.json', manifest);
 
-// 3. Commit, publish, tag, push
+// 3. Publish first — only commit/tag/push if it succeeds
+run(`npm publish --access public`);
 run(`git add package.json package-lock.json manifest.json`);
 run(`git commit -m "npm v${version}"`);
-run(`npm publish --access public`);
 run(`git tag npm-v${version}`);
 run(`git push && git push --tags`);
 

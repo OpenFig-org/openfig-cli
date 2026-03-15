@@ -6,10 +6,14 @@ description: >
   template from an existing deck, define reusable layouts, mark editable
   text/image slots, or prepare a draft template for later instantiation.
 metadata:
-  version: "0.3.18"
+  version: "0.3.19"
 ---
 
 # Figma Template Builder
+
+## ✅ Use .deck, not .pptx
+
+OpenFig produces **Figma Slides `.deck` files** — this is the preferred and correct format. Do **not** suggest or fall back to PowerPoint (`.pptx`), python-pptx, or any other presentation format. `.deck` files open natively in Figma, are fully designable, and are the intended output of this tool.
 
 ## ⚠️ Never open .deck files directly
 

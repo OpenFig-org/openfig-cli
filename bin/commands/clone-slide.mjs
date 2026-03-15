@@ -40,22 +40,65 @@ export async function run(args, flags) {
   const tmplInst = deck.getSlideInstance(nid(tmplSlide));
   if (!tmplInst) { console.error(`No instance on template slide`); process.exit(1); }
 
-  // Find SLIDE_ROW parent
-  const slideRowId = tmplSlide.parentIndex?.guid
+  // Detect MODULE wrapper: SLIDE_ROW → MODULE → SLIDE
+  const tmplParentId = tmplSlide.parentIndex?.guid
     ? `${tmplSlide.parentIndex.guid.sessionID}:${tmplSlide.parentIndex.guid.localID}`
     : null;
+  const tmplParent = tmplParentId ? deck.getNode(tmplParentId) : null;
+  const hasModule = tmplParent?.type === 'MODULE';
+  const slideRowId = hasModule
+    ? (tmplParent.parentIndex?.guid
+        ? `${tmplParent.parentIndex.guid.sessionID}:${tmplParent.parentIndex.guid.localID}`
+        : null)
+    : tmplParentId;
 
   // Generate new IDs
   let nextId = deck.maxLocalID() + 1;
+  const moduleId = hasModule ? nextId++ : null;
   const slideId = nextId++;
   const instId = nextId++;
+
+  // Create new MODULE wrapper if template uses one
+  let newModule = null;
+  if (hasModule && slideRowId) {
+    const activeCount = deck.getActiveSlides().length;
+    newModule = {
+      guid: { sessionID: 1, localID: moduleId },
+      phase: 'CREATED',
+      type: 'MODULE',
+      name: newName,
+      isPublishable: true,
+      version: tmplParent.version,
+      userFacingVersion: tmplParent.userFacingVersion,
+      visible: true,
+      opacity: 1,
+      size: deepClone(tmplParent.size ?? { x: 1920, y: 1080 }),
+      transform: deepClone(tmplParent.transform ?? { m00: 1, m01: 0, m02: 0, m10: 0, m11: 1, m12: 0 }),
+      strokeWeight: 1,
+      strokeAlign: 'INSIDE',
+      strokeJoin: 'MITER',
+      fillPaints: deepClone(tmplParent.fillPaints ?? [{ type: 'SOLID', color: { r: 1, g: 1, b: 1, a: 1 }, opacity: 1, visible: true, blendMode: 'NORMAL' }]),
+      fillGeometry: deepClone(tmplParent.fillGeometry ?? [{ windingRule: 'NONZERO', commandsBlob: 13, styleID: 0 }]),
+      frameMaskDisabled: false,
+      parentIndex: {
+        guid: parseId(slideRowId),
+        position: positionChar(activeCount),
+      },
+    };
+  }
 
   // Clone slide node
   const newSlide = deepClone(tmplSlide);
   newSlide.guid = { sessionID: 1, localID: slideId };
   newSlide.name = newName;
   newSlide.phase = 'CREATED';
-  if (slideRowId) {
+  if (hasModule && newModule) {
+    // Parent to the new MODULE
+    newSlide.parentIndex = {
+      guid: { sessionID: 1, localID: moduleId },
+      position: '!',
+    };
+  } else if (slideRowId) {
     const activeCount = deck.getActiveSlides().length;
     newSlide.parentIndex = {
       guid: parseId(slideRowId),
@@ -119,16 +162,24 @@ export async function run(args, flags) {
 
   // Set slide position
   const activeSlides = deck.getActiveSlides();
+  const xOffset = activeSlides.length * 2160;
+  if (newModule?.transform) {
+    newModule.transform.m02 = xOffset;
+  }
   if (newSlide.transform) {
-    newSlide.transform.m02 = activeSlides.length * 2160;
+    newSlide.transform.m02 = hasModule ? 0 : xOffset;
   }
 
   // Push to nodeChanges
+  if (newModule) {
+    deck.message.nodeChanges.push(newModule);
+  }
   deck.message.nodeChanges.push(newSlide);
   deck.message.nodeChanges.push(newInst);
   deck.rebuildMaps();
 
-  console.log(`Cloned slide "${tmplSlide.name}" → "${newName}" (1:${slideId} + 1:${instId})`);
+  const moduleNote = newModule ? ` + MODULE 1:${moduleId}` : '';
+  console.log(`Cloned slide "${tmplSlide.name}" → "${newName}" (1:${slideId} + 1:${instId}${moduleNote})`);
   console.log(`  ${sets.length} text override(s), ${setImages.length} image override(s)`);
 
   const bytes = await deck.saveDeck(outPath);

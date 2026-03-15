@@ -223,45 +223,46 @@ server.tool(
 );
 
 // ── clone-slide ─────────────────────────────────────────────────────────
+import { run as cloneSlideRun } from './bin/commands/clone-slide.mjs';
+
 server.tool(
   'openfig_clone_slide',
   'Duplicate a slide from the deck',
   {
     path: z.string().describe('Path to .deck file'),
     output: z.string().describe('Output .deck path'),
-    slideId: z.string().describe('Source slide node ID to clone'),
+    slideId: z.string().describe('Source slide node ID or name to clone'),
+    name: z.string().optional().describe('Name for the new slide'),
+    set: z.array(z.string()).optional().describe('Text overrides as "nodeId=value" pairs'),
+    setImage: z.array(z.string()).optional().describe('Image overrides as "nodeId=path" pairs'),
   },
-  async ({ path, output, slideId }) => {
-    const deck = await FigDeck.fromDeckFile(path);
-    const slide = deck.getNode(slideId);
-    if (!slide) return { content: [{ type: 'text', text: `Slide ${slideId} not found` }] };
-
-    let nextId = deck.maxLocalID() + 1;
-    const newSlide = deepClone(slide);
-    const newSlideId = nextId++;
-    newSlide.guid = { sessionID: 1, localID: newSlideId };
-    newSlide.phase = 'CREATED';
-    delete newSlide.prototypeInteractions;
-    delete newSlide.slideThumbnailHash;
-    delete newSlide.editInfo;
-
-    const inst = deck.getSlideInstance(slideId);
-    if (inst) {
-      const newInst = deepClone(inst);
-      newInst.guid = { sessionID: 1, localID: nextId++ };
-      newInst.phase = 'CREATED';
-      newInst.parentIndex = { guid: { sessionID: 1, localID: newSlideId }, position: '!' };
-      delete newInst.derivedSymbolData;
-      delete newInst.derivedSymbolDataLayoutVersion;
-      delete newInst.editInfo;
-      deck.message.nodeChanges.push(newInst);
+  async ({ path, output, slideId, name, set, setImage }) => {
+    const logs = [];
+    const origLog = console.log;
+    const origError = console.error;
+    const origExit = process.exit;
+    console.log = (...a) => logs.push(a.join(' '));
+    console.error = (...a) => logs.push(a.join(' '));
+    process.exit = (code) => { throw new Error(`exit:${code}`); };
+    try {
+      await cloneSlideRun(
+        [path],
+        {
+          o: output,
+          template: slideId,
+          name: name || 'New Slide',
+          set: set || [],
+          'set-image': setImage || [],
+        }
+      );
+    } catch (e) {
+      if (!e.message?.startsWith('exit:')) logs.push(`Error: ${e.message}`);
+    } finally {
+      console.log = origLog;
+      console.error = origError;
+      process.exit = origExit;
     }
-
-    deck.message.nodeChanges.push(newSlide);
-    deck.rebuildMaps();
-
-    const bytes = await deck.saveDeck(output);
-    return { content: [{ type: 'text', text: `Cloned slide ${slideId} → 1:${newSlideId}. Saved ${output} (${bytes} bytes)` }] };
+    return { content: [{ type: 'text', text: logs.join('\n') }] };
   }
 );
 

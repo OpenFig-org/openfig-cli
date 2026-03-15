@@ -11,6 +11,10 @@ metadata:
 
 # Figma Template Builder
 
+## ⚠️ Never open .deck files directly
+
+`.deck` files are binary ZIP archives. **Never open, read, or display a `.deck` file** — it will show garbage bytes in the panel. To inspect or modify a `.deck` file, always use the MCP tools shown below.
+
 Use this skill when the goal is to build or refine the template itself. For the common workflow of taking an existing template and producing a new presentation, use `skills/figma-slides-creator/SKILL.md`.
 
 ## MCP First

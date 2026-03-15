@@ -1,6 +1,6 @@
 {
-  "name": "Figma Slides Creator",
-  "version": "0.3.23",
+  "name": "openfig",
+  "version": "0.3.24",
   "description": "Create, edit, and build Figma Slides presentations",
   "author": {
     "name": "OpenFig.org Contributors"

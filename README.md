@@ -53,6 +53,10 @@ npm install -g openfig-cli
 
 Node 18+. No build step. Pure ESM.
 
+## File Format Support
+
+All CLI commands work on both `.deck` (Figma Slides) and `.fig` (Figma Design) files. Pass either format wherever a file path is expected.
+
 ## Quick Start
 
 ```bash

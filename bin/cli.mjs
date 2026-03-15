@@ -30,6 +30,7 @@ const COMMANDS = {
   'remove-slide':   './commands/remove-slide.mjs',
   'roundtrip':      './commands/roundtrip.mjs',
   'export':         './commands/export.mjs',
+  'pdf':            './commands/pdf.mjs',
 };
 
 const arg2 = process.argv[2];
@@ -40,6 +41,7 @@ if (!arg2 || arg2 === '--help' || arg2 === '-h') {
   console.log('Usage: openfig <command> [args...]\n');
   console.log('Commands:');
   console.log('  export         Export slides as images (PNG/JPG/WEBP)');
+  console.log('  pdf            Export slides as a multi-page PDF');
   console.log('  inspect        Show document structure (node hierarchy tree)');
   console.log('  list-text      List all text content in the deck');
   console.log('  list-overrides List editable override keys per symbol');

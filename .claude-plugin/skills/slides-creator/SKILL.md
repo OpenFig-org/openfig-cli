@@ -153,6 +153,16 @@ Use this when the user provides a `.deck` file to modify.
 7. `openfig_remove_slide` — mark unwanted slides as REMOVED
 8. Always write to a **new output path** — never overwrite the source
 
+### ⚠️ clone-slide --set requires node IDs, not slot names
+
+When using `openfig_clone_slide` with `--set` overrides, you **must** use the actual node IDs from the template (e.g., `75:127`), not semantic slot names (e.g., `slot:text:slide_title`).
+
+| Wrong | Right |
+|-------|-------|
+| `--set "slot:text:slide_title=Hello"` | `--set "75:127=Hello"` |
+
+Using slot names stores overrides with `0:0` guidPaths, which the renderer cannot match to any node. The text will appear correct in `openfig_list_text` but won't render in exports or visual QA. Use `openfig_list_overrides` first to find the correct node IDs.
+
 ### MCP tool reference
 
 | Tool | Purpose |
@@ -255,13 +265,29 @@ Every deck must look **intentionally designed**, not AI-generated.
 
 ---
 
+## Known Rendering Limitations
+
+The `openfig` CLI renderer handles single-level overrides correctly but has one known gap:
+
+**Nested instance overrides (2+ segment guidPaths) do not render in CLI export.**
+
+This affects components like quote lockups where the override targets a text node inside a nested component instance. These overrides:
+- Are stored correctly in the `.deck` file
+- Will render correctly in **Figma Desktop**
+- Will show as template defaults in `openfig export` / `openfig_render_slide`
+
+When you encounter this during visual QA, verify the override is stored correctly via `openfig_list_text` and note it to the user — it's not a data error, just a renderer limitation.
+
+---
+
 ## QA
 
 1. Self-check: no placeholder text (`lorem ipsum`, `[title here]`) remains
 2. **Render every slide** using `openfig_render_slide` and visually inspect for overflows, clipping, alignment, and color issues
-3. Fix any issues found and re-render to confirm
-4. Tell the user to open the `.deck` in Figma Desktop for final review
-5. Offer to fix anything they report
+3. If a slide shows template defaults, check `openfig_list_text` — if overrides are present, it may be a nested override (see Known Rendering Limitations above)
+4. Fix any real issues found and re-render to confirm
+5. Tell the user to open the `.deck` in Figma Desktop for final review
+6. Offer to fix anything they report
 
 ---
 

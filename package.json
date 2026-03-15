@@ -1,6 +1,6 @@
 {
   "name": "openfig-cli",
-  "version": "0.3.18",
+  "version": "0.3.19",
   "description": "OpenFig — Open-source tools for Figma file parsing and rendering",
   "type": "module",
   "bin": {

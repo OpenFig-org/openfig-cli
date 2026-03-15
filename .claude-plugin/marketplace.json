@@ -1,9 +1,9 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "OpenFig",
-  "description": "OpenFig — Create and edit Figma Slides (.deck) and Figma Design (.fig) files",
+  "name": "Figma Slides Creator",
+  "description": "Create, edit, and build Figma Slides presentations",
   "metadata": {
-    "description": "OpenFig — Create and edit Figma Slides (.deck) and Figma Design (.fig) files"
+    "description": "Create, edit, and build Figma Slides presentations"
   },
   "owner": {
     "name": "OpenFig Contributors",
@@ -11,9 +11,9 @@
   },
   "plugins": [
     {
-      "name": "OpenFig",
-      "description": "Create and edit Figma Slides (.deck) and Figma Design (.fig) files",
-      "version": "0.3.21",
+      "name": "Figma Slides Creator",
+      "description": "Create, edit, and build Figma Slides presentations",
+      "version": "0.3.22",
       "author": {
         "name": "OpenFig Contributors"
       },

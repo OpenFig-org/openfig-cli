@@ -1,7 +1,7 @@
 {
-  "name": "OpenFig",
-  "version": "0.3.21",
-  "description": "Create and edit Figma Slides (.deck) and Figma Design (.fig) files",
+  "name": "Figma Slides Creator",
+  "version": "0.3.22",
+  "description": "Create, edit, and build Figma Slides presentations",
   "author": {
     "name": "OpenFig Contributors"
   },

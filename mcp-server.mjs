@@ -21,6 +21,7 @@ import {
 import { nid, ov, removeNode } from './lib/core/node-helpers.mjs';
 import { imageOv, hashToHex } from './lib/core/image-helpers.mjs';
 import { deepClone } from './lib/core/deep-clone.mjs';
+import { searchImages, downloadImage } from './lib/images/search.mjs';
 
 const server = new McpServer({
   name: 'openfig',
@@ -533,6 +534,38 @@ server.tool(
         mimeType: 'image/webp',
       }],
     };
+  }
+);
+
+// ── search_images ────────────────────────────────────────────────────────
+server.tool(
+  'search_images',
+  'Search for images by keyword. Returns a numbered list of results with URLs, dimensions, and source. Use this to find filler or placeholder images for slides.',
+  {
+    query: z.string().describe('Search query, e.g. "modern office sustainability"'),
+    count: z.number().optional().describe('Number of results to return (default: 10, max: 20)'),
+  },
+  async ({ query, count = 10 }) => {
+    const results = await searchImages(query, count);
+    const lines = results.map((r, i) =>
+      `${i + 1}. ${r.title}\n   URL: ${r.url}\n   Size: ${r.width}×${r.height} | Source: ${r.source}`
+    );
+    return { content: [{ type: 'text', text: lines.join('\n\n') || 'No results found' }] };
+  }
+);
+
+// ── download_image ───────────────────────────────────────────────────────
+server.tool(
+  'download_image',
+  'Download an image from a URL to the project images/ folder. Returns the local file path. Always show the user the downloaded path before inserting into a slide.',
+  {
+    url:        z.string().describe('Image URL to download'),
+    filename:   z.string().optional().describe('Output filename (default: derived from URL)'),
+    output_dir: z.string().optional().describe('Directory to save into (default: ./images/ relative to cwd)'),
+  },
+  async ({ url, filename, output_dir }) => {
+    const outPath = await downloadImage(url, filename, output_dir);
+    return { content: [{ type: 'text', text: `Downloaded to: ${outPath}` }] };
   }
 );
 

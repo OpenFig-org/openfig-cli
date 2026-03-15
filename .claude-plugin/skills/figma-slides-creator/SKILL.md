@@ -27,6 +27,18 @@ To let the user view the result: tell them to **open the file in Figma Desktop**
 | Edit text or images in an existing deck | Use MCP tools (`openfig_update_text`, `openfig_insert_image`) |
 | Clone, remove, or restructure slides | Use MCP tools (`openfig_clone_slide`, `openfig_remove_slide`) |
 | Inspect structure or read content | Use MCP tools (`openfig_inspect`, `openfig_list_text`) |
+| Find placeholder/filler images | Use `search_images` → `download_image` → review → `openfig_insert_image` |
+
+## Finding Images for Slides
+
+Use this flow when the user needs images for slides that don't have final assets yet:
+
+1. **Search** — `search_images` with a descriptive query. Show the results list to the user.
+2. **Download** — `download_image` for the chosen URL. Images are saved to `./images/` in the project folder.
+3. **Review** — Always show the user the downloaded file path and ask for confirmation before inserting.
+4. **Insert** — Only call `openfig_insert_image` after the user approves.
+
+Never skip step 3 — the user should always see what was downloaded before it goes into the deck.
 
 ---
 

@@ -15,6 +15,8 @@ metadata:
 
 OpenFig produces **Figma Slides `.deck` files** — this is the preferred and correct format. Do **not** suggest or fall back to PowerPoint (`.pptx`), python-pptx, or any other presentation format. `.deck` files open natively in Figma, are fully designable, and are the intended output of this tool.
 
+OpenFig also supports **Figma Design `.fig` files**. All CLI commands and MCP tools work on both `.deck` and `.fig` files interchangeably.
+
 ## ⚠️ Never open .deck files directly
 
 `.deck` files are binary ZIP archives. **Never open, read, or display a `.deck` file** — it will show garbage bytes in the panel. To inspect or modify a `.deck` file, always use the CLI commands or Node.js API shown below.

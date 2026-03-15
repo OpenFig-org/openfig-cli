@@ -6,16 +6,16 @@
     "description": "Create, edit, and build Figma Slides presentations"
   },
   "owner": {
-    "name": "OpenFig Contributors",
+    "name": "OpenFig.org Contributors",
     "email": "shove-tank-malt@duck.com"
   },
   "plugins": [
     {
       "name": "Figma Slides Creator",
       "description": "Create, edit, and build Figma Slides presentations",
-      "version": "0.3.22",
+      "version": "0.3.23",
       "author": {
-        "name": "OpenFig Contributors"
+        "name": "OpenFig.org Contributors"
       },
       "source": "./",
       "category": "development"

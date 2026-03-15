@@ -1,11 +1,12 @@
 {
   "name": "Figma Slides Creator",
-  "version": "0.3.22",
+  "version": "0.3.23",
   "description": "Create, edit, and build Figma Slides presentations",
   "author": {
-    "name": "OpenFig Contributors"
+    "name": "OpenFig.org Contributors"
   },
-  "repository": "https://github.com/rcoenen/openfig",
+  "repository": "https://github.com/rcoenen/OpenFig",
+  "homepage": "https://openfig.org",
   "license": "MIT",
   "keywords": [
     "figma",

@@ -1,12 +1,12 @@
-name: Release
+name: Release npm
 
 on:
   push:
     tags:
-      - 'v*'
+      - 'npm-v*'
 
 jobs:
-  build-plugin-zip:
+  publish:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -17,33 +17,31 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build plugin ZIP
+      - name: Build .mcpb bundle
         run: node scripts/pack.mjs
 
-      - name: Upload to GitHub Release
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: dist/openfig.mcpb
           name: OpenFig ${{ github.ref_name }}
           body: |
-            ## Install
+            ## npm package release
 
             ```bash
             npm install -g openfig-cli
             ```
 
-            ## MCP / Claude Desktop
+            ## Claude Cowork / Desktop (MCP bundle)
 
-            **Option A — Marketplace (recommended):**
-            ```bash
-            claude plugin marketplace add rcoenen/OpenFig
-            claude plugin install openfig
-            ```
-
-            **Option B — Local upload:**
-            1. Download `openfig.mcpb` below
-            2. Claude Desktop → Settings → Extensions → Upload local plugin
+            Download `openfig.mcpb` and install via Claude Desktop → Settings → Extensions → Upload local plugin.

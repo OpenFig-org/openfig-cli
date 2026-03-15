@@ -25,7 +25,8 @@
   "scripts": {
     "start": "node bin/cli.mjs",
     "pack": "node scripts/pack.mjs",
-    "release": "node scripts/release.mjs",
+    "release": "node scripts/release-npm.mjs",
+    "release:plugin": "node scripts/release-claudeplugin.mjs",
     "validate:extension": "mcpb validate manifest.json",
     "test": "vitest run",
     "test:watch": "vitest"

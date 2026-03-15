@@ -1,5 +1,5 @@
 ---
-name: figma-slides-creator
+name: slides-creator
 description: >
   Create, edit, and inspect Figma Slides .deck files. Use when the user asks to
   create a presentation, build a slide deck, edit slides, update text or images,

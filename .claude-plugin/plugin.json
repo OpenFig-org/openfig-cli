@@ -1,6 +1,6 @@
 {
-  "name": "openfig",
-  "version": "0.3.17",
+  "name": "OpenFig",
+  "version": "0.3.18",
   "description": "Open-source tools for parsing and rendering Figma design files",
   "author": {
     "name": "OpenFig Contributors"

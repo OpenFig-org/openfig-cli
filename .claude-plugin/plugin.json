@@ -13,5 +13,13 @@
     "slides",
     "presentation"
   ],
+  "mcpServers": {
+    "openfig": {
+      "command": "node",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/mcp-server.mjs"
+      ]
+    }
+  },
   "skills": "./.claude-plugin/skills/"
 }

@@ -88,7 +88,7 @@ await deck.save('output.deck');
 | High-level API | [docs/api-spec.md](docs/api-spec.md) |
 | Low-level FigDeck API | [docs/library.md](docs/library.md) |
 | Template workflows | [docs/template-workflows.md](docs/template-workflows.md) |
-| File format internals | [docs/format/](docs/format/) |
+| File format internals | [docs/format/](docs/format/) ([canonical source](https://github.com/OpenFig-org/openfig-core/tree/main/docs)) |
 
 ## License
 

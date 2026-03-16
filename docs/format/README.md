@@ -1,5 +1,8 @@
 # .deck / .fig File Format Documentation
 
+> **Canonical source:** Format documentation has moved to [openfig-core](https://github.com/OpenFig-org/openfig-core/tree/main/docs).
+> The files in this directory are kept for convenience but openfig-core is the source of truth.
+
 Technical specification for the Figma binary format. `.deck` files (Slides) are
 ZIP archives containing a `canvas.fig` + metadata. The inner binary format is
 shared with standalone `.fig` files (Design).

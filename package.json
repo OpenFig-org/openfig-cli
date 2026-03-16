@@ -12,7 +12,9 @@
     "./deck": "./lib/core/fig-deck.mjs",
     "./node-helpers": "./lib/core/node-helpers.mjs",
     "./image-helpers": "./lib/core/image-helpers.mjs",
-    "./deep-clone": "./lib/core/deep-clone.mjs"
+    "./deep-clone": "./lib/core/deep-clone.mjs",
+    "./mcp-server": "./mcp-server.mjs",
+    "./package.json": "./package.json"
   },
   "files": [
     "bin/",
@@ -26,7 +28,6 @@
     "start": "node bin/cli.mjs",
     "pack": "node scripts/pack.mjs",
     "release": "node scripts/release-npm.mjs",
-    "release:plugin": "node scripts/release-claudeplugin.mjs",
     "validate:extension": "mcpb validate manifest.json",
     "test": "vitest run",
     "test:watch": "vitest"

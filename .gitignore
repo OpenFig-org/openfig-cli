@@ -12,3 +12,4 @@ CLAUDE.md
 .claude/
 .opencode/
 dist/
+.tmp-test/

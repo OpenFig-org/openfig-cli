@@ -72,12 +72,12 @@ server.tool(
       deck.walkTree(id, (node, depth) => {
         if (depth === 0 || node.phase === 'REMOVED') return;
         if (node.type === 'TEXT' && node.textData?.characters) {
-          directLines.push(`  [text-node] ${nid(node)} "${node.name || ''}": ${node.textData.characters.substring(0, 120)}`);
+          directLines.push(`  [text-node] ${nid(node)} "${node.name || ''}": ${node.textData.characters}`);
         }
         if (node.type === 'SHAPE_WITH_TEXT' && node.nodeGenerationData?.overrides) {
           for (const override of node.nodeGenerationData.overrides) {
             if (override.textData?.characters) {
-              directLines.push(`  [shape-text] ${nid(node)} "${node.name || ''}": ${override.textData.characters.substring(0, 120)}`);
+              directLines.push(`  [shape-text] ${nid(node)} "${node.name || ''}": ${override.textData.characters}`);
               break;
             }
           }
@@ -96,7 +96,7 @@ server.tool(
         const key = ov.guidPath?.guids?.[0];
         const keyStr = key ? `${key.sessionID}:${key.localID}` : '?';
         if (ov.textData?.characters) {
-          lines.push(`  [text-override] ${keyStr}: ${ov.textData.characters.substring(0, 120)}`);
+          lines.push(`  [text-override] ${keyStr}: ${ov.textData.characters}`);
         }
         if (ov.fillPaints?.length) {
           for (const p of ov.fillPaints) {

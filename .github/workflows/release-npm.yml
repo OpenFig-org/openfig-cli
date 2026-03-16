@@ -22,9 +22,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build .mcpb bundle
-        run: node scripts/pack.mjs
-
       - name: Check if version already published
         id: check
         run: |
@@ -45,15 +42,8 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/openfig.mcpb
-          name: OpenFig ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
           body: |
-            ## npm package release
-
             ```bash
             npm install -g openfig-cli
             ```
-
-            ## Claude Cowork / Desktop (MCP bundle)
-
-            Download `openfig.mcpb` and install via Claude Desktop → Settings → Extensions → Upload local plugin.

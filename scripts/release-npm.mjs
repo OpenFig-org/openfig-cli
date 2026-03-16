@@ -2,7 +2,7 @@
 /**
  * OpenFig npm release script
  * Usage: node scripts/release-npm.mjs [patch|minor|major]
- * Bumps package.json + manifest.json, publishes to npm, tags as npm-v*.
+ * Bumps package.json, publishes to npm, tags as npm-v*.
  */
 import { execSync } from 'child_process';
 import { readFileSync, writeFileSync } from 'fs';
@@ -21,14 +21,9 @@ run(`npm version ${bump} --no-git-tag-version`);
 const { version } = read('package.json');
 console.log(`\nReleasing npm package v${version}...\n`);
 
-// 2. Sync MCPB manifest
-const manifest = read('manifest.json');
-manifest.version = version;
-write('manifest.json', manifest);
-
-// 3. Publish first — only commit/tag/push if it succeeds
+// 2. Publish first — only commit/tag/push if it succeeds
 run(`npm publish --access public`);
-run(`git add package.json package-lock.json manifest.json`);
+run(`git add package.json package-lock.json`);
 run(`git commit -m "npm v${version}"`);
 run(`git tag npm-v${version}`);
 run(`git push && git push --tags`);

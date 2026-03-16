@@ -19,16 +19,14 @@
   "files": [
     "bin/",
     "mcp-server.mjs",
-    "manifest.json",
+
     "lib/",
     "LICENSE",
     "README.md"
   ],
   "scripts": {
     "start": "node bin/cli.mjs",
-    "pack": "node scripts/pack.mjs",
     "release": "node scripts/release-npm.mjs",
-    "validate:extension": "mcpb validate manifest.json",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -57,7 +55,7 @@
     "zstd-codec": "^0.1.5"
   },
   "devDependencies": {
-    "@anthropic-ai/mcpb": "^2.1.2",
+
     "@fontsource/darker-grotesque": "^5.2.8",
     "@fontsource/inter": "^5.2.8",
     "@fontsource/irish-grover": "^5.2.7",

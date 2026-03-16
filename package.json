@@ -1,6 +1,6 @@
 {
   "name": "openfig-cli",
-  "version": "0.3.30",
+  "version": "0.3.31",
   "description": "OpenFig — Open-source tools for Figma file parsing and rendering",
   "type": "module",
   "bin": {
@@ -19,7 +19,6 @@
   "files": [
     "bin/",
     "mcp-server.mjs",
-
     "lib/",
     "LICENSE",
     "README.md"
@@ -55,7 +54,6 @@
     "zstd-codec": "^0.1.5"
   },
   "devDependencies": {
-
     "@fontsource/darker-grotesque": "^5.2.8",
     "@fontsource/inter": "^5.2.8",
     "@fontsource/irish-grover": "^5.2.7",

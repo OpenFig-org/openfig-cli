@@ -20,7 +20,7 @@ export async function run(args) {
   for (const node of deck.message.nodeChanges) {
     if (node.type === 'TEXT' && node.textData?.characters) {
       const text = node.textData.characters;
-      const preview = text.length > 80 ? text.substring(0, 77) + '...' : text;
+      const preview = text;
       console.log(`[${nid(node)}] "${node.name || ''}" → ${JSON.stringify(preview)}`);
     }
   }
@@ -44,7 +44,7 @@ export async function run(args) {
 
       if (ov.textData?.characters) {
         const text = ov.textData.characters;
-        const preview = text.length > 80 ? text.substring(0, 77) + '...' : text;
+        const preview = text;
         console.log(`  ${path}  TEXT: ${JSON.stringify(preview)}`);
       }
       if (ov.fillPaints?.length) {

@@ -44,8 +44,8 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.1",
     "@resvg/resvg-wasm": "^2.6.2",
-    "fzstd": "^0.1.1",
     "kiwi-schema": "^0.5.0",
+    "openfig-core": "^0.2.0",
     "pako": "^2.1.0",
     "pdf-lib": "^1.17.1",
     "sharp": "^0.34.5",

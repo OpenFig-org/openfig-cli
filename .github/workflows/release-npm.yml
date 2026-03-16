@@ -16,7 +16,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
@@ -25,7 +25,19 @@ jobs:
       - name: Build .mcpb bundle
         run: node scripts/pack.mjs
 
+      - name: Check if version already published
+        id: check
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          if npm view openfig-cli@"$PKG_VERSION" version 2>/dev/null; then
+            echo "already_published=true" >> "$GITHUB_OUTPUT"
+            echo "Version $PKG_VERSION already published — skipping."
+          else
+            echo "already_published=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish to npm
+        if: steps.check.outputs.already_published != 'true'
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

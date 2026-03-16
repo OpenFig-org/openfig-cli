@@ -124,6 +124,51 @@ export async function run(args, flags) {
   delete newInst.derivedSymbolDataLayoutVersion;
   delete newInst.editInfo;
 
+  // Clone sibling nodes (non-INSTANCE children of template slide, e.g. logo vectors)
+  const tmplSlideId = nid(tmplSlide);
+  const tmplInstId = nid(tmplInst);
+  const tmplChildren = deck.childrenMap.get(tmplSlideId) || [];
+  const siblingNodes = [];
+  const idRemap = new Map();
+
+  for (const child of tmplChildren) {
+    if (nid(child) === tmplInstId) continue;
+    if (child.phase === 'REMOVED') continue;
+
+    // Collect this node and all descendants
+    const subtree = [];
+    function collectSubtree(nodeId) {
+      const node = deck.getNode(nodeId);
+      if (!node || node.phase === 'REMOVED') return;
+      subtree.push(node);
+      const kids = deck.childrenMap.get(nodeId) || [];
+      for (const kid of kids) collectSubtree(nid(kid));
+    }
+    collectSubtree(nid(child));
+
+    // Clone each node with new IDs, re-parenting to new slide
+    for (const node of subtree) {
+      const oldId = nid(node);
+      const newLocalId = nextId++;
+      idRemap.set(oldId, newLocalId);
+
+      const cloned = deepClone(node);
+      cloned.guid = { sessionID: 1, localID: newLocalId };
+      cloned.phase = 'CREATED';
+      delete cloned.editInfo;
+
+      if (cloned.parentIndex?.guid) {
+        const parentOldId = `${cloned.parentIndex.guid.sessionID}:${cloned.parentIndex.guid.localID}`;
+        if (parentOldId === tmplSlideId) {
+          cloned.parentIndex.guid = { sessionID: 1, localID: slideId };
+        } else if (idRemap.has(parentOldId)) {
+          cloned.parentIndex.guid = { sessionID: 1, localID: idRemap.get(parentOldId) };
+        }
+      }
+      siblingNodes.push(cloned);
+    }
+  }
+
   // Apply text overrides
   for (const pair of sets) {
     const eqIdx = pair.indexOf('=');
@@ -176,10 +221,14 @@ export async function run(args, flags) {
   }
   deck.message.nodeChanges.push(newSlide);
   deck.message.nodeChanges.push(newInst);
+  for (const sib of siblingNodes) {
+    deck.message.nodeChanges.push(sib);
+  }
   deck.rebuildMaps();
 
   const moduleNote = newModule ? ` + MODULE 1:${moduleId}` : '';
-  console.log(`Cloned slide "${tmplSlide.name}" → "${newName}" (1:${slideId} + 1:${instId}${moduleNote})`);
+  const sibNote = siblingNodes.length ? `, ${siblingNodes.length} sibling node(s)` : '';
+  console.log(`Cloned slide "${tmplSlide.name}" → "${newName}" (1:${slideId} + 1:${instId}${moduleNote}${sibNote})`);
   console.log(`  ${sets.length} text override(s), ${setImages.length} image override(s)`);
 
   const bytes = await deck.saveDeck(outPath);

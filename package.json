@@ -45,7 +45,7 @@
     "@modelcontextprotocol/sdk": "^1.27.1",
     "@resvg/resvg-wasm": "^2.6.2",
     "kiwi-schema": "^0.5.0",
-    "openfig-core": "^0.3.1",
+    "openfig-core": "^0.3.2",
     "pako": "^2.1.0",
     "pdf-lib": "^1.17.1",
     "sharp": "^0.34.5",

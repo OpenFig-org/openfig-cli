@@ -19,7 +19,7 @@ Node 18+. No build step. Pure ESM.
 | Product | Extension | Read | Render | Modify |
 |---------|-----------|------|--------|--------|
 | Figma Slides | `.deck` | ✅ | ✅ PNG / PDF | ✅ |
-| Figma Design | `.fig` | ✅ | ✅ PNG / PDF | — |
+| Figma Design | `.fig` | ✅ | ✅ PNG / PDF | ✅ via [OpenFig Editor](https://github.com/OpenFig-org/openfig-designer) |
 
 ## Render Quality
 

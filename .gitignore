@@ -14,3 +14,4 @@ CLAUDE.md
 dist/
 .tmp-test/
 docs/_internal/
+specs/

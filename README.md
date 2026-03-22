@@ -21,15 +21,6 @@ Node 18+. No build step. Pure ESM.
 | Figma Slides | `.deck` | ✅ | ✅ PNG / PDF | ✅ |
 | Figma Design | `.fig` | ✅ | ✅ PNG / PDF | ✅ via [OpenFig Editor](https://github.com/OpenFig-org/openfig-designer) |
 
-## Render Quality
-
-**≥99% SSIM** against Figma reference exports across all test cases:
-
-| Test suite | Visual results |
-|------------|----------------|
-| `.deck` slides | [render-report-deck.html](https://rcoenen.github.io/OpenFig/test/rasterizer/reports/openfig-render-report-deck.html) |
-| `.fig` design frames | [render-report-fig.html](https://rcoenen.github.io/OpenFig/test/rasterizer/reports/openfig-render-report-fig.html) |
-
 ## CLI
 
 ```bash

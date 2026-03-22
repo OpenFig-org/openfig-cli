@@ -4,46 +4,7 @@
 
 Open tools for Figma files.
 
-Parse, inspect, and render `.deck` and `.fig` files without the Figma application — including PNG export.
-
-OpenFig is an open-source implementation of the Figma file format that allows developers to inspect, parse, and render Figma files without using the Figma application or API. The primary use case is Figma Slides (`.deck`), with `.fig` design file support also available.
-
-## Figma File Formats
-
-Each Figma product has its own native file format. Active development — status may change:
-
-| Product | Extension | Status |
-|---------|-----------|--------|
-| Figma Slides | `.deck` | ✅ |
-| Figma Design | `.fig` | ✅ read + PNG render |
-| Figma Jam (whiteboard) | `.jam` | ❌ not yet |
-| Figma Buzz | `.buzz` | ❌ not yet |
-| Figma Sites | `.site` | ❌ not yet |
-| Figma Make | `.make` | ❌ not yet |
-
-## Render Quality
-
-OpenFig achieves **≥99% SSIM** (Structural Similarity Index) against approved compatibility references across all test cases. Render fidelity is verified with visual regression tests against approved compatibility-reference PNGs.
-
-| Test suite | Visual results |
-|------------|----------------|
-| `.deck` slides | [render-report-deck.html](https://rcoenen.github.io/OpenFig/test/rasterizer/reports/openfig-render-report-deck.html) |
-| `.fig` design frames | [render-report-fig.html](https://rcoenen.github.io/OpenFig/test/rasterizer/reports/openfig-render-report-fig.html) |
-
-## Why native `.deck`?
-
-Figma Slides lets you download presentations as `.deck` files and re-upload them. This is the **native** round-trip format. Exporting to `.pptx` is lossy — vectors get rasterized, fonts fall back to system defaults, layout breaks. By staying in `.deck`, you preserve everything exactly as Figma renders it.
-
-OpenFig makes this round-trip programmable. Download a `.deck`, modify it, re-upload. Everything stays native.
-
-Plug in Claude Cowork or any coding agent and you have an AI that can read and edit Figma presentations end-to-end — without ever opening the Figma UI.
-
-## Use Cases
-
-- **AI agent for presentations** — let an LLM rewrite copy, insert images, and produce a ready-to-upload `.deck`
-- **Batch-produce branded decks** — start from a template, feed in data per client/project, get pixel-perfect slides out
-- **Inspect and audit** — understand the internal structure of any `.deck` file
-- **Automate** text and image placement across dozens of slides in seconds
+Parse, inspect, render, and modify `.deck` and `.fig` files without the Figma application.
 
 ## Install
 
@@ -55,35 +16,56 @@ Node 18+. No build step. Pure ESM.
 
 ## File Format Support
 
-All CLI commands work on both `.deck` (Figma Slides) and `.fig` (Figma Design) files. Pass either format wherever a file path is expected.
+| Product | Extension | Read | Render | Modify |
+|---------|-----------|------|--------|--------|
+| Figma Slides | `.deck` | ✅ | ✅ PNG / PDF | ✅ |
+| Figma Design | `.fig` | ✅ | ✅ PNG / PDF | — |
 
-## Quick Start
+## Render Quality
+
+**≥99% SSIM** against approved compatibility references across all test cases:
+
+| Test suite | Visual results |
+|------------|----------------|
+| `.deck` slides | [render-report-deck.html](https://rcoenen.github.io/OpenFig/test/rasterizer/reports/openfig-render-report-deck.html) |
+| `.fig` design frames | [render-report-fig.html](https://rcoenen.github.io/OpenFig/test/rasterizer/reports/openfig-render-report-fig.html) |
+
+## CLI
 
 ```bash
-openfig inspect my-presentation.deck        # node hierarchy
-openfig list-text my-presentation.deck      # all text + images per slide
-openfig list-overrides my-presentation.deck # editable fields per symbol
+# Read & inspect (works on .deck and .fig)
+openfig inspect deck.deck              # node hierarchy tree
+openfig list-text deck.deck            # all text and image content per slide
+openfig list-overrides deck.deck       # editable override keys per symbol
+
+# Render (works on .deck and .fig)
+openfig export deck.deck               # export slides/frames as PNG
+openfig pdf deck.deck                  # export as multi-page PDF
+
+# Modify (.deck only)
+openfig update-text deck.deck -o out.deck --slide <id> --set "key=value"
+openfig insert-image deck.deck -o out.deck --slide <id> --key <nodeId> --image <path>
+openfig clone-slide deck.deck -o out.deck --template <id|name> --name <name> [--set key=value ...]
+openfig remove-slide deck.deck -o out.deck --slide <id>
+openfig roundtrip in.deck out.deck     # decode + re-encode validation
 ```
 
 > Full CLI reference: [docs/cli.md](docs/cli.md)
 
-## Claude Cowork / MCP Integration
+## Why native `.deck`?
+
+Figma Slides lets you download and re-upload `.deck` files losslessly. Exporting to `.pptx` is lossy — vectors rasterize, fonts fall back, layout breaks. OpenFig makes this native round-trip programmable: download, modify, re-upload.
+
+Plug in Claude Cowork or any coding agent and you have an AI that can read and edit Figma presentations end-to-end — without opening the Figma UI.
+
+## Agentic / MCP Integration
 
 > Install guide, MCP workflows, and template states: [docs/agentic/claude-cowork.md](docs/agentic/claude-cowork.md)
 
-## Programmatic API
+## Docs
 
-```javascript
-import { Deck } from 'openfig';
-
-const deck = await Deck.open('template.deck');
-const slide = deck.slides[0];
-slide.addText('Hello world', { style: 'Title' });
-await deck.save('output.deck');
-```
-
-| Docs | |
-|------|---|
+| | |
+|---|---|
 | MCP / Claude workflows | [docs/mcp.md](docs/mcp.md) |
 | High-level API | [docs/api-spec.md](docs/api-spec.md) |
 | Low-level FigDeck API | [docs/library.md](docs/library.md) |

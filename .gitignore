@@ -13,3 +13,4 @@ CLAUDE.md
 .opencode/
 dist/
 .tmp-test/
+docs/_internal/

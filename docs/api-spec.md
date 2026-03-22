@@ -20,7 +20,7 @@ Reusable template authoring and module-backed template instantiation are documen
    (custom fonts, exact RGB, manual positioning) is available as optional overrides
    but not the primary interface.
 
-2. **Validate before expanding.** The `.deck` format is partially reverse-engineered.
+2. **Validate before expanding.** Not all `.deck` format fields are fully documented.
    Don't assume a field works in Figma until a roundtrip test confirms it.
 
 3. **Fail loudly on unknowns.** Unvalidated operations throw `NotImplementedError`

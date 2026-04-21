@@ -1,20 +1,16 @@
 /**
  * Tests for FigDeck.importSymbols() — cross-deck symbol import API.
  *
- * Strategy: load two copies of blank-template.deck, inject synthetic SYMBOL
- * nodes (with children, nested INSTANCEs, overrideKeys) into the "source" deck,
- * then call importSymbols() on the "target" deck and verify the results.
+ * Strategy: construct two zero-seed decks via FigDeck.createEmpty(), inject
+ * synthetic SYMBOL nodes (with children, nested INSTANCEs, overrideKeys) into
+ * the "source" deck, then call importSymbols() on the "target" deck and verify
+ * the results. No bundled fixture is required.
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
 import { FigDeck } from '../../lib/core/fig-deck.mjs';
 import { nid } from '../../lib/core/node-helpers.mjs';
 import { deepClone } from '../../lib/core/deep-clone.mjs';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const BLANK_DECK = join(__dirname, '../../lib/slides/blank-template.deck');
 
 /**
  * Inject a synthetic SYMBOL with children into a FigDeck for testing.
@@ -188,8 +184,8 @@ describe('FigDeck.importSymbols()', () => {
   let sym1, sym2;
 
   beforeAll(async () => {
-    sourceDeck = await FigDeck.fromDeckFile(BLANK_DECK);
-    targetDeck = await FigDeck.fromDeckFile(BLANK_DECK);
+    sourceDeck = FigDeck.createEmpty({ name: 'source' });
+    targetDeck = FigDeck.createEmpty({ name: 'target' });
 
     // Inject test symbols into source deck
     sym1 = injectTestSymbol(sourceDeck, { name: 'IconButton', componentKey: 'ck-icon-button' });

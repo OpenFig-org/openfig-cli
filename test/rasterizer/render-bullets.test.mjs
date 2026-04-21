@@ -27,14 +27,14 @@ describe('bullet and numbered list rendering', () => {
     const s1 = deck.addBlankSlide();
     s1.setBackground('White');
     s1.addText('Apple\nBanana\nCherry', {
-      style: 'Body 1', color: 'Black',
+      font: 'Inter', fontSize: 36, color: 'Black',
       x: 80, y: 80, width: 1760, align: 'LEFT', list: 'bullet',
     });
 
     const s2 = deck.addBlankSlide();
     s2.setBackground('White');
     s2.addText('First\nSecond\nThird', {
-      style: 'Body 1', color: 'Black',
+      font: 'Inter', fontSize: 36, color: 'Black',
       x: 80, y: 80, width: 1760, align: 'LEFT', list: 'number',
     });
 
@@ -67,7 +67,7 @@ describe('bullet and numbered list rendering', () => {
     const s = deck.addBlankSlide();
     s.setBackground('White');
     s.addText('No bullets here\nJust plain text', {
-      style: 'Body 1', color: 'Black',
+      font: 'Inter', fontSize: 36, color: 'Black',
       x: 80, y: 80, width: 1760, align: 'LEFT',
     });
     await deck.save(plainPath);

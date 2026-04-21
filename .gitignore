@@ -4,7 +4,6 @@ examples/
 AGENTS.md
 .mcp.json
 *.deck
-!lib/blank-template.deck
 *.fig
 /tmp/
 .DS_Store
@@ -16,3 +15,4 @@ dist/
 docs/_internal/
 specs/
 research/
+CRACKING_THE_DECK.md

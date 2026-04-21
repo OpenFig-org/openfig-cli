@@ -33,6 +33,9 @@ openfig list-overrides deck.deck       # editable override keys per symbol
 openfig export deck.deck               # export slides/frames as PNG
 openfig pdf deck.deck                  # export as multi-page PDF
 
+# Create (.deck only)
+openfig create-deck -o new.deck [--title "Name"] [--layout cover --layout content ...]
+
 # Modify (.deck only)
 openfig update-text deck.deck -o out.deck --slide <id> --set "key=value"
 openfig insert-image deck.deck -o out.deck --slide <id> --key <nodeId> --image <path>

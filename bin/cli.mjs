@@ -5,6 +5,7 @@
  * Usage: openfig <command> <file.deck | file.fig> [args...]
  *
  * Commands:
+ *   create-deck    Create a new .deck file from scratch
  *   inspect        Show document structure (node hierarchy tree)
  *   list-text      List all text content in the deck
  *   list-overrides List all editable override keys per symbol
@@ -21,6 +22,7 @@
  */
 
 const COMMANDS = {
+  'create-deck':    './commands/create-deck.mjs',
   'inspect':        './commands/inspect.mjs',
   'list-text':      './commands/list-text.mjs',
   'list-overrides': './commands/list-overrides.mjs',
@@ -40,6 +42,7 @@ if (!arg2 || arg2 === '--help' || arg2 === '-h') {
   console.log(`OpenFig — Open-source tools for Figma file parsing and rendering\n`);
   console.log('Usage: openfig <command> <file.deck | file.fig> [args...]\n');
   console.log('Commands:');
+  console.log('  create-deck    Create a new .deck file from scratch');
   console.log('  export         Export slides as images (PNG/JPG/WEBP)');
   console.log('  pdf            Export slides as a multi-page PDF');
   console.log('  inspect        Show document structure (node hierarchy tree)');

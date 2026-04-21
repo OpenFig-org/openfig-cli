@@ -22,7 +22,7 @@ OpenFig supports two related template states and one downstream instantiation fl
 
 ### Instantiated deck
 
-- In the current observed Figma flow, instantiation preserves the published module-backed structure
+- In the current workflow, instantiation preserves the published module-backed structure
 - OpenFig follows that model and clones `MODULE -> SLIDE -> subtree` layouts directly
 
 ## Naming Conventions

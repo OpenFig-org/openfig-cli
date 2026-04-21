@@ -45,7 +45,7 @@ openfig/
 │   ├── image-utils.mjs     # sharp-based getImageDimensions, generateThumbnail
 │   ├── deep-clone.mjs      # typed-array-safe deepClone
 │   ├── api.mjs             # Deck, Slide, Symbol, TextNode, ImageNode, FrameProxy
-│   └── blank-template.deck # bundled blank deck for Deck.create()
+│   └── empty-deck.mjs      # zero-seed deck construction for Deck.create()
 ├── docs/format/            # .deck file format specification
 └── commands/               # CLI commands (unchanged)
 ```

@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Design of the London Underground Map</title>
+<script src="deck-stage.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
+<script type="application/json" id="speaker-notes">
+[
+  "Welcome. Over the next ten slides I want to walk through the story of one of the most successful pieces of information design ever made — the London Underground map, first published by Harry Beck in 1933. It's a story about how a draughtsman with no design training threw away the most important assumption mapmakers had been making for two thousand years, and in doing so made a network of trains legible to millions of people who would never have to think about it.",
+  "To understand what Beck did, you first have to understand what came before him. Until 1933, every Underground map was a geographic map — the lines drawn more or less accurately on top of London's streets. The problem was that central London has a huge number of stations crammed into a small area, while the suburbs stretched for miles with very little in between. The result was a map where half the network was an unreadable knot and the other half was empty space. F. H. Stingemore, the mapmaker working just before Beck, tried to fix this by slightly enlarging the centre, but the fundamental approach was still geographic. Beck's insight was that passengers don't actually care about geography once they're underground. They care about the journey — which line, which change, how many stops. And so he built a map around the journey, not the land.",
+  "Here's the photograph that in some ways explains everything. This is a District line train at Sloane Square station. Beck spent his working life drawing circuits — the wiring diagrams for signalling systems that kept trains like this one safely apart on tracks like these. And in a circuit diagram, you don't care where the capacitor is physically located on the circuit board. You care about what it's connected to. Beck looked at the Underground and saw a circuit. The 1931 prototype he sketched during a layoff was rejected by the Publicity Office as too revolutionary — they wanted a map, not a schematic. But a small 500-copy trial run in 1932 proved the public didn't share management's hesitation. They took to it immediately.",
+  "Four constraints define the diagram. First — orthogonality. Every line segment runs horizontally, vertically, or at exactly 45 degrees. Three directions, nothing else. Second — even spacing. Stations are placed at roughly equal intervals along a line, which means a two-stop journey in central London looks the same length as a two-stop journey in the suburbs. Third — one colour per line, applied consistently. Red is Central, navy is Piccadilly. You can identify your line from across the platform. Fourth, and this is the one people often overlook — Beck kept exactly one topographical feature from the geographic map: the Thames. It's the only thing that orients you in real space. Everything else is abstraction. These four rules are why the map works, and any time you see a transit map anywhere in the world that looks like this, you're looking at Beck's grammar.",
+  "I want to pause on this image because it's relevant. This is a Tube escalator — the curved ceiling, the strip lighting, the 'Stand on the right' painted onto the steps. Look at what's been stripped away. There are no decorative flourishes. The shape of the tunnel is exactly what it has to be. The instruction is the shortest possible sentence that could do the job. Every single thing you see here is reduced to its function. Beck's map has the same quality. It isn't a picture of the Underground. It's the Underground, reduced. Straight lines, three angles, interchange diamonds, the Thames as a ribbon — and everything else left out. What makes the map powerful isn't what he put in. It's what he had the nerve to leave out.",
+  "The public reaction was immediate. When Beck's map was published as a pocket edition in January 1933, London Transport printed 750,000 copies. Within a month they had to order a reprint. By the summer they'd issued the large quad royal poster version — forty by fifty inches — and it was on every station wall. The figures here are illustrative, reconstructed from period accounts, but the shape of the curve is the important thing: demand ramped up sharply and kept climbing. Worth noting — Beck was paid five guineas for the original design. About five pounds and twenty-five pence. Five guineas for one of the most reproduced pieces of graphic design in history.",
+  "Here's the whole arc in five steps. 1931 — Beck, laid off from the signalling office, draws the first diagram at home in his spare time. He submits it to the Publicity department. 1932 — they reject it as too radical. Not a fit for the brand, essentially. But he doesn't give up. Later that year, he persuades them to run a small trial — 500 copies distributed at a handful of stations. The public response is overwhelmingly positive. 1933 — the full pocket edition goes out, 700,000 copies, reprinted within a month. And by the end of the year the large-format poster version is everywhere, and the diagram has become the official face of the Underground. Four years from sketch to standard. He kept working on it, incidentally, until 1960 — updating it as new lines and stations came into service.",
+  "One principle from earlier deserves a closer look — the colour per line rule. This is the official Transport for London palette. Bakerloo brown is named for the portmanteau of Baker Street and Waterloo. The Central line is pillarbox red — the deepest colour on the map, because it's also the longest line. The District is the deep green you see here; it's actually the oldest line on the entire network, predating Beck by more than six decades. Jubilee is silver grey, opened in 1979 for the Queen's Silver Jubilee. Piccadilly is dark blue — the airport line, connecting Heathrow to the West End. And Victoria is that distinctive light blue, the fastest and most automated line on the network. Every new line added since Beck has been given its own colour, which is why the palette has grown so carefully over ninety years.",
+  "One more piece of context. The typeface you see most often on the map and across every Tube station is called Johnston Sans — designed in 1916 by Edward Johnston, commissioned by the Underground's managing director Frank Pick. Pick had a clear vision for the Underground as a unified design system, and Johnston was central to it. This was seventeen years before Beck's map. What this means is that when Beck came to design his diagram, he was operating inside an existing visual language — a typeface, a corporate palette, the roundel symbol. He didn't start from nothing. He inherited a design system and extended it. And the quote on the right is Beck's own description of what he was trying to do: tidy up the old map by straightening the lines. That's it. That's the whole design brief he gave himself. 'Looking at the old map, it occurred to me that it might be possible to tidy it up by straightening the lines.' As revolutions go, it begins with a remarkable amount of modesty.",
+  "Beck didn't invent from nothing, and his map didn't just help people navigate — it changed how they understood the city itself. Alexander Kent, a cartography researcher at Canterbury Christ Church University, puts it plainly: the map altered people's mental models of London. Distance, direction, even whether a neighbourhood 'exists' in the public imagination — all of it gets distorted by Beck's diagram, and continues to be distorted today. Kent also points out that Beck built on predecessors: Max Gill had already removed topographic detail, Fred Stingemore had introduced the Johnston font and began distorting the network. Beck took their work to its logical extreme. And he was a commuter himself — which gave him a user's-eye view that no amount of professional mapmaking instinct could substitute for.",
+  "Beck's grammar has proved durable enough to provoke. In 2024, Maxwell Roberts — a psychology lecturer — posted a reimagined Tube map built on concentric circles and spokes. It went viral overnight, passing one million engagements in 24 hours. Roberts had first drawn his circular version in 2013; this update followed TfL's own 'circles' experiment. He's blunt about the official map: 'It has poor balance, simplicity, coherence and topographical accuracy. It fails by any criterion of effectiveness you can imagine.' Whether or not you agree, the fact that a single alternative map can generate that much reaction — ninety years after Beck — says something about how deeply the diagram has embedded itself in people's sense of what the city should look like.",
+  "To close. Ninety-two years after it first appeared, Beck's diagram is still the Underground. The network has more than doubled in size since 1933. Dozens of stations have been added, new lines have opened — the Victoria, the Jubilee, the Elizabeth — and every single addition has been made in Beck's grammar. Straight lines, three angles, even spacing, one colour per line, the Thames as a ribbon. You'll find versions of this map on the walls of the New York Subway, the Paris Métro, the Tokyo Metro, the Moscow Metro, the Washington DC rail, the Sydney rail, and several hundred others. Every transit map you've ever found useful is, in some sense, Beck's map. And it started with a draughtsman who'd lost his job, sketching circuits at his kitchen table, wondering if the Underground might be drawn the same way. Thank you."
+]
+</script>
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  section {
+    font-family: 'Calibri', 'Gill Sans', Arial, sans-serif;
+    overflow: hidden;
+  }
+
+  .georgia { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; }
+
+  /* ── OpenFig branding ────────────────────────────────────────── */
+  .openfig-badge {
+    position: absolute;
+    bottom: 36px; right: 60px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0.72;
+  }
+  .openfig-mark {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .openfig-wordmark {
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: inherit;
+  }
+  .openfig-wordmark .open { opacity: 0.7; }
+  .openfig-wordmark .fig  { opacity: 1; }
+
+
+  .s1 { background: #0B1B33; }
+  .s1 .roundel {
+    position: absolute;
+    top: 120px; left: 820px;
+    width: 220px; height: 180px;
+    object-fit: contain;
+  }
+  .s1 .pretitle {
+    position: absolute;
+    top: 350px; left: 0; right: 0;
+    text-align: center;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-style: italic;
+    font-size: 50px;
+    color: #C9D4E8;
+  }
+  .s1 .title-london {
+    position: absolute;
+    top: 454px; left: 0; right: 0;
+    text-align: center;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-weight: 700;
+    font-size: 136px;
+    color: #ffffff;
+    letter-spacing: 12px;
+    line-height: 1;
+  }
+  .s1 .title-sub {
+    position: absolute;
+    top: 610px; left: 0; right: 0;
+    text-align: center;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-weight: 700;
+    font-size: 72px;
+    color: #ffffff;
+    letter-spacing: 10px;
+    line-height: 1;
+  }
+  .s1 .byline {
+    position: absolute;
+    top: 792px; left: 0; right: 0;
+    text-align: center;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 14px;
+  }
+  .s1 .byline .name { color: #ffffff; }
+  .s1 .byline .dot { color: #DC241F; }
+  .s1 .byline .year { color: #C9D4E8; font-weight: 400; }
+  .s1 .footer {
+    position: absolute;
+    top: 965px; left: 0; right: 0;
+    text-align: center;
+    font-style: italic;
+    font-size: 24px;
+    color: #7A8CAB;
+  }
+
+  /* ── Slide 2: Geographic vs Diagrammatic ─────────────────────── */
+  .s2 { background: #ffffff; }
+  .s2 .slide-title {
+    position: absolute;
+    top: 72px; left: 86px; right: 86px;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-weight: 700;
+    font-size: 58px;
+    color: #0B1B33;
+    line-height: 1.1;
+  }
+  .s2 .slide-sub {
+    position: absolute;
+    top: 160px; left: 86px; right: 86px;
+    font-style: italic;
+    font-size: 26px;
+    color: #5A6B82;
+  }
+  .s2 .divider {
+    position: absolute;
+    left: 960px; top: 288px; bottom: 80px;
+    width: 2px;
+    background: #E8EAEE;
+  }
+  /* Left column */
+  .s2 .col-left { position: absolute; left: 86px; top: 288px; width: 840px; }
+  .s2 .col-right { position: absolute; left: 1003px; top: 288px; width: 840px; }
+  .s2 .era-label {
+    font-size: 24px; font-weight: 700;
+    letter-spacing: 6px; text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .era-before { color: #DC241F; }
+  .era-after  { color: #1C3F95; }
+  .s2 .col-head {
+    font-family: 'EB Garamond', Georgia, serif;
+    font-weight: 700;
+    font-size: 44px;
+    color: #0B1B33;
+    line-height: 1.1;
+    margin-bottom: 28px;
+  }
+  .s2 .col-body {
+    font-size: 24px;
+    color: #0B1B33;
+    line-height: 1.55;
+    margin-bottom: 32px;
+  }
+  .s2 .col-bullets { margin-top: 18px; }
+  .s2 .col-bullets li {
+    font-size: 24px;
+    color: #5A6B82;
+    line-height: 1.5;
+    margin-bottom: 10px;
+    list-style: disc;
+    margin-left: 28px;
+  }
+
+  /* ── Slide 3: The Electrical Circuit ─────────────────────────── */
+  .s3 { background: #ffffff; }
+  .s3 .photo {
+    position: absolute;
+    top: 0; right: 0;
+    width: 840px; height: 1080px;
+    object-fit: cover;
+  }
+  .s3 .slide-num {
+    position: absolute;
+    top: 72px; left: 86px;
+    font-size: 24px; font-weight: 700;
+    letter-spacing: 8px; color: #DC241F;
+  }
+  .s3 .slide-title {
+    position: absolute;
+    top: 120px; left: 86px; width: 936px;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-weight: 700; font-size: 72px;
+    color: #0B1B33; line-height: 1.1;
+  }
+  .s3 .body1 {
+    position: absolute;
+    top: 310px; left: 86px; width: 890px;
+    font-size: 30px; color: #0B1B33; line-height: 1.55;
+  }
+  .s3 .body2 {
+    position: absolute;
+    top: 560px; left: 86px; width: 890px;
+    font-size: 24px; color: #5A6B82; line-height: 1.6;
+  }
+
+  /* ── Slide 4: Four Principles ─────────────────────────────────── */
+  .s4 { background: #F5F1E8; }
+  .s4 .slide-title {
+    position: absolute;
+    top: 65px; left: 86px; right: 86px;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-weight: 700; font-size: 56px;
+    color: #0B1B33;
+  }
+  .s4 .slide-sub {
+    position: absolute;
+    top: 152px; left: 86px; right: 86px;
+    font-style: italic; font-size: 26px; color: #5A6B82;
+  }
+  .s4 .card {
+    position: absolute;
+    background: #ffffff;
+    border: 1px solid #E8EAEE;
+    display: flex;
+  }
+  .s4 .card-bar { width: 12px; flex-shrink: 0; }
+  .s4 .card-body { padding: 36px 36px 36px 32px; flex: 1; }
+  .s4 .card-num {
+    font-size: 24px; font-weight: 700;
+    letter-spacing: 6px; margin-bottom: 12px;
+  }
+  .s4 .card-title {
+    font-family: 'EB Garamond', Georgia, serif;
+    font-weight: 700; font-size: 42px;
+    color: #0B1B33; margin-bottom: 20px;
+    line-height: 1.1;
+  }
+  .s4 .card-desc {
+    font-size: 24px; color: #5A6B82; line-height: 1.55;
+  }
+
+  /* ── Slide 5: The Diagram, Reduced ───────────────────────────── */
+  .s5 { background: #0B1B33; }
+  .s5 .photo {
+    position: absolute;
+    top: 0; left: 0;
+    width: 840px; height: 1080px;
+    object-fit: cover;
+  }
+  .s5 .label {
+    position: absolute;
+    top: 259px; left: 1008px;
+    font-size: 24px; font-weight: 700;
+    letter-spacing: 10px; color: #FFC8C6;
+    text-transform: uppercase;
+  }
+  .s5 .slide-title {
+    position: absolute;
+    top: 310px; left: 1008px; right: 80px;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-weight: 700; font-size: 68px;
+    color: #ffffff; line-height: 1.1;
+  }
+  .s5 .body {
+    position: absolute;
+    top: 576px; left: 1008px; right: 80px;
+    font-style: italic; font-size: 28px;
+    color: #DCE3F1; line-height: 1.6;
+  }
+
+  /* ── Slide 6: Chart ───────────────────────────────────────────── */
+  .s6 { background: #ffffff; }
+  .s6 .slide-title {
+    position: absolute;
+    top: 72px; left: 86px; right: 86px;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-weight: 700; font-size: 56px;
+    color: #0B1B33;
+  }
+  .s6 .slide-sub {
+    position: absolute;
+    top: 155px; left: 86px; right: 86px;
+    font-style: italic; font-size: 25px; color: #5A6B82;
+  }
+  .s6 .chart-area {
+    position: absolute;
+    top: 210px; left: 86px; right: 86px; bottom: 100px;
+  }
+  .s6 .chart-note {
+    position: absolute;
+    bottom: 40px; left: 86px; right: 86px;
+    font-style: italic; font-size: 24px; color: #5A6B82;
+    text-align: center;
+  }
+
+  /* ── Slide 7: Timeline ────────────────────────────────────────── */
+  .s7 { background: #ffffff; }
+  .s7 .slide-title {
+    position: absolute;
+    top: 72px; left: 86px; right: 86px;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-weight: 700; font-size: 56px;
+    color: #0B1B33;
+  }
+  .s7 .slide-sub {
+    position: absolute;
+    top: 158px; left: 86px; right: 86px;
+    font-style: italic; font-size: 25px; color: #5A6B82;
+  }
+  .s7 .timeline {
+    position: absolute;
+    top: 260px; left: 60px; right: 60px; bottom: 80px;
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+  }
+  .s7 .tcard {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .s7 .tcard-head {
+    padding: 14px 18px;
+    font-size: 26px; font-weight: 700;
+    letter-spacing: 4px; color: #ffffff;
+    text-align: center;
+  }
+  .s7 .tcard-body {
+    flex: 1;
+    border: 1.5px solid #E8EAEE;
+    border-top: none;
+    padding: 20px 18px 20px;
+    background: #ffffff;
+  }
+  .s7 .tcard-event {
+    font-family: 'EB Garamond', Georgia, serif;
+    font-weight: 700; font-size: 34px;
+    color: #0B1B33; margin-bottom: 14px;
+  }
+  .s7 .tcard-desc {
+    font-size: 24px; color: #5A6B82; line-height: 1.5;
+  }
+  .s7 .arrow {
+    width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 38px;
+    flex-shrink: 0;
+    color: #B0B8C4;
+  }
+
+  /* ── Slide 8: Table ───────────────────────────────────────────── */
+  .s8 { background: #ffffff; }
+  .s8 .slide-title {
+    position: absolute;
+    top: 72px; left: 86px; right: 86px;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-weight: 700; font-size: 56px;
+    color: #0B1B33;
+  }
+  .s8 .slide-sub {
+    position: absolute;
+    top: 155px; left: 86px; right: 86px;
+    font-style: italic; font-size: 25px; color: #5A6B82;
+  }
+  .s8 .tbl-wrap {
+    position: absolute;
+    top: 210px; left: 86px; right: 86px; bottom: 80px;
+    display: flex;
+    flex-direction: column;
+  }
+  .s8 table {
+    width: 100%; border-collapse: collapse; flex: 1;
+  }
+  .s8 thead tr { background: #0B1B33; }
+  .s8 thead th {
+    padding: 16px 20px;
+    font-size: 24px; font-weight: 700;
+    color: #ffffff; text-align: left;
+  }
+  .s8 tbody tr:nth-child(odd)  { background: #ffffff; }
+  .s8 tbody tr:nth-child(even) { background: #F5F1E8; }
+  .s8 tbody td {
+    padding: 14px 20px;
+    font-size: 24px; color: #0B1B33;
+    vertical-align: middle;
+  }
+  .s8 .swatch {
+    display: inline-block;
+    width: 36px; height: 20px;
+    border-radius: 3px;
+    vertical-align: middle;
+  }
+
+  /* ── Slide 9: Quote / Johnston Sans ──────────────────────────── */
+  .s9 { background: #F5F1E8; }
+  .s9 .specimen {
+    position: absolute;
+    left: 115px; top: 115px;
+    width: 504px; height: 756px;
+    object-fit: contain;
+    background: #fff;
+  }
+  .s9 .spec-cap1 {
+    position: absolute;
+    left: 115px; top: 884px; width: 504px;
+    text-align: center;
+    font-size: 24px; font-weight: 700; color: #0B1B33;
+  }
+  .s9 .spec-cap2 {
+    position: absolute;
+    left: 115px; top: 920px; width: 504px;
+    text-align: center;
+    font-style: italic; font-size: 24px; color: #5A6B82;
+  }
+  .s9 .quote-mark {
+    position: absolute;
+    left: 700px; top: 40px;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 280px;
+    color: #DC241F;
+    line-height: 1;
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .s9 .quote-text {
+    position: absolute;
+    left: 720px; top: 280px; right: 80px;
+    z-index: 1;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-style: italic;
+    font-size: 50px;
+    color: #0B1B33;
+    line-height: 1.4;
+  }
+  .s9 .rule {
+    position: absolute;
+    left: 720px; top: 778px;
+    width: 80px; height: 5px;
+    background: #DC241F;
+  }
+  .s9 .attr {
+    position: absolute;
+    left: 720px; top: 802px;
+    font-size: 24px;
+  }
+  .s9 .attr .name { font-weight: 700; color: #0B1B33; letter-spacing: 4px; }
+  .s9 .attr .date { color: #5A6B82; }
+  .s9 .attr2 {
+    position: absolute;
+    left: 720px; top: 842px;
+    font-style: italic; font-size: 20px; color: #5A6B82;
+  }
+
+  /* ── Slide 10c: The Map Rewired London ──────────────────────── */
+  .s10c { background: #0B1B33; }
+  .s10c-eyebrow {
+    position: absolute;
+    top: 72px; left: 100px;
+    font-size: 24px; font-weight: 700;
+    letter-spacing: 8px; color: #C9D4E8;
+    text-transform: uppercase;
+  }
+  .s10c-title {
+    position: absolute;
+    top: 120px; left: 100px; right: 100px;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-weight: 700; font-size: 60px;
+    color: #ffffff; line-height: 1.1;
+  }
+  .s10c-rule {
+    position: absolute;
+    top: 240px; left: 100px;
+    width: 80px; height: 5px;
+    background: #DC241F;
+  }
+  .s10c-quote {
+    position: absolute;
+    top: 280px; left: 100px; right: 100px;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-style: italic; font-size: 42px;
+    color: #DCE3F1; line-height: 1.55;
+  }
+  .s10c-attr {
+    position: absolute;
+    top: 700px; left: 100px;
+    font-size: 24px; color: #7A8CAB;
+  }
+  .s10c-attr strong { color: #C9D4E8; }
+  .s10c-factrow {
+    position: absolute;
+    bottom: 70px; left: 100px; right: 100px;
+    display: flex; gap: 0;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    padding-top: 36px;
+  }
+  .s10c-fact { flex: 1; padding-right: 48px; }
+  .s10c-fact-label {
+    font-size: 24px; font-weight: 700; letter-spacing: 4px;
+    color: #DC241F; margin-bottom: 10px;
+  }
+  .s10c-fact-text { font-size: 26px; color: #C9D4E8; line-height: 1.45; }
+
+  /* ── Slide 10b: Maxwell Roberts ──────────────────────────────── */
+  .s10b { background: #ffffff; }
+  .s10b-num {
+    position: absolute;
+    top: 72px; left: 86px;
+    font-size: 24px; font-weight: 700;
+    letter-spacing: 8px; color: #DC241F;
+  }
+  .s10b-title {
+    position: absolute;
+    top: 114px; left: 86px; right: 86px;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-weight: 700; font-size: 58px;
+    color: #0B1B33; line-height: 1.1;
+  }
+  .s10b-sub {
+    position: absolute;
+    top: 195px; left: 86px; width: 820px;
+    font-style: italic; font-size: 26px; color: #5A6B82;
+    line-height: 1.4;
+  }
+  .s10b-left {
+    position: absolute;
+    top: 270px; left: 86px; width: 780px;
+  }
+  .s10b-stat {
+    font-family: 'EB Garamond', Georgia, serif;
+    font-weight: 700; font-size: 72px;
+    color: #DC241F; line-height: 1;
+    margin-bottom: 0;
+  }
+  .s10b-stat-label {
+    font-size: 24px; font-weight: 600;
+    color: #5A6B82; letter-spacing: 1px;
+    margin-bottom: 18px;
+  }
+  .s10b-body {
+    font-size: 24px; color: #0B1B33;
+    line-height: 1.45;
+  }
+  .s10b-quote {
+    margin-top: 24px;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-style: italic; font-size: 24px;
+    color: #5A6B82; line-height: 1.4;
+    border-left: 4px solid #DC241F;
+    padding-left: 24px;
+  }
+  .s10b-attr {
+    margin-top: 16px;
+    font-size: 24px; font-weight: 600;
+    color: #0B1B33; padding-left: 28px;
+  }
+  .s10b-right {
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 680px;
+    padding: 50px 50px 50px 30px;
+  }
+
+  /* ── Slide 10: Closing ───────────────────────────────────────── */
+  .s10 { background: #0B1B33; }
+  .s10 .roundels {
+    position: absolute;
+    top: 187px;
+    display: flex;
+    gap: 0;
+    left: 593px;
+  }
+  .s10 .roundels img {
+    width: 130px; height: 106px;
+    object-fit: contain;
+    margin-right: 150px;
+  }
+  .s10 .text1 {
+    position: absolute;
+    top: 403px; left: 0; right: 0;
+    text-align: center;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-style: italic; font-size: 64px;
+    color: #C9D4E8;
+    line-height: 1;
+  }
+  .s10 .text2 {
+    position: absolute;
+    top: 504px; left: 0; right: 0;
+    text-align: center;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-weight: 700; font-size: 80px;
+    color: #ffffff; line-height: 1;
+  }
+  .s10 .text3 {
+    position: absolute;
+    top: 606px; left: 0; right: 0;
+    text-align: center;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-weight: 700; font-size: 80px;
+    color: #ffffff; line-height: 1;
+  }
+  .s10 .rule {
+    position: absolute;
+    top: 798px;
+    left: 50%; transform: translateX(-50%);
+    width: 115px; height: 5px;
+    background: #DC241F;
+  }
+  .s10 .end-label {
+    position: absolute;
+    top: 836px; left: 0; right: 0;
+    text-align: center;
+    font-size: 26px; font-weight: 700;
+    letter-spacing: 14px; color: #ffffff;
+  }
+  .s10 .end-sub {
+    position: absolute;
+    top: 908px; left: 0; right: 0;
+    text-align: center;
+    font-style: italic; font-size: 22px; color: #7A8CAB;
+  }
+</style>
+</head>
+<body>
+
+<deck-stage width="1920" height="1080">
+
+  <!-- ── SLIDE 1: Title ─────────────────────────────────────────── -->
+  <section class="s1" data-label="Title">
+    <img class="roundel" src="media/underground-roundel.svg" alt="London Underground roundel">
+    <div class="pretitle">The Design of the</div>
+    <div class="title-london">LONDON</div>
+    <div class="title-sub">UNDERGROUND MAP</div>
+    <div class="byline">
+      <span class="name">HARRY BECK</span>
+      <span class="dot">&nbsp; · &nbsp;</span>
+      <span class="year">1933</span>
+    </div>
+    <div class="footer">A Demo Deck for <a href="https://openfig.org/" target="_blank" style="color:#C9D4E8;text-decoration:underline;text-underline-offset:3px;">OpenFig.org</a></div>
+
+    <!-- OpenFig badge -->
+    <div style="position:absolute;bottom:36px;right:72px;display:flex;align-items:center;gap:10px;opacity:0.6;">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="22" height="22" rx="5" fill="#fff" opacity="0.15"/>
+        <rect x="5" y="5" width="5" height="5" rx="1.5" fill="#fff"/>
+        <rect x="12" y="5" width="5" height="5" rx="1.5" fill="#fff" opacity="0.6"/>
+        <rect x="5" y="12" width="5" height="5" rx="1.5" fill="#fff" opacity="0.6"/>
+        <rect x="12" y="12" width="5" height="5" rx="1.5" fill="#fff" opacity="0.3"/>
+      </svg>
+      <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:24px;font-weight:600;color:#fff;letter-spacing:-0.01em;"><span style="opacity:0.6;">Open</span>Fig</span>
+    </div>
+  </section>
+
+  <!-- ── SLIDE 2: Geographic vs Diagrammatic ──────────────────── -->
+  <section class="s2" data-label="Geographic vs Diagrammatic">
+    <div class="slide-title">Geographic vs Diagrammatic</div>
+    <div class="slide-sub">Two ways to represent a transit network — one truthful to the land, the other truthful to the rider.</div>
+    <div class="divider"></div>
+
+    <div class="col-left">
+      <div class="era-label era-before">BEFORE 1933</div>
+      <div class="col-head georgia">Geographic Maps</div>
+      <div class="col-body">The Underground was drawn on top of London's streets. Stations in the centre huddled together in an unreadable knot; suburban stations floated in near-empty space.<br><br>F. H. Stingemore's 1932 map — the last of the geographic era — tried to compensate by slightly enlarging central London, but the fundamental problem remained: passengers don't navigate by longitude.</div>
+      <ul class="col-bullets">
+        <li>True to the city</li>
+        <li>Central stations crowded together</li>
+        <li>Line colours obscured by streets</li>
+      </ul>
+    </div>
+
+    <div class="col-right">
+      <div class="era-label era-after">FROM 1933</div>
+      <div class="col-head georgia">Beck's Diagram</div>
+      <div class="col-body">Harry Beck — inspired by electrical schematics he'd drawn as a signalling draughtsman — discarded geography entirely. Lines became horizontals, verticals, and 45° diagonals. Stations were evenly spaced.<br><br>He understood that passengers, once underground, don't care about compass directions. They care about which line to board, which station to change at, and how many stops until home.</div>
+      <ul class="col-bullets">
+        <li>True to the journey</li>
+        <li>Evenly spaced stations</li>
+        <li>Lines instantly recognisable by colour</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ── SLIDE 3: The Electrical Circuit ──────────────────────── -->
+  <section class="s3" data-label="The Electrical Circuit">
+    <img class="photo" src="media/image-3-1.jpg" alt="District line train at Sloane Square station">
+    <div class="slide-num">02</div>
+    <div class="slide-title">The Electrical Circuit</div>
+    <div class="body1">Beck trained as a signalling engineer. He drew circuits for a living — grids of components connected by orthogonal lines, where topology mattered but exact position did not.</div>
+    <div class="body2">When he sketched his 1931 prototype during a layoff, he applied the same logic to the Tube. Passengers, he reasoned, are electrons: what matters is the network they traverse, not the map coordinates they pass through.<br><br>The initial submission was rejected as "too revolutionary." A 500-copy trial run in 1932 proved the public disagreed with management.</div>
+  </section>
+
+  <!-- ── SLIDE 4: Four Principles ─────────────────────────────── -->
+  <section class="s4" data-label="Four Principles of the Diagram">
+    <div class="slide-title">Four Principles of the Diagram</div>
+    <div class="slide-sub">The rules Beck imposed — and the compromises they forced.</div>
+
+    <!-- Top-left: Orthogonality (red) -->
+    <div class="card" style="left:107px;top:235px;width:828px;height:368px;">
+      <div class="card-bar" style="background:#E32017;"></div>
+      <div class="card-body">
+        <div class="card-num" style="color:#E32017;">01</div>
+        <div class="card-title">Orthogonality</div>
+        <div class="card-desc">Every line segment runs horizontally, vertically, or at exactly 45°. No curves. No arbitrary angles. The system's grammar reduces to three directions.</div>
+      </div>
+    </div>
+
+    <!-- Top-right: Even Spacing (dark blue) -->
+    <div class="card" style="left:985px;top:235px;width:828px;height:368px;">
+      <div class="card-bar" style="background:#003688;"></div>
+      <div class="card-body">
+        <div class="card-num" style="color:#003688;">02</div>
+        <div class="card-title">Even Spacing</div>
+        <div class="card-desc">Stations along a line are placed at roughly equal intervals regardless of real distance. A stop is a stop; its significance to the rider is not measured in metres.</div>
+      </div>
+    </div>
+
+    <!-- Bottom-left: Colour Per Line (light blue) -->
+    <div class="card" style="left:107px;top:645px;width:828px;height:368px;">
+      <div class="card-bar" style="background:#0098D4;"></div>
+      <div class="card-body">
+        <div class="card-num" style="color:#0098D4;">03</div>
+        <div class="card-title">Colour Per Line</div>
+        <div class="card-desc">Each line gets one distinctive colour, applied consistently across the entire network. The Central is red. The Piccadilly is navy. Identity is instantaneous.</div>
+      </div>
+    </div>
+
+    <!-- Bottom-right: One Topographical Feature (brown) -->
+    <div class="card" style="left:985px;top:645px;width:828px;height:368px;">
+      <div class="card-bar" style="background:#B36305;"></div>
+      <div class="card-body">
+        <div class="card-num" style="color:#B36305;">04</div>
+        <div class="card-title">One Topographical Feature</div>
+        <div class="card-desc">Only the Thames survives from the geographic map, schematised into a stylised ribbon. Its role: orient the rider at a glance — north bank or south.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SLIDE 5: The Diagram, Reduced ────────────────────────── -->
+  <section class="s5" data-label="The Diagram Reduced">
+    <img class="photo" src="media/image-5-1.jpg" alt="London Underground escalator tunnel">
+    <div class="label">STYLE GUIDE</div>
+    <div class="slide-title">The Diagram, Reduced</div>
+    <div class="body">Straight lines. Three angles. Interchange diamonds. A blue ribbon for the Thames. Everything else is colour, type, and the silence around them.</div>
+  </section>
+
+  <!-- ── SLIDE 6: Pocket Maps Chart ───────────────────────────── -->
+  <section class="s6" data-label="Pocket Maps Printed 1933">
+    <div class="slide-title">Pocket Maps Printed, 1933</div>
+    <div class="slide-sub">The first two months of publication. The second print run was ordered after four weeks.</div>
+    <div class="chart-area">
+      <svg viewBox="0 0 1748 790" width="100%" height="100%" style="overflow:visible;">
+        <defs>
+          <linearGradient id="areafill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0B1B33" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="#0B1B33" stop-opacity="0.02"/>
+          </linearGradient>
+        </defs>
+        <!-- grid lines -->
+        <line x1="100" y1="40" x2="100" y2="680" stroke="#E8EAEE" stroke-width="1.5"/>
+        <line x1="100" y1="680" x2="1700" y2="680" stroke="#E8EAEE" stroke-width="1.5"/>
+        <!-- horizontal grid -->
+        <line x1="100" y1="520" x2="1700" y2="520" stroke="#E8EAEE" stroke-width="1" stroke-dasharray="6,4"/>
+        <line x1="100" y1="360" x2="1700" y2="360" stroke="#E8EAEE" stroke-width="1" stroke-dasharray="6,4"/>
+        <line x1="100" y1="200" x2="1700" y2="200" stroke="#E8EAEE" stroke-width="1" stroke-dasharray="6,4"/>
+        <line x1="100" y1="40"  x2="1700" y2="40"  stroke="#E8EAEE" stroke-width="1" stroke-dasharray="6,4"/>
+
+        <!-- y-axis labels -->
+        <text x="85" y="685" text-anchor="end" font-size="24" fill="#5A6B82">0</text>
+        <text x="85" y="525" text-anchor="end" font-size="24" fill="#5A6B82">200k</text>
+        <text x="85" y="365" text-anchor="end" font-size="24" fill="#5A6B82">400k</text>
+        <text x="85" y="205" text-anchor="end" font-size="24" fill="#5A6B82">600k</text>
+        <text x="85" y="45"  text-anchor="end" font-size="24" fill="#5A6B82">800k</text>
+
+        <!-- Data: 8 weeks, demand 
+             Week: 1=50k, 2=130k, 3=230k, 4=330k (reprint), 5=450k, 6=560k, 7=660k, 8=740k
+             y = 680 - (val/800000)*640 -->
+        <!-- x positions: week1=225, week2=425, week3=625, week4=825, week5=1025, week6=1225, week7=1425, week8=1625 -->
+
+        <!-- area fill -->
+        <polygon
+          points="225,640 425,576 625,496 825,416 1025,320 1225,232 1425,152 1625,86 1625,680 225,680"
+          fill="url(#areafill)"/>
+
+        <!-- line -->
+        <polyline
+          points="225,640 425,576 625,496 825,416 1025,320 1225,232 1425,152 1625,86"
+          fill="none" stroke="#0B1B33" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+
+        <!-- dots -->
+        <circle cx="225"  cy="640" r="7" fill="#0B1B33"/>
+        <circle cx="425"  cy="576" r="7" fill="#0B1B33"/>
+        <circle cx="625"  cy="496" r="7" fill="#0B1B33"/>
+        <circle cx="825"  cy="416" r="7" fill="#DC241F" stroke="#fff" stroke-width="2.5"/>
+        <circle cx="1025" cy="320" r="7" fill="#0B1B33"/>
+        <circle cx="1225" cy="232" r="7" fill="#0B1B33"/>
+        <circle cx="1425" cy="152" r="7" fill="#0B1B33"/>
+        <circle cx="1625" cy="86"  r="7" fill="#0B1B33"/>
+
+        <!-- reprint annotation -->
+        <line x1="825" y1="60" x2="825" y2="680" stroke="#DC241F" stroke-width="1.5" stroke-dasharray="8,5"/>
+        <rect x="660" y="55" width="330" height="54" rx="4" fill="#DC241F"/>
+        <text x="825" y="91" text-anchor="middle" font-size="24" fill="#fff" font-weight="700">Reprint ordered</text>
+
+        <!-- x-axis labels -->
+        <text x="225"  y="718" text-anchor="middle" font-size="24" fill="#5A6B82">Week 1</text>
+        <text x="425"  y="718" text-anchor="middle" font-size="24" fill="#5A6B82">Week 2</text>
+        <text x="625"  y="718" text-anchor="middle" font-size="24" fill="#5A6B82">Week 3</text>
+        <text x="825"  y="718" text-anchor="middle" font-size="24" fill="#DC241F" font-weight="700">Week 4</text>
+        <text x="1025" y="718" text-anchor="middle" font-size="24" fill="#5A6B82">Week 5</text>
+        <text x="1225" y="718" text-anchor="middle" font-size="24" fill="#5A6B82">Week 6</text>
+        <text x="1425" y="718" text-anchor="middle" font-size="24" fill="#5A6B82">Week 7</text>
+        <text x="1625" y="718" text-anchor="middle" font-size="24" fill="#5A6B82">Week 8</text>
+
+        <!-- x-axis label -->
+        <text x="900" y="780" text-anchor="middle" font-size="24" fill="#5A6B82" font-style="italic">Weeks since publication (January 1933)</text>
+      </svg>
+    </div>
+    <div class="chart-note">Figures are illustrative, reconstructed from period accounts.</div>
+  </section>
+
+  <!-- ── SLIDE 7: From Sketch to Standard ─────────────────────── -->
+  <section class="s7" data-label="From Sketch to Standard">
+    <div class="slide-title">From Sketch to Standard</div>
+    <div class="slide-sub">The diagram's journey from a draughtsman's spare-time doodle to official network map.</div>
+
+    <div class="timeline">
+
+      <div class="tcard">
+        <div class="tcard-head" style="background:#9B0056;">1931</div>
+        <div class="tcard-body">
+          <div class="tcard-event">Sketch</div>
+          <div class="tcard-desc">Beck, laid off from the signalling office, drafts the diagram at home.</div>
+        </div>
+      </div>
+
+      <div class="arrow">
+        <svg width="48" height="32" viewBox="0 0 48 32"><path d="M2 16h38m0 0l-10-9m10 9l-10 9" stroke="#B0B8C4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </div>
+
+      <div class="tcard">
+        <div class="tcard-head" style="background:#DC241F;">1932</div>
+        <div class="tcard-body">
+          <div class="tcard-event">Rejected</div>
+          <div class="tcard-desc">Publicity office rules the design too radical and returns it.</div>
+        </div>
+      </div>
+
+      <div class="arrow">
+        <svg width="48" height="32" viewBox="0 0 48 32"><path d="M2 16h38m0 0l-10-9m10 9l-10 9" stroke="#B0B8C4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </div>
+
+      <div class="tcard">
+        <div class="tcard-head" style="background:#B36305;">1932</div>
+        <div class="tcard-body">
+          <div class="tcard-event">Trial Run</div>
+          <div class="tcard-desc">A 500-copy pilot run is distributed at a few stations. The public approves.</div>
+        </div>
+      </div>
+
+      <div class="arrow">
+        <svg width="48" height="32" viewBox="0 0 48 32"><path d="M2 16h38m0 0l-10-9m10 9l-10 9" stroke="#B0B8C4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </div>
+
+      <div class="tcard">
+        <div class="tcard-head" style="background:#00782A;">1933</div>
+        <div class="tcard-body">
+          <div class="tcard-event">Published</div>
+          <div class="tcard-desc">Pocket edition — 700,000 copies. A reprint is ordered within a month.</div>
+        </div>
+      </div>
+
+      <div class="arrow">
+        <svg width="48" height="32" viewBox="0 0 48 32"><path d="M2 16h38m0 0l-10-9m10 9l-10 9" stroke="#B0B8C4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </div>
+
+      <div class="tcard">
+        <div class="tcard-head" style="background:#1C3F95;">1933</div>
+        <div class="tcard-body">
+          <div class="tcard-event">Standard</div>
+          <div class="tcard-desc">Large-format poster editions appear. The diagram becomes the Underground's face.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── SLIDE 8: A Colour Per Line ───────────────────────────── -->
+  <section class="s8" data-label="A Colour Per Line">
+    <div class="slide-title">A Colour Per Line</div>
+    <div class="slide-sub">Beck's insistence on a unique colour for every line survives to this day. The official TfL palette:</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Line</th>
+            <th>Swatch</th>
+            <th>Opened</th>
+            <th>Stations</th>
+            <th>Character</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Bakerloo</td>
+            <td><span class="swatch" style="background:#B36305;"></span></td>
+            <td>1906</td>
+            <td>25</td>
+            <td>Tobacco brown, named for a portmanteau of Baker Street and Waterloo.</td>
+          </tr>
+          <tr>
+            <td>Central</td>
+            <td><span class="swatch" style="background:#E32017;"></span></td>
+            <td>1900</td>
+            <td>49</td>
+            <td>Pillarbox red. Runs east–west the full width of the network.</td>
+          </tr>
+          <tr>
+            <td>District</td>
+            <td><span class="swatch" style="background:#00782A;"></span></td>
+            <td>1868</td>
+            <td>60</td>
+            <td>Deep green. The oldest in the network, predating Beck by decades.</td>
+          </tr>
+          <tr>
+            <td>Jubilee</td>
+            <td><span class="swatch" style="background:#A0A5A9;"></span></td>
+            <td>1979</td>
+            <td>27</td>
+            <td>Silver grey, opened for the Queen's Silver Jubilee.</td>
+          </tr>
+          <tr>
+            <td>Piccadilly</td>
+            <td><span class="swatch" style="background:#003688;"></span></td>
+            <td>1906</td>
+            <td>53</td>
+            <td>Dark blue. The airport line; connects Heathrow to the West End.</td>
+          </tr>
+          <tr>
+            <td>Victoria</td>
+            <td><span class="swatch" style="background:#0098D4;"></span></td>
+            <td>1968</td>
+            <td>16</td>
+            <td>Light blue. The fastest and most automated line on the network.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── SLIDE 9: Johnston Sans / Quote ───────────────────────── -->
+  <section class="s9" data-label="Johnston Sans and Beck Quote">
+    <img class="specimen" src="media/image-9-1.png" alt="Johnston Sans type specimen">
+    <div class="spec-cap1">Johnston Sans, 1916</div>
+    <div class="spec-cap2">Commissioned for the Underground</div>
+
+    <div class="quote-mark">"</div>
+    <div class="quote-text">Looking at the old map of the Underground railways of London, it occurred to me that it might be possible to tidy it up by straightening the lines.</div>
+    <div class="rule"></div>
+    <div class="attr">
+      <span class="name">HARRY BECK</span>
+      <span class="date">&ensp;·&ensp;c. 1933, in an unpublished note</span>
+    </div>
+  </section>
+
+  <!-- ── SLIDE 10: The Map Rewired London ─────────────────────── -->
+  <section class="s10c" data-label="The Map Rewired London">
+    <div class="s10c-eyebrow">LEGACY</div>
+    <div class="s10c-title">The Map Rewired London</div>
+    <div class="s10c-rule"></div>
+    <div class="s10c-quote">"The positive image Beck provided encouraged more people to use the Underground … but the effect was also to change users' mental maps of London — affecting their geographical understanding of the city. Distance, direction and existence all get distorted and continue to do so today."</div>
+    <div class="s10c-attr"><strong>Alexander J. Kent</strong> — Reader in Cartography, Canterbury Christ Church University</div>
+    <div class="s10c-factrow">
+      <div class="s10c-fact">
+        <div class="s10c-fact-label">PREDECESSORS</div>
+        <div class="s10c-fact-text">Max Gill removed topographic detail. Fred Stingemore added Johnston font and distorted the network. Beck inherited their work and pushed it to its logical conclusion.</div>
+      </div>
+      <div class="s10c-fact">
+        <div class="s10c-fact-label">USER-CENTRED</div>
+        <div class="s10c-fact-text">Beck was himself a commuter. He stripped away what a map "should" be in favour of what riders actually needed: a clear route planner, nothing more.</div>
+      </div>
+      <div class="s10c-fact">
+        <div class="s10c-fact-label">AFTER BECK</div>
+        <div class="s10c-fact-text">He continued refining the map until 1959. He also designed posters, drew cartoons for the staff magazine, and tutored typography. He died in 1974.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SLIDE 11: Maxwell Roberts' Viral Redesign ────────────── -->
+  <section class="s10b" data-label="A Viral Reimagining">
+    <div class="s10b-num">11</div>
+    <div class="s10b-title">A Viral Reimagining</div>
+    <div class="s10b-sub">In 2024, a psychology lecturer's alternative map got over a million engagements in 24 hours.</div>
+
+    <div class="s10b-left">
+      <div class="s10b-stat">1M+</div>
+      <div class="s10b-stat-label">engagements in 24 hours</div>
+
+      <div class="s10b-body">Maxwell Roberts, a university psychology lecturer, reimagined the Tube map using <strong>concentric circles and spokes</strong> — placing the Circle Line at the centre as a roundel shape, and radiating outwards.</div>
+      <div class="s10b-body" style="margin-top:12px;">He first built the design in 2013, updated it in 2024 after TfL published their own circular version.</div>
+
+      <div class="s10b-quote">"It has poor balance, simplicity, coherence and topographical accuracy. It fails by any criterion of effectiveness you can imagine."</div>
+      <div class="s10b-attr">— Maxwell Roberts, 2024</div>
+    </div>
+
+    <!-- Right: illustrative circles-and-spokes diagram -->
+    <div class="s10b-right">
+      <svg viewBox="0 0 600 600" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+        <!-- Background circles -->
+        <circle cx="300" cy="300" r="260" fill="none" stroke="#E8EAEE" stroke-width="1.5"/>
+        <circle cx="300" cy="300" r="200" fill="none" stroke="#E8EAEE" stroke-width="1.5"/>
+        <circle cx="300" cy="300" r="140" fill="none" stroke="#E8EAEE" stroke-width="1.5"/>
+        <circle cx="300" cy="300" r="80"  fill="none" stroke="#E8EAEE" stroke-width="1.5"/>
+
+        <!-- Circle line ring (innermost bold circle) -->
+        <circle cx="300" cy="300" r="80" fill="none" stroke="#FFD300" stroke-width="9"/>
+
+        <!-- Spokes / lines — representing different tube lines -->
+        <!-- Central (red) horizontal -->
+        <line x1="30" y1="300" x2="570" y2="300" stroke="#E32017" stroke-width="8" stroke-linecap="round"/>
+        <!-- Jubilee (grey) diagonal NW-SE -->
+        <line x1="100" y1="100" x2="500" y2="500" stroke="#A0A5A9" stroke-width="7" stroke-linecap="round"/>
+        <!-- Victoria (light blue) vertical -->
+        <line x1="300" y1="30" x2="300" y2="570" stroke="#0098D4" stroke-width="8" stroke-linecap="round"/>
+        <!-- Piccadilly (dark blue) diagonal NE-SW -->
+        <line x1="500" y1="100" x2="100" y2="500" stroke="#003688" stroke-width="7" stroke-linecap="round"/>
+        <!-- Bakerloo (brown) arc-ish -->
+        <path d="M 180 60 Q 250 300 180 540" fill="none" stroke="#B36305" stroke-width="7" stroke-linecap="round"/>
+        <!-- District (green) arc -->
+        <path d="M 420 60 Q 350 300 420 540" fill="none" stroke="#00782A" stroke-width="7" stroke-linecap="round"/>
+
+        <!-- Circle line ring on top -->
+        <circle cx="300" cy="300" r="80" fill="none" stroke="#FFD300" stroke-width="9"/>
+
+        <!-- Station dots -->
+        <circle cx="300" cy="300" r="10" fill="#fff" stroke="#0B1B33" stroke-width="3"/>
+        <!-- Ring intersections -->
+        <circle cx="220" cy="300" r="7" fill="#fff" stroke="#0B1B33" stroke-width="2.5"/>
+        <circle cx="380" cy="300" r="7" fill="#fff" stroke="#0B1B33" stroke-width="2.5"/>
+        <circle cx="300" cy="220" r="7" fill="#fff" stroke="#0B1B33" stroke-width="2.5"/>
+        <circle cx="300" cy="380" r="7" fill="#fff" stroke="#0B1B33" stroke-width="2.5"/>
+        <circle cx="243" cy="243" r="7" fill="#fff" stroke="#0B1B33" stroke-width="2.5"/>
+        <circle cx="357" cy="357" r="7" fill="#fff" stroke="#0B1B33" stroke-width="2.5"/>
+        <circle cx="357" cy="243" r="7" fill="#fff" stroke="#0B1B33" stroke-width="2.5"/>
+        <circle cx="243" cy="357" r="7" fill="#fff" stroke="#0B1B33" stroke-width="2.5"/>
+
+        <!-- Label -->
+        <text x="300" y="590" text-anchor="middle" font-size="24" fill="#5A6B82" font-style="italic" font-family="Calibri, Arial, sans-serif">Illustrative — circles and spokes concept</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ── SLIDE 12: Closing ─────────────────────────────────────── -->
+  <section class="s10" data-label="Closing">
+    <div class="roundels">
+      <img src="media/image-10-1.png" alt="Central line roundel">
+      <img src="media/image-10-2.png" alt="Piccadilly line roundel">
+      <img src="media/image-10-3.png" alt="Victoria line roundel">
+      <img src="media/image-10-4.png" alt="Jubilee line roundel">
+    </div>
+    <div class="text1">Ninety-two years on,</div>
+    <div class="text2">the diagram remains</div>
+    <div class="text3">the Underground.</div>
+    <div class="rule"></div>
+    <div class="end-label">END OF FIXTURE</div>
+    <div class="end-sub">12 slides · multi-column, images, chart, diagram, table, full-bleed, portrait, rich text</div>
+  </section>
+
+</deck-stage>
+
+</body>
+</html>

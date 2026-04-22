@@ -23,6 +23,7 @@
 
 const COMMANDS = {
   'create-deck':    './commands/create-deck.mjs',
+  'convert-html':   './commands/convert-html.mjs',
   'inspect':        './commands/inspect.mjs',
   'list-text':      './commands/list-text.mjs',
   'list-overrides': './commands/list-overrides.mjs',
@@ -43,6 +44,7 @@ if (!arg2 || arg2 === '--help' || arg2 === '-h') {
   console.log('Usage: openfig <command> <file.deck | file.fig> [args...]\n');
   console.log('Commands:');
   console.log('  create-deck    Create a new .deck file from scratch');
+  console.log('  convert-html   Convert a Claude Design standalone HTML export into a .deck');
   console.log('  export         Export slides as images (PNG/JPG/WEBP)');
   console.log('  pdf            Export slides as a multi-page PDF');
   console.log('  inspect        Show document structure (node hierarchy tree)');

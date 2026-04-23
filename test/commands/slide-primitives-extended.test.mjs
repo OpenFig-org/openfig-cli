@@ -9,6 +9,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { Deck } from '../../lib/slides/api.mjs';
 import { FigDeck } from '../../lib/core/fig-deck.mjs';
+import { slideToSvg } from '../../lib/rasterizer/svg-builder.mjs';
 
 let workDir;
 
@@ -97,6 +98,21 @@ describe('slide primitive extensions', () => {
     expect(vec.strokeWeight).toBe(7);
     expect(vec.strokePaints?.[0]?.type).toBe('SOLID');
     expect(vec.vectorData?.vectorNetworkBlob).toBeTypeOf('number');
+  });
+
+  it('stroke-only addPath renders from vectorNetworkBlob without placeholder fallback', async () => {
+    const fd = await buildAndReload(s => {
+      s.addPath('M 0 0 C 80 60 140 60 220 0', {
+        x: 100,
+        y: 100,
+        stroke: '#B36305',
+        strokeWeight: 7,
+        dashPattern: [8, 4],
+      });
+    });
+    const svg = slideToSvg(fd, fd.getSlide(1));
+    expect(svg).not.toContain('#ff00ff');
+    expect(svg).toContain('stroke-dasharray="8 4"');
   });
 
   it('setSpeakerNotes attaches Lexical-wrapped text to the SLIDE node', async () => {

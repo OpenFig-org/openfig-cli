@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<title>noWrap edge cases</title>
+<style>html, body { margin: 0; padding: 0; }</style>
+</head>
+<body>
+<div id="mount"></div>
+<script type="__bundler/manifest">
+{}
+</script>
+<script type="__bundler/template">
+"<!DOCTYPE html>\n<html lang=\"en\"><head>\n<meta charset=\"UTF-8\">\n<title>noWrap edge cases</title>\n<style>\n@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');\n\nhtml, body { margin: 0; padding: 0; }\nbody { font-family: 'Inter', system-ui, sans-serif; color: #0a0a0a; background: #fafafa; }\nsection {\n  position: relative;\n  width: 1920px;\n  height: 1080px;\n  padding: 80px 60px;\n  box-sizing: border-box;\n  background: #ffffff;\n  overflow: hidden;\n}\nsection + section { margin-top: 40px; }\n.title { font-weight: 700; font-size: 28px; margin: 0 0 40px; }\n.bullet-row {\n  font-size: 24px;\n  line-height: 1.4;\n  margin-bottom: 14px;\n}\n.divider-num {\n  position: absolute;\n  right: 56px;\n  top: 80px;\n  font-size: 420px;\n  letter-spacing: -0.03em;\n  color: #4B7FAE;\n  font-weight: 400;\n  line-height: 1;\n}\n</style>\n</head>\n<body>\n\n<section data-label=\"A — bullet span + bare text\">\n  <h1 class=\"title\">A. Bullet span (margin-right) + bare text body</h1>\n  <div class=\"bullet-row\"><span style=\"color:#275C8F;font-weight:700;margin-right:8px;\">&bull;</span>Each request must include an authentication token in the Authorization header.</div>\n  <div class=\"bullet-row\"><span style=\"color:#275C8F;font-weight:700;margin-right:8px;\">&bull;</span>Responses are JSON-encoded and subject to a per-key request rate limit.</div>\n  <div class=\"bullet-row\"><span style=\"color:#275C8F;font-weight:700;margin-right:8px;\">&bull;</span>Idempotency keys are honored for twenty-four hours after first use.</div>\n</section>\n\n<section data-label=\"B — bullet span + body span\">\n  <h1 class=\"title\">B. Bullet span + body span (regression check)</h1>\n  <div class=\"bullet-row\"><span style=\"color:#275C8F;font-weight:700;min-width:16px;margin-right:8px;\">&bull;</span><span>Webhooks are delivered with at-least-once semantics and exponential retry.</span></div>\n  <div class=\"bullet-row\"><span style=\"color:#275C8F;font-weight:700;min-width:16px;margin-right:8px;\">&bull;</span><span>Subscribers should treat duplicate deliveries as benign and dedupe by event id.</span></div>\n</section>\n\n<section data-label=\"C — large right-anchored numeral\">\n  <h1 class=\"title\">C. Large right-anchored numeral (Slides wrap boundary)</h1>\n  <div class=\"divider-num\">11</div>\n</section>\n\n<section data-label=\"D — long noWrap body near right edge\">\n  <h1 class=\"title\">D. Long noWrap body bullets near right edge (false-positive zone)</h1>\n  <div class=\"bullet-row\" style=\"white-space:nowrap;\"><span style=\"color:#275C8F;font-weight:700;margin-right:8px;\">&bull;</span>The schema migration runs inside a single transaction and is reversible by replaying the inverse in the opposite direction.</div>\n  <div class=\"bullet-row\" style=\"white-space:nowrap;\"><span style=\"color:#275C8F;font-weight:700;margin-right:8px;\">&bull;</span>Database connections are pooled per worker and returned to the pool when the request handler returns or throws an exception.</div>\n</section>\n\n</body></html>"
+</script>
+<script>
+  (function () {
+    var tpl = document.querySelector('script[type="__bundler/template"]').textContent;
+    var html = JSON.parse(tpl);
+    var doc = new DOMParser().parseFromString(html, 'text/html');
+    var mount = document.getElementById('mount');
+    for (var i = 0; i < doc.body.children.length; i++) {
+      mount.appendChild(document.importNode(doc.body.children[i], true));
+    }
+    var styles = doc.head.querySelectorAll('style, link[rel="stylesheet"]');
+    for (var j = 0; j < styles.length; j++) {
+      document.head.appendChild(document.importNode(styles[j], true));
+    }
+  })();
+</script>
+</body></html>

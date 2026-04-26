@@ -12,6 +12,7 @@ CLAUDE.md
 .opencode/
 dist/
 .tmp-test/
+*.dryrun-html-build/
 docs/_internal/
 specs/
 research/

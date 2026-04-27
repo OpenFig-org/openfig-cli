@@ -266,6 +266,42 @@ server.tool(
   }
 );
 
+// ── convert-html ────────────────────────────────────────────────────────
+import { run as convertHtmlRun } from './bin/commands/convert-html.mjs';
+
+server.tool(
+  'openfig_convert_html',
+  'Convert a Claude Design standalone HTML export into a .deck file',
+  {
+    path: z.string().describe('Path to input .html file (Claude Design standalone export)'),
+    output: z.string().describe('Output .deck path'),
+    title: z.string().optional().describe('Presentation name (default: inferred from <title>)'),
+    dryRun: z.boolean().optional().describe('Extract geometry only; skip .deck emission'),
+  },
+  async ({ path, output, title, dryRun }) => {
+    const logs = [];
+    const origLog = console.log;
+    const origError = console.error;
+    const origExit = process.exit;
+    console.log = (...a) => logs.push(a.join(' '));
+    console.error = (...a) => logs.push(a.join(' '));
+    process.exit = (code) => { throw new Error(`exit:${code}`); };
+    try {
+      const flags = { o: output };
+      if (title) flags.title = title;
+      if (dryRun) flags['dry-run'] = true;
+      await convertHtmlRun([path], flags);
+    } catch (e) {
+      if (!e.message?.startsWith('exit:')) logs.push(`Error: ${e.message}`);
+    } finally {
+      console.log = origLog;
+      console.error = origError;
+      process.exit = origExit;
+    }
+    return { content: [{ type: 'text', text: logs.join('\n') }] };
+  }
+);
+
 // ── remove-slide ────────────────────────────────────────────────────────
 server.tool(
   'openfig_remove_slide',

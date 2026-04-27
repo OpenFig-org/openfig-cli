@@ -69,7 +69,7 @@ describe('Carbon Question standalone HTML → .deck build', () => {
     }
   });
 
-  it('adds slide 4 label slack and shifts the ring captions with it', () => {
+  it('keeps slide 4 ring captions aligned with measured label stacks', () => {
     const texts = fd.message.nodeChanges.filter(n => n.type === 'TEXT');
     const firstLabel = texts.find(
       n => n.textData?.characters === 'Estimated global data-center electricity consumption in 2025 — 3.2% of world total',
@@ -81,6 +81,6 @@ describe('Carbon Question standalone HTML → .deck build', () => {
     expect(firstLabel).toBeTruthy();
     expect(firstCaption).toBeTruthy();
     expect(firstLabel.size.y).toBe(144);
-    expect(firstCaption.transform.m12).toBe(604);
+    expect(firstCaption.transform.m12).toBe(611);
   });
 });

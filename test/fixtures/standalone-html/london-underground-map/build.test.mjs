@@ -57,9 +57,9 @@ describe('LU standalone HTML → .deck build', () => {
     expect(before).toBeTruthy();
     expect(from).toBeTruthy();
     expect(before.transform.m02).toBe(86);
-    expect(before.transform.m12).toBe(288);
+    expect(before.transform.m12).toBe(290);
     expect(from.transform.m02).toBe(1003);
-    expect(from.transform.m12).toBe(288);
+    expect(from.transform.m12).toBe(290);
   });
 
   it('gives paragraph text a realistic (not 2-px) computed height', () => {

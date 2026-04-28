@@ -27,19 +27,19 @@ In Claude Design, choose the **Slide deck** tab and create your project.
 The **Use speaker notes** toggle is optional; if on, OpenFig maps notes
 to each slide.
 
-![Create slide deck](docs/images/create_slides_project.png)
+<img src="docs/images/create_slides_project.png" alt="Create slide deck" width="380" />
 
 ### 2. Build your deck, then export
 
 When you're done designing, click **Share → Export as standalone HTML**.
 
-![Export as standalone HTML](docs/images/export_standalone_html.png)
+<img src="docs/images/export_standalone_html.png" alt="Export as standalone HTML" width="720" />
 
 Claude Design generates a single self-contained file named
 `{Project Name} (Standalone).html` — all slides, images, fonts, and the
 rendering engine inlined. Works offline.
 
-![Download standalone HTML](docs/images/download_standalone_html.png)
+<img src="docs/images/download_standalone_html.png" alt="Download standalone HTML" width="480" />
 
 ### 3. Convert to .deck
 

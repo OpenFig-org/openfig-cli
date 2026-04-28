@@ -14,6 +14,40 @@ npm install -g openfig-cli
 
 Node 18+. No build step. Pure ESM.
 
+## Convert from Claude Design
+
+OpenFig converts standalone HTML exports from
+[claude.ai/design](https://claude.ai/design) into editable Figma Slides
+decks — text, images, vectors, layouts, and speaker notes carry through
+as native nodes. Not a flat raster.
+
+### 1. Create a Slide Deck project
+
+In Claude Design, choose the **Slide deck** tab and create your project.
+The **Use speaker notes** toggle is optional; if on, OpenFig maps notes
+to each slide.
+
+![Create slide deck](docs/images/create_slides_project.png)
+
+### 2. Build your deck, then export
+
+When you're done designing, click **Share → Export as standalone HTML**.
+
+![Export as standalone HTML](docs/images/export_standalone_html.png)
+
+Claude Design generates a single self-contained file named
+`{Project Name} (Standalone).html` — all slides, images, fonts, and the
+rendering engine inlined. Works offline.
+
+![Download standalone HTML](docs/images/download_standalone_html.png)
+
+### 3. Convert to .deck
+
+```bash
+openfig convert-html "London Underground Map (Standalone).html" -o lu.deck
+open lu.deck   # opens directly in Figma Slides
+```
+
 ## File Format Support
 
 | Product | Extension | Read | Render | Modify |

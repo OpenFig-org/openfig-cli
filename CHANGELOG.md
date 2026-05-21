@@ -5,6 +5,25 @@ All notable changes to `openfig-cli` are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.5] - 2026-05-21
+
+### Changed
+
+- **`convert-html`: font alias map now derived from FreeDesktop's
+  `30-metric-aliases.conf`** (the canonical open-source list of
+  metric-compatible font pairs that ships with fontconfig and underlies
+  Linux/ChromeOS/LibreOffice font substitution). A new refresh script
+  fetches the upstream config, parses the alias declarations, and keeps
+  only the substitutes Figma actually serves. Surviving aliases are
+  still Calibri→Carlito and Cambria→Caladea, but the provenance is now
+  upstream rather than hand-typed, so new pairs land automatically the
+  next time the refresh script runs.
+- **Figma-availability set consolidated into a single JSON.** The
+  previously-inline system-core list (Inter, Arial, Helvetica, …) is
+  now baked into `lib/slides/figma-available-fonts.json` by the refresh
+  script, making the JSON the single source of truth for "what Figma
+  can resolve."
+
 ## [0.4.4] - 2026-05-21
 
 ### Fixed

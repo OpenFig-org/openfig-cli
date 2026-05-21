@@ -1,0 +1,93 @@
+# Changelog
+
+All notable changes to `openfig-cli` are documented here.
+
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.4.3] - 2026-05-21
+
+### Fixed
+
+- **`convert-html`: bake CSS `invert(1)` filters into raster image bytes.**
+  Logos that Claude Design ships as black assets and recolors via
+  `filter: invert(1)` (or compound `brightness(0) invert(1)`) no longer
+  render as black on dark slides. Image bytes are now inverted via sharp
+  before embedding, and a warning surfaces any other CSS filter we don't
+  bake yet.
+- **`convert-html`: preserve `image/svg+xml` assets as native Figma vectors.**
+  SVG assets referenced through the runtime blob-URL manifest were
+  previously routed through the raster `<img>` path and baked to pixels.
+  They're now inlined as `data:` URLs in the browser stage so the existing
+  SVG-vector path picks them up and emits Figma VECTOR nodes — crisp at any
+  zoom. The same `invert(1)` / `brightness(0) invert(1)` filters apply by
+  rewriting fill/stroke colors directly in the SVG markup.
+
+## [0.4.2] - 2026-04-28
+
+### Changed
+
+- README: screenshots compressed and display widths constrained for faster
+  page loads on npmjs.com.
+
+## [0.4.1] - 2026-04-28
+
+### Added
+
+- README: Claude Design HTML export workflow (the standalone-HTML → `.deck`
+  flow added in 0.4.0).
+
+## [0.4.0] - 2026-04-28
+
+### Added
+
+- **`openfig convert-html` command** — convert a Claude Design standalone
+  HTML export into a native `.deck` file. Text, images, vectors, layouts,
+  and speaker notes carry through as editable Figma Slides nodes.
+- **`openfig_convert_html` MCP tool** — same conversion exposed to MCP
+  clients (Claude Cowork etc.).
+- **Zero-seed `.deck` creation** — `openfig create-deck` and
+  `FigDeck.createEmpty()` produce a fully programmatic deck without
+  requiring a seed template.
+- **Chromium-based layout extraction** — the standalone-HTML converter
+  drives Playwright/Chromium so CSS layout is browser-faithful, replacing
+  the previous hand-rolled CSS engine.
+- **Broader SVG shape coverage in the handoff stage** — polyline, polygon,
+  rect, ellipse, gradient fills, and concatenated/relative path commands.
+- **CSS variable resolution** — `var(--name)` references resolve through
+  the captured `:root` token values before handoff.
+- **`::before` / `::after` pseudo-elements** rendered as text/shape nodes.
+- **Inline rich-text flows** coalesced into single richText elements so
+  mid-sentence weight/style changes stay together.
+
+### Fixed
+
+- Text wrapping near slide right edge for large `noWrap` text.
+- Font measurement: Playwright now uses Inter for metrics that match
+  Figma's substitution behaviour; system-font stacks are forced onto
+  Inter pre-measurement.
+- `SHAPE_WITH_TEXT` containers no longer absorb their inline SVG/IMG
+  children as text leaves.
+- Empty inline elements with CSS-only geometry are imported as shapes
+  rather than being dropped.
+- Straight-line shapes emit as VECTOR paths so `strokeAlign` is honoured
+  (previously rasterised inconsistently).
+- Multi-line `noWrap` captions: `WIDTH_AND_HEIGHT` sizing keeps the box
+  tight to content.
+- CSS `vertical-align` honoured on text elements.
+- SVG opacity attribute and direct text inside containers preserved.
+- SVG subpath separation preserved for vector wordmarks (no more glyph
+  merging).
+- Converter warnings surface unsupported CSS so unknown constructs are
+  visible at convert time instead of silently dropped.
+
+## [0.3.31] - 2026-03-16
+
+Pre-`convert-html` baseline. Earlier 0.3.x versions are not catalogued
+here; see `git log --tags='*0.3.*'` for the full history.
+
+[0.4.3]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.4.3
+[0.4.2]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.4.2
+[0.4.1]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.4.1
+[0.4.0]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.4.0
+[0.3.31]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.3.31

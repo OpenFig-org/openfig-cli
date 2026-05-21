@@ -60,6 +60,7 @@
     "@fontsource/darker-grotesque": "^5.2.8",
     "@fontsource/inter": "^5.2.8",
     "@fontsource/irish-grover": "^5.2.7",
+    "google-font-metadata": "^6.0.8",
     "vitest": "^4.1.0"
   },
   "keywords": [

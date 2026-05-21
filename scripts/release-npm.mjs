@@ -17,11 +17,26 @@ function write(rel, obj) { writeFileSync(join(root, rel), JSON.stringify(obj, nu
 function run(cmd) { execSync(cmd, { cwd: root, stdio: 'inherit' }); }
 
 // 1. Bump package.json
+const previousVersion = read('package.json').version;
 run(`npm version ${bump} --no-git-tag-version`);
 const { version } = read('package.json');
 console.log(`\nReleasing npm package v${version}...\n`);
 
-// 2. Publish first — only commit/tag/push if it succeeds
+// 2. CHANGELOG.md must already contain a `## [<version>]` heading so the
+// GitHub release workflow can extract the body. Without this check we ship
+// silently-empty releases (happened on 0.4.4 — the tag pushes before the
+// changelog entry exists, the workflow finds nothing, and the release body
+// is empty forever). Revert the bump if the section is missing.
+const changelog = readFileSync(join(root, 'CHANGELOG.md'), 'utf8');
+if (!new RegExp(`^## \\[${version.replace(/\./g, '\\.')}\\]`, 'm').test(changelog)) {
+  write('package.json', { ...read('package.json'), version: previousVersion });
+  run(`npm install --package-lock-only --silent`);
+  console.error(`\n✗ CHANGELOG.md is missing a "## [${version}]" section.`);
+  console.error(`  Add the entry before running release. Reverted package.json to ${previousVersion}.\n`);
+  process.exit(1);
+}
+
+// 3. Publish first — only commit/tag/push if it succeeds
 run(`npm publish --access public`);
 run(`git add package.json package-lock.json`);
 run(`git commit -m "npm v${version}"`);

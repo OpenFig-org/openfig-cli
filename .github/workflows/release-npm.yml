@@ -39,11 +39,36 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Extract release notes from CHANGELOG.md
+        id: notes
+        run: |
+          # Strip the `npm-v` prefix to get the bare version (e.g. 0.4.3)
+          VERSION="${GITHUB_REF_NAME#npm-v}"
+          # Pull the body of `## [VERSION]` up to (but not including) the
+          # next `## [` heading. Empty string if the section is missing,
+          # in which case the release falls through to just the install
+          # snippet — never fails the publish.
+          NOTES=""
+          if [ -f CHANGELOG.md ]; then
+            NOTES=$(awk -v ver="$VERSION" '
+              $0 ~ "^## \\[" ver "\\]" { found=1; next }
+              found && /^## \[/         { exit }
+              found                     { print }
+            ' CHANGELOG.md | sed -e '/./,$!d' | awk 'NF{p=1} p' )
+          fi
+          {
+            echo "notes<<RELEASE_NOTES_EOF"
+            echo "$NOTES"
+            echo "RELEASE_NOTES_EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           name: ${{ github.ref_name }}
           body: |
+            ${{ steps.notes.outputs.notes }}
+
             ```bash
             npm install -g openfig-cli
             ```

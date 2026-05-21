@@ -5,6 +5,30 @@ All notable changes to `openfig-cli` are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.4] - 2026-05-21
+
+### Fixed
+
+- **`convert-html`: alias proprietary fonts and widen Figma availability check.**
+  Decks emitted from Claude Design HTML opened with a missing-font dialog
+  when the source CSS used proprietary system fonts (Calibri, Cambria) that
+  Figma cannot load. The font normalizer now walks the full CSS font stack
+  and:
+  1. substitutes metric-compatible OFL clones — `Calibri → Carlito`,
+     `Cambria → Caladea` — so layout is preserved;
+  2. otherwise picks the first family Figma is known to have, checked
+     against the full Google Fonts catalog (~1900 families, vendored as
+     JSON, regenerated via `scripts/refresh-figma-available-fonts.mjs`)
+     plus the system core (Inter, Arial, Helvetica, Times, etc.);
+  3. falls back to the first portable token only when nothing in the stack
+     is resolvable, letting Figma's font picker handle the rest.
+
+  Also eliminates the spurious "likely not available" warning that fired
+  on common Google Fonts (e.g. EB Garamond) under the previous hand-curated
+  30-entry allowlist. HTML and SVG-text paths now share the same
+  `lib/slides/font-normalize.mjs` so the dispatcher can't reintroduce a
+  raw CSS stack.
+
 ## [0.4.3] - 2026-05-21
 
 ### Fixed

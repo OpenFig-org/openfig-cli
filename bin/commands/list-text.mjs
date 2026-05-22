@@ -11,9 +11,7 @@ export async function run(args) {
   const file = args[0];
   if (!file) { console.error('Usage: list-text <file.deck>'); process.exit(1); }
 
-  const deck = file.endsWith('.fig')
-    ? FigDeck.fromFigFile(file)
-    : await FigDeck.fromDeckFile(file);
+  const deck = await FigDeck.fromFile(file);
 
   // Direct text nodes
   console.log('=== Direct text nodes ===\n');

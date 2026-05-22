@@ -14,9 +14,7 @@ export async function run(args, flags) {
   const filterType = flags.type || null;
   const jsonOut = flags.json != null;
 
-  const deck = file.endsWith('.fig')
-    ? FigDeck.fromFigFile(file)
-    : await FigDeck.fromDeckFile(file);
+  const deck = await FigDeck.fromFile(file);
 
   // Find root nodes (no parentIndex or parent not in nodeMap)
   const roots = deck.message.nodeChanges.filter(n => {

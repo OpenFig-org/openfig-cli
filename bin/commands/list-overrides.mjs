@@ -12,9 +12,7 @@ export async function run(args, flags) {
 
   const filterSym = flags.symbol || null;
 
-  const deck = file.endsWith('.fig')
-    ? FigDeck.fromFigFile(file)
-    : await FigDeck.fromDeckFile(file);
+  const deck = await FigDeck.fromFile(file);
 
   const symbols = deck.getSymbols();
 

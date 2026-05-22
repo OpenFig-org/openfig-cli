@@ -1,6 +1,6 @@
 {
   "name": "openfig-cli",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "description": "OpenFig — Open-source tools for Figma file parsing and rendering",
   "type": "module",
   "bin": {
@@ -47,7 +47,7 @@
     "css": "^3.0.0",
     "kiwi-schema": "^0.5.0",
     "node-html-parser": "^7.1.0",
-    "openfig-core": "^0.3.5",
+    "openfig-core": "^0.3.7",
     "pako": "^2.1.0",
     "pdf-lib": "^1.17.1",
     "playwright-core": "^1.59.1",

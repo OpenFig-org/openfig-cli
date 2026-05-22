@@ -5,6 +5,17 @@ All notable changes to `openfig-cli` are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.6] - 2026-05-22
+
+### Added
+
+- **`openfig deck-to-fig` command** — Convert a Figma Slides `.deck` file into a standard Figma Design `.fig` file. Visual slides scaffolding is flattened, and components are baked/flattened with overrides into visual frames arranged as a canvas row/grid.
+- **Unified ZIP/Binary auto-detection** — `FigDeck.fromFile()` unified loader automatically detects zipped `.fig`/`.deck` packages versus raw Kiwi binaries by inspecting magic bytes.
+
+### Fixed
+
+- **CLI Inspect/List Commands** — Restored compatibility of `inspect`, `list-text`, and `list-overrides` commands when reading standard zipped `.fig` files exported from Figma.
+
 ## [0.4.5] - 2026-05-21
 
 ### Changed
@@ -129,6 +140,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Pre-`convert-html` baseline. Earlier 0.3.x versions are not catalogued
 here; see `git log --tags='*0.3.*'` for the full history.
 
+[0.4.6]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.4.6
 [0.4.5]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.4.5
 [0.4.4]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.4.4
 [0.4.3]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.4.3

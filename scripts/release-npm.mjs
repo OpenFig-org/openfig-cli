@@ -27,7 +27,8 @@ console.log(`\nReleasing npm package v${version}...\n`);
 // silently-empty releases (happened on 0.4.4 — the tag pushes before the
 // changelog entry exists, the workflow finds nothing, and the release body
 // is empty forever). Revert the bump if the section is missing.
-const changelog = readFileSync(join(root, 'CHANGELOG.md'), 'utf8');
+const changelogPath = join(root, 'CHANGELOG.md');
+let changelog = readFileSync(changelogPath, 'utf8');
 if (!new RegExp(`^## \\[${version.replace(/\./g, '\\.')}\\]`, 'm').test(changelog)) {
   write('package.json', { ...read('package.json'), version: previousVersion });
   run(`npm install --package-lock-only --silent`);
@@ -36,9 +37,22 @@ if (!new RegExp(`^## \\[${version.replace(/\./g, '\\.')}\\]`, 'm').test(changelo
   process.exit(1);
 }
 
+// Append the Keep-a-Changelog reference-link line so the heading renders
+// as a clickable release link on GitHub. Idempotent: skip if already present.
+const linkRef = `[${version}]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v${version}`;
+if (!changelog.includes(linkRef)) {
+  // Insert above the first existing `[X.Y.Z]: …` reference so the list
+  // stays in descending-version order.
+  const refMatch = changelog.match(/^\[\d+\.\d+\.\d+\]:.*$/m);
+  changelog = refMatch
+    ? changelog.replace(refMatch[0], `${linkRef}\n${refMatch[0]}`)
+    : changelog.trimEnd() + `\n\n${linkRef}\n`;
+  writeFileSync(changelogPath, changelog);
+}
+
 // 3. Publish first — only commit/tag/push if it succeeds
 run(`npm publish --access public`);
-run(`git add package.json package-lock.json`);
+run(`git add package.json package-lock.json CHANGELOG.md`);
 run(`git commit -m "npm v${version}"`);
 run(`git tag npm-v${version}`);
 run(`git push && git push --tags`);

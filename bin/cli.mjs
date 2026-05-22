@@ -34,6 +34,7 @@ const COMMANDS = {
   'roundtrip':      './commands/roundtrip.mjs',
   'export':         './commands/export.mjs',
   'pdf':            './commands/pdf.mjs',
+  'deck-to-fig':    './commands/deck-to-fig.mjs',
 };
 
 const arg2 = process.argv[2];
@@ -45,6 +46,7 @@ if (!arg2 || arg2 === '--help' || arg2 === '-h') {
   console.log('Commands:');
   console.log('  create-deck    Create a new .deck file from scratch');
   console.log('  convert-html   Convert a Claude Design standalone HTML export into a .deck');
+  console.log('  deck-to-fig    Convert a Figma Slides .deck file into a Figma Design .fig file');
   console.log('  export         Export slides as images (PNG/JPG/WEBP)');
   console.log('  pdf            Export slides as a multi-page PDF');
   console.log('  inspect        Show document structure (node hierarchy tree)');

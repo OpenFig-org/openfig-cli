@@ -49,12 +49,8 @@ jobs:
           # in which case the release falls through to just the install
           # snippet — never fails the publish.
           NOTES=""
-          if [ -f CHANGELOG.md ]; then
-            NOTES=$(awk -v ver="$VERSION" '
-              $0 ~ "^## \\[" ver "\\]" { found=1; next }
-              found && /^## \[/         { exit }
-              found                     { print }
-            ' CHANGELOG.md | sed -e '/./,$!d' | awk 'NF{p=1} p' )
+          if [ -f CHANGELOG.md ] && [ -f scripts/extract-changelog-section.mjs ]; then
+            NOTES=$(node scripts/extract-changelog-section.mjs "$VERSION" || true)
           fi
           {
             echo "notes<<RELEASE_NOTES_EOF"

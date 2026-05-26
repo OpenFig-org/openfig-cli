@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<title>Northwind Telemetry — Reliability Digest</title>
+<style>html, body { margin: 0; padding: 0; }</style>
+</head>
+<body>
+<div id="mount"></div>
+<script type="__bundler/manifest">
+{}
+</script>
+<script type="__bundler/template">
+"<!DOCTYPE html>\n<html lang=\"en\"><head>\n<meta charset=\"UTF-8\">\n<title>Northwind Telemetry — Reliability Digest</title>\n<style>\n@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');\n\nhtml, body { margin: 0; padding: 0; }\nbody { font-family: 'Inter', system-ui, sans-serif; }\nsection {\n  position: relative;\n  width: 1920px;\n  height: 1080px;\n  padding: 80px 60px;\n  box-sizing: border-box;\n  overflow: hidden;\n}\nsection + section { margin-top: 40px; }\n.dark  { background: #10243a; color: #ffffff; }\n.light { background: #ffffff; color: #101010; }\n.title { font-weight: 700; font-size: 40px; margin: 24px 0 0; }\n.glyph { color: inherit; }\n\n/* Quote side box: base is a full box; quote-top mode collapses to a top rule. */\n.sidebox { border: 1px solid #000000; padding: 20px 24px; max-width: 760px; }\nbody.quote-top .sidebox { border: none; border-top: 4px solid #275C8F; padding: 20px 0; }\n.sidebox p { font-size: 24px; line-height: 32px; color: #275C8F; margin: 0; font-style: italic; }\n\n/* Two-column rows with a fixed 200px label column. */\n.row { display: flex; gap: 50px; align-items: flex-start; }\n.row + .row { margin-top: 40px; }\n.lbl {\n  width: 200px; flex-shrink: 0;\n  font-weight: 700; font-size: 24px; line-height: 26px;\n  color: #275C8F; text-transform: uppercase;\n}\n.bdy { font-size: 24px; line-height: 32px; max-width: 1200px; color: #101010; }\n</style>\n<!-- Deck tweak state saved by the design tool; convert-html replays this.\n     TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{\"quoteStyle\":\"top\"}/*EDITMODE-END*/ -->\n</head>\n<body>\n\n<section class=\"dark\" data-label=\"dark-icon\">\n  <span class=\"glyph\"><svg width=\"48\" height=\"48\" viewBox=\"0 0 48 48\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M8 8 H40 V40 H8 Z\" fill=\"currentColor\"></path></svg></span>\n  <h1 class=\"title\">Signal Coverage</h1>\n</section>\n\n<section class=\"light\" data-label=\"light-icon\">\n  <span class=\"glyph\"><svg width=\"48\" height=\"48\" viewBox=\"0 0 48 48\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M8 8 H40 V40 H8 Z\" fill=\"currentColor\"></path></svg></span>\n  <h1 class=\"title\">Regional Latency</h1>\n</section>\n\n<section class=\"light\" data-label=\"quote-box\">\n  <h1 class=\"title\">Window Summary</h1>\n  <div class=\"sidebox\"><p>Latency stayed within the committed target across every region for the full measurement window.</p></div>\n</section>\n\n<section class=\"light\" data-label=\"wrap-label\">\n  <h1 class=\"title\">Findings</h1>\n  <div class=\"row\" style=\"margin-top:40px;\">\n    <div class=\"lbl\">SECTION 01<br>THROUGHPUT METRICS</div>\n    <div class=\"bdy\">Aggregate throughput held above the committed floor for the entire measurement window with no sustained dips.</div>\n  </div>\n  <div class=\"row\">\n    <div class=\"lbl\">PART TWO<br>OK</div>\n    <div class=\"bdy\">A control label whose second segment fits inside the column, so its authored line break is preserved as-is.</div>\n  </div>\n</section>\n\n</body></html>"
+</script>
+<script>
+  (function () {
+    var tpl = document.querySelector('script[type="__bundler/template"]').textContent;
+    var html = JSON.parse(tpl);
+    var doc = new DOMParser().parseFromString(html, 'text/html');
+    // Replay the saved tweak state so the live preview matches the design tool.
+    var m = html.match(/EDITMODE-BEGIN\*\/([\s\S]*?)\/\*EDITMODE-END/);
+    var tweaks = {};
+    try { tweaks = JSON.parse(m[1]); } catch (e) {}
+    if (tweaks.quoteStyle === 'top') document.body.classList.add('quote-top');
+    var mount = document.getElementById('mount');
+    for (var i = 0; i < doc.body.children.length; i++) {
+      mount.appendChild(document.importNode(doc.body.children[i], true));
+    }
+    var styles = doc.head.querySelectorAll('style, link[rel="stylesheet"]');
+    for (var j = 0; j < styles.length; j++) {
+      document.head.appendChild(document.importNode(styles[j], true));
+    }
+  })();
+</script>
+</body></html>

@@ -5,6 +5,14 @@ All notable changes to `openfig-cli` are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.7] - 2026-05-26
+
+### Fixed
+
+- **`convert-html`: SVG `currentColor` now resolves to the element's computed color.** Vectorized SVG paths using `fill`/`stroke="currentColor"` (e.g. adaptive logos and icons) previously failed conversion with `Unknown color: "currentColor"`. The extractor now captures each SVG's computed CSS `color` and substitutes it before vectorizing, so an icon renders light on a dark slide and dark on a light one.
+- **`convert-html`: saved deck tweak state is replayed before extraction.** The exported `__bundler/template` is the DOM *before* the design tool applies the user's saved tweaks (`TWEAK_DEFAULTS`). These are now replayed — `quoteStyle`, `dividerBg`, `.method-icon` visibility, and the `--t-icon-size` / `--t-icon-scale` / `--t-kf-num-size` vars — so the rendered deck matches the design. Fixes a phantom box drawn around quote callouts when `quoteStyle: "top"` was set.
+- **`convert-html`: hard-break labels that overflow their column now wrap.** A text leaf containing a `<br>` was always marked `noWrap`; when a segment between breaks was wider than its (e.g. fixed-width) column it overflowed into adjacent content. `noWrap` is now kept only when each authored line fits — otherwise the text reflows within its measured width.
+
 ## [0.4.6] - 2026-05-22
 
 ### Added
@@ -140,6 +148,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Pre-`convert-html` baseline. Earlier 0.3.x versions are not catalogued
 here; see `git log --tags='*0.3.*'` for the full history.
 
+[0.4.7]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.4.7
 [0.4.6]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.4.6
 [0.4.5]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.4.5
 [0.4.4]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.4.4

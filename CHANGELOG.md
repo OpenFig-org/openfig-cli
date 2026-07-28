@@ -5,6 +5,16 @@ All notable changes to `openfig-cli` are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-07-27
+
+### Fixed
+
+- **Reading a `.deck` or `.fig` could parse unrelated memory instead of the file.** `canvas.fig` was handed to the parser as `new Uint8Array(buf.buffer)`, which discards a Buffer's `byteOffset` and `byteLength`. `readFileSync` routinely returns a Buffer that is a *view* into a shared pool — in one observed case a 26,643-byte file sat at offset 960 of a 65,536-byte backing buffer — so the parser received the whole pool from offset 0 and read whatever happened to be adjacent in memory. Symptoms varied with pool contents: `Unknown prelude: …`, `Offset is outside the bounds of the DataView`, or silently wrong data. Because pooling depends on allocation history, failures moved between runs and between files, which made it look like unrelated flakiness in several commands (`inspect`, `list-text`, `create-deck`, `deck-to-fig`, and the rasterizer). It affected any file whose read happened to be pooled, not any particular size or format.
+
+### Changed
+
+- `packageManager` is pinned to npm. The repo tracks `package-lock.json`, but stray `pnpm-lock.yaml` / `pnpm-workspace.yaml` files had appeared alongside it, leaving the toolchain ambiguous and local installs resolving stale versions.
+
 ## [0.5.0] - 2026-07-27
 
 ### Added
@@ -165,6 +175,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Pre-`convert-html` baseline. Earlier 0.3.x versions are not catalogued
 here; see `git log --tags='*0.3.*'` for the full history.
 
+[0.5.1]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.5.1
 [0.5.0]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.5.0
 [0.4.7]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.4.7
 [0.4.6]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.4.6

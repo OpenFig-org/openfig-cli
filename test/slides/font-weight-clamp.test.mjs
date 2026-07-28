@@ -29,14 +29,17 @@ function makeRealm(fonts, elements) {
   };
 }
 
-function makeElement(fontFamily, fontWeight) {
+function makeElement(fontFamily, fontWeight, fontStyle = 'normal') {
   const applied = {};
   return {
-    computed: { fontFamily, fontWeight: String(fontWeight) },
+    computed: { fontFamily, fontWeight: String(fontWeight), fontStyle },
     style: { setProperty: (k, v) => { applied[k] = v; } },
     applied,
   };
 }
+
+/** A registered face, as `document.fonts` reports one. */
+const face = (family, weight, style = 'normal') => ({ family, weight: String(weight), style });
 
 /**
  * Runs prepareForMeasurement and returns what the clamp did. Only the clamp
@@ -95,6 +98,31 @@ describe('clamping font-weight to faces the family ships', () => {
     const el = makeElement('Nearest, sans-serif', 600);
     const fonts = [400, 500, 700].map((w) => ({ family: 'Nearest', weight: String(w) }));
     await runClamp(fonts, [el]);
+    expect(el.applied['font-weight']).toBe('700');
+  });
+
+  it('sets a family with no italic upright', async () => {
+    // Space Grotesk ships no italic. A browser slants the upright glyphs
+    // itself; Figma will not, and reported "Space Grotesk / Italic" missing on
+    // a real deck. Same class of bug as the synthetic bold, other axis.
+    const el = makeElement('"Space Grotesk", sans-serif', 400, 'italic');
+    const { logs } = await runClamp([face('Space Grotesk', 400)], [el]);
+    expect(el.applied['font-style']).toBe('normal');
+    expect(logs.join('\n')).toMatch(/Space Grotesk has no italic/);
+  });
+
+  it('keeps italic where the family has a real italic face', async () => {
+    const el = makeElement('"Instrument Serif", serif', 400, 'italic');
+    const fonts = [face('Instrument Serif', 400), face('Instrument Serif', 400, 'italic')];
+    const { logs } = await runClamp(fonts, [el]);
+    expect(el.applied['font-style']).toBeUndefined();
+    expect(logs).toHaveLength(0);
+  });
+
+  it('handles a family missing both the weight and the italic', async () => {
+    const el = makeElement('"Space Grotesk", sans-serif', 900, 'italic');
+    await runClamp([face('Space Grotesk', 400), face('Space Grotesk', 700)], [el]);
+    expect(el.applied['font-style']).toBe('normal');
     expect(el.applied['font-weight']).toBe('700');
   });
 

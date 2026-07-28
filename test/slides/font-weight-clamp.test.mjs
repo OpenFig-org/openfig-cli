@@ -71,34 +71,62 @@ describe('clamping font-weight to faces the family ships', () => {
     expect(logs.join('\n')).toMatch(/Instrument Serif has no weight 700/);
   });
 
-  it('leaves a weight the family does ship exactly alone', async () => {
-    const el = makeElement('"Space Grotesk", sans-serif', 600);
-    const fonts = [300, 400, 500, 600, 700].map((w) => ({ family: 'Space Grotesk', weight: String(w) }));
+  it('leaves a weight alone when it is already the face it will be named as', async () => {
+    const el = makeElement('"Space Grotesk", sans-serif', 400);
+    const fonts = [300, 400, 500, 600, 700].map((w) => face('Space Grotesk', w));
     const { logs } = await runClamp(fonts, [el]);
     expect(el.applied['font-weight']).toBeUndefined();
     expect(logs).toHaveLength(0);
   });
 
-  it('treats a variable font as covering its whole range', async () => {
+  it('snaps an unnameable weight to one it can name, even when the family has it', async () => {
+    // Space Grotesk really does ship a 600, but the handoff has no style name
+    // for it — it can only say Regular or Bold. Measuring at 600 and writing
+    // "Bold" sizes the box for a face that will not be rendered, so the weight
+    // moves to the one that will be.
+    const el = makeElement('"Space Grotesk", sans-serif', 600);
+    const fonts = [300, 400, 500, 600, 700].map((w) => face('Space Grotesk', w));
+    await runClamp(fonts, [el]);
+    expect(el.applied['font-weight']).toBe('700');
+  });
+
+  it('applies the same rule inside a variable range', async () => {
+    // A variable font can render 550, but the handoff still has only two names
+    // for it. 550 is equidistant from both, and the tie goes to the heavier
+    // face, as CSS font matching does above 500.
     const el = makeElement('"Space Grotesk", sans-serif', 550);
-    await runClamp([{ family: 'Space Grotesk', weight: '300 700' }], [el]);
-    expect(el.applied['font-weight']).toBeUndefined();
+    await runClamp([face('Space Grotesk', '300 700')], [el]);
+    expect(el.applied['font-weight']).toBe('700');
+  });
+
+  it('rounds a light-side weight down rather than up', async () => {
+    const el = makeElement('"Space Grotesk", sans-serif', 500);
+    await runClamp([face('Space Grotesk', '300 700')], [el]);
+    expect(el.applied['font-weight']).toBe('400');
   });
 
   it('clamps to the end of a variable range when the ask is outside it', async () => {
     const el = makeElement('"Space Grotesk", sans-serif', 900);
-    await runClamp([{ family: 'Space Grotesk', weight: '300 700' }], [el]);
+    await runClamp([face('Space Grotesk', '300 700')], [el]);
     expect(el.applied['font-weight']).toBe('700');
   });
 
-  it('picks the nearest weight, not simply Regular', async () => {
-    // 600 sits between 500 and 700; both are one step away, and CSS resolves
-    // ties above 500 upward. Collapsing this to Regular would be a second,
-    // quieter version of the same bug.
-    const el = makeElement('Nearest, sans-serif', 600);
-    const fonts = [400, 500, 700].map((w) => ({ family: 'Nearest', weight: String(w) }));
-    await runClamp(fonts, [el]);
-    expect(el.applied['font-weight']).toBe('700');
+  it('does not land on a heavy face it has no name for', async () => {
+    // Coda ships 400 and 800 and no 700. Snapping a bold request to the
+    // nearest available weight put it on 800, which the handoff then wrote as
+    // "Bold" — a face Coda does not have. Eight Google families behave this
+    // way, so the clamp must choose only among weights it can name.
+    const el = makeElement('Coda, sans-serif', 700);
+    await runClamp([face('Coda', 400), face('Coda', 800)], [el]);
+    expect(el.applied['font-weight']).toBe('400');
+  });
+
+  it('leaves a family with no nameable weight at all untouched', async () => {
+    // Buda ships only 300 — the one family in Google's catalogue with neither
+    // a 400 nor a 700. Inventing a face for it would be worse than declining.
+    const el = makeElement('Buda, serif', 300);
+    await runClamp([face('Buda', 300)], [el]);
+    expect(el.applied['font-weight']).toBeUndefined();
   });
 
   it('sets a family with no italic upright', async () => {

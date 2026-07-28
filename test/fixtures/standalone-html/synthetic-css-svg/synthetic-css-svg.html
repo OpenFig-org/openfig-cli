@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Synthetic CSS and SVG Features</title>
+<style>
+  html, body { margin: 0; padding: 0; }
+  section {
+    position: absolute;
+    left: 0; top: 0;
+    width: 1920px; height: 1080px;
+    background: #ffffff;
+  }
+  #pie {
+    position: absolute;
+    left: 100px; top: 100px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: conic-gradient(
+      rgb(0, 0, 255) 0deg,
+      rgb(0, 0, 255) 25%,
+      rgb(255, 0, 0) 25%,
+      rgb(255, 0, 0) 100%
+    );
+  }
+  #icon { position: absolute; left: 600px; top: 100px; }
+</style>
+</head>
+<body>
+
+<!--
+  Synthetic Claude Design standalone covering two constructs that appear in
+  real exports but in none of the recorded fixtures:
+
+  1. A pie chart drawn as a CSS conic-gradient on a border-radius:50% div.
+     There is no vector geometry to extract, and the element has a transparent
+     background-color, so an extractor that does not understand conic-gradient
+     emits nothing at all for it — not even an empty circle.
+
+  2. An SVG whose geometry sits under <g transform="translate(...)">. Dropping
+     the group transform collapses every sub-path toward the SVG origin.
+
+  All shapes are primitives at known coordinates; no third-party content.
+-->
+
+<script type="__bundler/manifest">{}</script>
+<script type="__bundler/template">"<html><head><title>Synthetic CSS and SVG Features</title></head><body><section data-screen-label='01 Features'><div id='pie'></div><svg id='icon' width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'><g transform='translate(20,30)'><path d='M 0 0 L 40 0 L 40 40 Z' fill='rgb(0,128,0)'/></g></svg></section></body></html>"</script>
+
+<script>
+(function () {
+  var raw = document.querySelector('script[type="__bundler/template"]').textContent;
+  var html = JSON.parse(raw);
+  var body = html.replace(/[\s\S]*<body[^>]*>/i, '').replace(/<\/body>[\s\S]*/i, '');
+  document.body.insertAdjacentHTML('afterbegin', body);
+})();
+</script>
+
+</body>
+</html>

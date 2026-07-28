@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Synthetic Viewer Chrome</title>
+<style>
+  html, body { margin: 0; padding: 0; }
+  section {
+    position: absolute;
+    left: 0; top: 0;
+    width: 1920px; height: 1080px;
+    background: #ffffff;
+    font: 400 40px Inter, sans-serif;
+  }
+  section p { position: absolute; margin: 0; }
+</style>
+</head>
+<body>
+
+<!--
+  Synthetic Claude Design standalone: minimal __bundler envelope plus a runtime
+  that mimics a *viewer stage* — a shadow-DOM wrapper that scales the
+  1920x1080 slide down to leave room for presenter chrome down the left side.
+
+  Real exports do this, and it means a converter measuring at a 1920-wide
+  viewport reads every coordinate at ~90% of true size. No fixture built from
+  a bare extracted template can reproduce it, because the chrome only exists
+  once the standalone's own runtime has run.
+
+  Contains no third-party content: two positioned text anchors at known
+  coordinates, which the test asserts land at their authored positions.
+-->
+
+<script type="__bundler/manifest">{}</script>
+<script type="__bundler/template">"<html><head><title>Synthetic Viewer Chrome</title></head><body><section data-screen-label='01 Chrome'><p id='a' style='left:200px; top:300px'>ANCHOR ALPHA</p><p id='b' style='left:1400px; top:800px'>ANCHOR BETA</p></section></body></html>"</script>
+
+<script>
+(function () {
+  var SIDEBAR = 188;
+  var raw = document.querySelector('script[type="__bundler/template"]').textContent;
+  var html = JSON.parse(raw);
+  var body = html.replace(/[\s\S]*<body[^>]*>/i, '').replace(/<\/body>[\s\S]*/i, '');
+
+  var host = document.createElement('deck-stage');
+  document.body.appendChild(host);
+
+  var root = host.attachShadow({ mode: 'open' });
+  var style = document.createElement('style');
+  style.textContent =
+    ':host { position: fixed; inset: 0; display: block; overflow: hidden; }' +
+    '#fit { position: absolute; left: ' + SIDEBAR + 'px; top: 0; transform-origin: 0 0; }';
+  root.appendChild(style);
+
+  var fit = document.createElement('div');
+  fit.id = 'fit';
+  fit.appendChild(document.createElement('slot'));
+  root.appendChild(fit);
+
+  // Slide markup stays in the light DOM and is slotted into the scaled
+  // wrapper, so getComputedStyle(section).width still reports 1920px while
+  // getBoundingClientRect() reports the scaled size.
+  host.innerHTML = body;
+
+  function apply() {
+    var avail = window.innerWidth - SIDEBAR;
+    var s = Math.min(avail / 1920, window.innerHeight / 1080);
+    fit.style.transform = 'scale(' + s + ')';
+  }
+  apply();
+  window.addEventListener('resize', apply);
+})();
+</script>
+
+</body>
+</html>

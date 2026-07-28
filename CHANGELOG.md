@@ -5,6 +5,23 @@ All notable changes to `openfig-cli` are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-07-27
+
+### Added
+
+- **`convert-html`: CSS `conic-gradient` is converted to vector geometry.** Pie and donut charts in Claude Design decks are drawn as a `conic-gradient` on a `border-radius: 50%` element — there is no SVG to extract. Previously the layer was skipped, and because such elements usually have a transparent `background-color`, *nothing at all* was emitted for them: the chart vanished silently. Cones are now emitted as wedge paths and routed through the SVG pipeline, so each slice becomes a selectable Figma VECTOR node with crisp edges at any zoom. Hard stops produce one exact wedge per segment; genuine colour ramps are subdivided. Handles `from <angle>`, `at <position>`, and stop positions in `%`, `deg`, `turn`, `rad`, and `grad`.
+- **`convert-html`: unsupported `background-image` functions now warn.** Previously any layer that was not `linear-gradient`, `radial-gradient`, or `url()` was dropped without a word, so a missing visual looked like a clean conversion.
+
+### Fixed
+
+- **SVG element and group transforms are applied instead of discarded.** The shape parser never read `transform` attributes and did not descend into `<g>` at all, so geometry under `<g transform="translate(...)">` or a per-path `matrix(...)` collapsed toward the SVG origin — icons rendered mangled, or disappeared. Enclosing group transforms are now recovered and composed with each element's own transform, then baked into the shape's coordinates. Affects every `.deck` and `.fig` conversion that vectorizes SVG.
+- **`convert-html`: slides are measured at true 1920×1080 scale.** A standalone whose viewer renders the slide inside a scaling stage (fitting it beside presenter chrome) yielded geometry at roughly 90% of true size — every coordinate uniformly wrong, with the error growing away from the origin. The converter now grows the measurement viewport until the slide reports its own CSS size 1:1.
+- **`convert-html`: fonts bundled in the export now load.** Asset URLs were rewritten for `<img>` elements only, never for `@font-face` rules, so every bundled face failed to load and Chromium silently substituted. Text was measured in the wrong typeface, producing subtly wrong wrap points and box heights.
+
+### Changed
+
+- **`convert-html` loads the standalone as authored rather than replaying its tweak state.** 0.4.7 reproduced the export's runtime in Node — the `quoteStyle` / `dividerBg` / icon-visibility mapping and the `--t-icon-*` variables. That mapping was written against one deck's markup and encoded its class names and section titles, so it did not generalise. The converter now runs the page's own runtime, which applies the same tweaks in the page's own vocabulary, and the hardcoded replay is gone. The saved tweak state is still honoured; `__bundler/ext_resources` and `__bundler/page_order` are now handled too, as a side effect of letting the page rehydrate itself.
+
 ## [0.4.7] - 2026-05-26
 
 ### Fixed
@@ -148,6 +165,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Pre-`convert-html` baseline. Earlier 0.3.x versions are not catalogued
 here; see `git log --tags='*0.3.*'` for the full history.
 
+[0.5.0]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.5.0
 [0.4.7]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.4.7
 [0.4.6]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.4.6
 [0.4.5]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.4.5

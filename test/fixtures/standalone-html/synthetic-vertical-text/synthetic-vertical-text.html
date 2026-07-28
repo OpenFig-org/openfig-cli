@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Synthetic Vertical Text</title>
+<style>
+  html, body { margin: 0; padding: 0; }
+  section {
+    position: absolute;
+    left: 0; top: 0;
+    width: 1920px; height: 1080px;
+    background: #ffffff;
+  }
+  .label {
+    position: absolute;
+    font-family: monospace;
+    font-size: 32px;
+    line-height: 40px;
+    color: rgb(20, 20, 20);
+    white-space: nowrap;
+  }
+  /* Reads bottom-to-top: the standard side-label idiom. */
+  #up {
+    left: 1600px; top: 200px;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+  /* Reads top-to-bottom: vertical-rl on its own. */
+  #down {
+    left: 200px; top: 200px;
+    writing-mode: vertical-rl;
+  }
+</style>
+</head>
+<body>
+
+<!--
+  Synthetic Claude Design standalone covering CSS vertical writing modes.
+
+  `writing-mode: vertical-rl` paired with `transform: rotate(180deg)` is how a
+  side label that reads bottom-to-top is written. Figma has no writing mode, so
+  an extractor that ignores both properties lays the run out horizontally
+  inside a tall narrow box and the label comes out as a squashed stack. The
+  same glyphs in the same places are reachable through node rotation, which is
+  what this guards.
+
+  Both directions are covered: the flipped form (anticlockwise quarter turn)
+  and plain vertical-rl (clockwise).
+-->
+
+<script type="__bundler/manifest">{}</script>
+<script type="__bundler/template">"<html><head><title>Synthetic Vertical Text</title></head><body><section data-screen-label='01 Vertical'><div id='up' class='label'>READS UP</div><div id='down' class='label'>READS DOWN</div></section></body></html>"</script>
+
+<script>
+(function () {
+  var raw = document.querySelector('script[type="__bundler/template"]').textContent;
+  var html = JSON.parse(raw);
+  var body = html.replace(/[\s\S]*<body[^>]*>/i, '').replace(/<\/body>[\s\S]*/i, '');
+  document.body.insertAdjacentHTML('afterbegin', body);
+})();
+</script>
+
+</body>
+</html>

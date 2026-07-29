@@ -165,6 +165,32 @@ was measured, and read high or low depending on how much of the image clipped �
 the same setting reads 2.024 at mid-tone and 1.821 as a whole-ramp mean. A ramp
 measures the curve; a photograph measures the curve *and* the photograph.
 
+### What the two together can and cannot reproduce
+
+Measured end to end: the fixture converted, evaluated against an approved compatibility reference, and
+compared against the Claude Design export of the same deck.
+
+| region | mean vs design | stdev vs design |
+|---|---|---|
+| portrait crop, `grayscale(1) contrast(1.12) brightness(1.18)` | −3.9% | −3.0% |
+| photo band, `grayscale(1) contrast(1.15) brightness(1.55)` | +1.5% | −15.9% |
+
+Mean luminance converges. Spread does not, and the reason is the difference in
+kind above: CSS `brightness` multiplies, expanding spread, while Figma's exposure
+rolls highlights off, compressing it. Contrast is the only lever that could
+compensate and it is already at the ±0.5 ceiling, so there is no headroom.
+
+**Matching the mean and matching the spread are therefore exclusive** once the
+requested brightness is large. `EXPOSURE_CURVE` anchors on mid-tone, which
+chooses the mean — the right trade for photographic content, but a choice rather
+than a convergence. Tracked as openfig-cli#20.
+
+*Method:* `scripts/measure-filtered-regions.mjs`. It renders both PDFs to a
+common pixel width rather than a common dpi, because the two exports use
+different page sizes, and finds the slide box by trimming, because the Claude
+Design page is letterboxed. Pointed at the ground truth as both inputs it reads
+0.0%, which is what makes a non-zero reading attributable to the conversion.
+
 ### Contrast clamps at ±0.5, and its range is narrow
 
 Two facts, both from the same ramp export.

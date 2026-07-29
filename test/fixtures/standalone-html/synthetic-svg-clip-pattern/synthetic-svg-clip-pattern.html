@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Synthetic SVG clip paths and pattern fills</title>
+<style>
+  html, body { margin: 0; padding: 0; }
+  section {
+    position: absolute;
+    left: 0; top: 0;
+    width: 1920px; height: 1080px;
+    background: #ffffff;
+  }
+  #art { position: absolute; left: 100px; top: 100px; }
+</style>
+</head>
+<body>
+
+<!--
+  Synthetic Claude Design standalone for clipPath and pattern fills.
+
+  Four cases, one per branch, chosen because each has a *different* wrong
+  answer that still looks like a picture:
+
+  1. A group clipped to a rectangle. The clipped rect is five times the size of
+     its clip, so a conversion that drops the clip does not produce a subtly
+     wrong shape — it covers the whole SVG. This is the case Figma can express,
+     as a frame with "clip content" on.
+
+  2. A group clipped to a triangle. Figma's only clipping primitive is a
+     rectangle, so this one cannot be expressed. The wrong answer here is not
+     dropping it, it is *approximating* it: clip the triangle to its bounding
+     box and the result is a deliberate-looking rectangle nobody authored. The
+     contract is convert-unclipped-and-report.
+
+  3. A rect filled with an axis-aligned pattern. The pattern's origin is
+     deliberately at x="3" y="7" rather than 0,0 — the tile's phase. Figma
+     anchors a tiled paint at the node's own corner and has nowhere to put a
+     phase, so a tile cropped at the pattern's authored origin repeats the
+     right picture in the wrong place, offset by up to a whole tile.
+
+  4. A rect filled with a pattern under patternTransform="rotate(45)" — the
+     ordinary way to write a diagonal hatch, and one with no rectangular tile
+     at any offset. Repeating an unrotated tile would produce a plausible
+     pattern that is not this one, so this falls back to rasterising the whole
+     filled region.
+
+  The SVG is 400x200 at viewBox "0 0 400 200", positioned at (100,100), so the
+  mapping to slide coordinates is a translate by (100,100) and every expected
+  number below is arithmetic rather than a recorded value.
+
+  All shapes are primitives in flat colours; no third-party content.
+-->
+
+<script type="__bundler/manifest">{}</script>
+<script type="__bundler/template">"<html><head><title>Synthetic SVG clip paths and pattern fills</title></head><body><section data-screen-label='01 Clip and pattern'><svg id='art' width='400' height='200' viewBox='0 0 400 200' xmlns='http://www.w3.org/2000/svg'><defs><clipPath id='win'><rect x='10' y='10' width='80' height='60'></rect></clipPath><clipPath id='wedge'><path d='M200 10 L280 10 L240 70 Z'></path></clipPath><pattern id='grid' patternUnits='userSpaceOnUse' x='3' y='7' width='20' height='20'><rect x='0' y='0' width='10' height='10' fill='#ff0000'></rect></pattern><pattern id='hatch' patternUnits='userSpaceOnUse' width='16' height='16' patternTransform='rotate(45)'><rect x='0' y='0' width='8' height='16' fill='#0000ff'></rect></pattern></defs><g clip-path='url(#win)'><rect x='0' y='0' width='400' height='200' fill='#00aa00'></rect></g><g clip-path='url(#wedge)'><rect x='200' y='10' width='80' height='60' fill='#aa00aa'></rect></g><rect x='100' y='100' width='60' height='40' fill='url(#grid)'></rect><rect x='200' y='100' width='60' height='40' fill='url(#hatch)'></rect></svg></section></body></html>"</script>
+
+<script>
+(function () {
+  var raw = document.querySelector('script[type="__bundler/template"]').textContent;
+  var html = JSON.parse(raw);
+  var body = html.replace(/[\s\S]*<body[^>]*>/i, '').replace(/<\/body>[\s\S]*/i, '');
+  document.body.insertAdjacentHTML('afterbegin', body);
+})();
+</script>
+
+</body>
+</html>

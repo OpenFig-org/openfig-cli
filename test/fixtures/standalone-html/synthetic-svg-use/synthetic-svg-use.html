@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Synthetic SVG use and symbol</title>
+<style>
+  html, body { margin: 0; padding: 0; }
+  section {
+    position: absolute;
+    left: 0; top: 0;
+    width: 1920px; height: 1080px;
+    background: #ffffff;
+  }
+  #sprite { position: absolute; left: 200px; top: 100px; }
+</style>
+</head>
+<body>
+
+<!--
+  Synthetic Claude Design standalone for <use>/<symbol> resolution.
+
+  A <symbol> is defined once and drawn twice: once by a <use> carrying x/y, and
+  once by a <use> that carries its own transform and sits inside a transformed
+  <g>. A third <use> names an id that is nowhere in the markup.
+
+  Three separate failures are visible in this one SVG:
+
+  1. No resolution at all — the symbol's path is scanned where it is *defined*,
+     so the deck gets one triangle at the SVG origin instead of two at the use
+     sites.
+  2. Resolution without blanking the <symbol> — the definition is painted as
+     well as its two copies, so the deck gets three triangles.
+  3. Resolution at the wrong point in the pipeline — the shape scan recovers
+     group transforms by character offset, and inlining a copy moves every
+     offset after it. Expand after the span scan and the second copy composes
+     against the wrong matrices: it lands somewhere plausible and wrong.
+
+  The second <use> is deliberately nested inside a <g transform> whose transform
+  does not commute with its own (translate around scale), so a copy composed
+  inside-out is off by 100 user units rather than being merely a different
+  spelling of the same matrix.
+
+  All shapes are primitives at known coordinates; no third-party content.
+-->
+
+<script type="__bundler/manifest">{}</script>
+<script type="__bundler/template">"<html><head><title>Synthetic SVG use and symbol</title></head><body><section data-screen-label='01 Use'><svg id='sprite' width='400' height='200' viewBox='0 0 400 200' xmlns='http://www.w3.org/2000/svg'><defs><symbol id='tick'><path d='M 0 0 L 20 0 L 20 20 Z' fill='rgb(0,128,0)'/></symbol></defs><use href='#tick' x='10' y='20'/><g transform='translate(100,0)'><use href='#tick' transform='scale(2)'/></g><use href='#absent' x='5' y='5'/></svg></section></body></html>"</script>
+
+<script>
+(function () {
+  var raw = document.querySelector('script[type="__bundler/template"]').textContent;
+  var html = JSON.parse(raw);
+  var body = html.replace(/[\s\S]*<body[^>]*>/i, '').replace(/<\/body>[\s\S]*/i, '');
+  document.body.insertAdjacentHTML('afterbegin', body);
+})();
+</script>
+
+</body>
+</html>

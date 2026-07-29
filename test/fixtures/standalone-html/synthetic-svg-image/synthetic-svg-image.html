@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Synthetic SVG embedded image</title>
+<style>
+  html, body { margin: 0; padding: 0; }
+  section {
+    position: absolute;
+    left: 0; top: 0;
+    width: 1920px; height: 1080px;
+    background: #ffffff;
+  }
+  #art { position: absolute; left: 100px; top: 100px; }
+</style>
+</head>
+<body>
+
+<!--
+  Synthetic Claude Design standalone for <image> inside an inline SVG.
+
+  Four <image> elements, one per case the conversion has to tell apart:
+
+  1. `href` naming an asset in __bundler/manifest. A real export writes the
+     asset's uuid and its own runtime swaps in a blob: URL before anything
+     measures the page — so by the time the extractor serialises the markup the
+     uuid is gone and the only join back to the decoded bytes is their hash.
+     The script at the bottom reproduces exactly that swap; without it this
+     fixture would test a path the real thing never takes.
+  2. `href` holding a data: URI. No runtime involved, and it must survive
+     verbatim through extraction into the handoff.
+  3. An <image> inside <defs><pattern>. A definition is painted where something
+     references it and nowhere else. Drawing it in place is not a small error:
+     the pattern tile here is authored at the SVG origin, so a converter that
+     paints it lays a bitmap over artwork it was supposed to fill.
+  4. `href` pointing at https://. Nothing from an export may leave the machine,
+     so this one is reported and skipped — never fetched. The host is
+     .invalid, which is reserved and unresolvable, so a converter that
+     regresses into fetching fails here rather than quietly succeeding on a
+     machine with a network.
+
+  Case 2 also sits under `translate(300,0) scale(2)`, which does not commute
+  with itself: an image flattened by the anchor alone lands at the right corner
+  at half the size, which reads as a layout bug rather than a transform bug.
+
+  The two PNGs are 4x4 solid colours generated for this fixture; no
+  third-party content.
+-->
+
+<script type="__bundler/manifest">{"a1b2c3d4-0000-4000-8000-000000000001":{"mime":"image/png","data":"iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAEklEQVR42mP4z8DwHxkzkC4AADxAH+Ea86VIAAAAAElFTkSuQmCC"}}</script>
+<script type="__bundler/template">"<html><head><title>Synthetic SVG embedded image</title></head><body><section data-screen-label='01 Images'><svg id='art' width='800' height='400' viewBox='0 0 800 400' xmlns='http://www.w3.org/2000/svg'><defs><pattern id='pat' patternUnits='userSpaceOnUse' x='0' y='0' width='100' height='100'><image href='a1b2c3d4-0000-4000-8000-000000000001' x='0' y='0' width='100' height='100'></image></pattern></defs><image href='a1b2c3d4-0000-4000-8000-000000000001' x='20' y='30' width='200' height='150'></image><g transform='translate(300,0) scale(2)'><image href='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAEUlEQVR42mNgYPj/HxWTLAAAHGAf4ct/c/kAAAAASUVORK5CYII=' x='10' y='20' width='50' height='40'></image></g><image href='https://images.example.invalid/remote.png' x='600' y='300' width='80' height='60'></image><rect x='0' y='350' width='100' height='40' fill='url(#pat)'></rect></section></body></html>"</script>
+
+<script>
+(function () {
+  var raw = document.querySelector('script[type="__bundler/template"]').textContent;
+  var html = JSON.parse(raw);
+  var body = html.replace(/[\s\S]*<body[^>]*>/i, '').replace(/<\/body>[\s\S]*/i, '');
+  document.body.insertAdjacentHTML('afterbegin', body);
+
+  // Stand in for the export's own asset runtime: every href naming a manifest
+  // asset becomes a blob: URL of the decoded bytes, synchronously, before
+  // anything measures the page.
+  var assets = JSON.parse(document.querySelector('script[type="__bundler/manifest"]').textContent);
+  Object.keys(assets).forEach(function (uuid) {
+    var bin = atob(assets[uuid].data);
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    var url = URL.createObjectURL(new Blob([bytes], { type: assets[uuid].mime }));
+    Array.prototype.forEach.call(document.querySelectorAll('image'), function (img) {
+      if (img.getAttribute('href') === uuid) img.setAttribute('href', url);
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

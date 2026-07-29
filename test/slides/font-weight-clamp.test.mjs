@@ -84,25 +84,35 @@ describe('clamping font-weight to faces the family ships', () => {
     // for it — it can only say Regular or Bold. Measuring at 600 and writing
     // "Bold" sizes the box for a face that will not be rendered, so the weight
     // moves to the one that will be.
+    //
+    // Discrete faces specifically: a `wght` variation is inert on a family
+    // with no axis, so nothing rescues the 600 here and the clamp still has to
+    // act. This is the case that distinguishes "has an axis" from "has the
+    // weight", and it is why the two are read separately.
     const el = makeElement('"Space Grotesk", sans-serif', 600);
     const fonts = [300, 400, 500, 600, 700].map((w) => face('Space Grotesk', w));
     await runClamp(fonts, [el]);
     expect(el.applied['font-weight']).toBe('700');
   });
 
-  it('applies the same rule inside a variable range', async () => {
-    // A variable font can render 550, but the handoff still has only two names
-    // for it. 550 is equidistant from both, and the tie goes to the heavier
-    // face, as CSS font matching does above 500.
+  // These two used to assert the opposite — 550 clamped to 700 and 500 to 400,
+  // on the grounds that the handoff could only name Regular or Bold. That is
+  // still true of the *name*, but a deck now also carries the authored weight
+  // as a `wght` variation, and Figma was measured applying one continuously
+  // along a family's axis. So on a variable family the authored weight is what
+  // renders, and clamping it here would size the box for a face nobody sees.
+  it('leaves a weight alone when the family has an axis that covers it', async () => {
     const el = makeElement('"Space Grotesk", sans-serif', 550);
-    await runClamp([face('Space Grotesk', '300 700')], [el]);
-    expect(el.applied['font-weight']).toBe('700');
+    const { logs } = await runClamp([face('Space Grotesk', '300 700')], [el]);
+    expect(el.applied['font-weight']).toBeUndefined();
+    // Nothing was lost, so there is nothing to report either.
+    expect(logs).toHaveLength(0);
   });
 
-  it('rounds a light-side weight down rather than up', async () => {
+  it('keeps an authored 500 inside a variable range', async () => {
     const el = makeElement('"Space Grotesk", sans-serif', 500);
     await runClamp([face('Space Grotesk', '300 700')], [el]);
-    expect(el.applied['font-weight']).toBe('400');
+    expect(el.applied['font-weight']).toBeUndefined();
   });
 
   it('clamps to the end of a variable range when the ask is outside it', async () => {

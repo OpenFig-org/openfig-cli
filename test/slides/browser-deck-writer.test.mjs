@@ -60,6 +60,16 @@ const IMAGE_FIXTURE = join(
   REPO, 'test', 'fixtures', 'standalone-html',
   'london-underground-map', 'london-underground-map.html',
 );
+// An <image> *inside* an inline SVG, which reaches the deck by a different
+// route from an <img>: its source is hashed out of the live realm and joined
+// back to a decoded asset, then rewritten inside serialised markup rather than
+// in a field of its own. Two hosts, two media stores — Node spills a data URI
+// to a file and the browser keeps bytes in a Map — so this is where the two
+// can silently disagree about what a slide contains.
+const SVG_IMAGE_FIXTURE = join(
+  REPO, 'test', 'fixtures', 'standalone-html',
+  'synthetic-svg-image', 'synthetic-svg-image.html',
+);
 
 // Same reasoning as `browser-host.test.mjs`: a real origin, so
 // `URL.createObjectURL` produces a `blob:` the measurement iframe is
@@ -353,4 +363,64 @@ describe('browser deck vs the Node path end to end', () => {
     expect(fromBrowser.x).toBeCloseTo(fromNode.x, 0);
     expect(fromBrowser.y).toBeCloseTo(fromNode.y, 0);
   });
+
+  it('converts an <image> and a pattern fill inside an inline SVG identically in both hosts', async () => {
+    // The two hosts resolve a media reference through entirely different
+    // machinery — Node writes a data URI out to the bundle's media directory
+    // and hands `addImage` a path, the browser decodes it to bytes and hands
+    // over a record — and neither one fails loudly when it comes up empty. The
+    // symptom of a host-specific break is a slide that converts, reports
+    // success, and is missing its picture in one host only.
+    //
+    // The fixture's <pattern> goes through a *third* piece of machinery that
+    // differs per host: a pattern fill is rasterised, and the two backends are
+    // librsvg under sharp and Chromium's own SVG decoder behind an <img>.
+    // Neither is obliged to produce the same PNG, but a tile at a different
+    // size repeats at a different pitch, which is a visibly different fill.
+    //
+    // Placement and raster *dimensions* rather than bytes, for the reason at
+    // the top of this file: sharp and Canvas encode different PNGs for the
+    // same pixels, so the archive entry names are contracted to differ. What
+    // must match is how many images there are, where they sit, and how big
+    // their pixels are.
+    const html = readFileSync(SVG_IMAGE_FIXTURE, 'utf8');
+    const b64 = await page.evaluate(async (source) => {
+      const { BrowserConversionHost, convertStandaloneToDeckBytes } = globalThis.OpenFigBrowser;
+      const host = new BrowserConversionHost({
+        sourceHtml: source, webFontPreload: false, ensureInter: false, onLog: () => {},
+      });
+      const { bytes } = await convertStandaloneToDeckBytes(source, host, { silent: true });
+      return host.base64FromBytes(bytes);
+    }, html);
+
+    const cliOut = join(workDir, 'svg-image.deck');
+    await convertStandaloneHtml(SVG_IMAGE_FIXTURE, cliOut, {
+      scratchDir: join(workDir, 'svg-image-build'),
+      silent: true,
+    });
+
+    const placements = (bytes) => FigDeck.fromDeckBytes(bytes).message.nodeChanges
+      .filter((n) => (n.fillPaints ?? []).some((p) => p.type === 'IMAGE'))
+      .map((n) => {
+        const paint = n.fillPaints.find((p) => p.type === 'IMAGE');
+        return {
+          x: n.transform.m02,
+          y: n.transform.m12,
+          width: n.size.x,
+          height: n.size.y,
+          scaleMode: paint.imageScaleMode,
+          rasterWidth: paint.originalImageWidth,
+          rasterHeight: paint.originalImageHeight,
+          scale: paint.scale,
+        };
+      });
+
+    const fromBrowser = placements(new Uint8Array(Buffer.from(b64, 'base64')));
+    // Three: the asset-backed image, the data: URI, and the rect whose fill is
+    // the <pattern>. The fixture's fourth <image> is an external URL, and both
+    // hosts have to agree about refusing it as well as about drawing the rest.
+    expect(fromBrowser).toHaveLength(3);
+    expect(fromBrowser.filter((p) => p.scaleMode === 'TILE')).toHaveLength(1);
+    expect(fromBrowser).toEqual(placements(new Uint8Array(readFileSync(cliOut))));
+  }, 300_000);
 });

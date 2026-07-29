@@ -23,6 +23,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
+import { sharpImageOps } from '../../lib/core/image-utils.mjs';
 import { resolveBrowser } from '../../lib/slides/playwright-layout.mjs';
 import { extractSlides } from '../../lib/slides/browser-extract.mjs';
 import { bundleForBrowser, repoWarnings } from './browser-bundle.mjs';
@@ -383,6 +384,100 @@ describe('canvas image ops, the browser replacement for sharp', () => {
   it('does not enlarge a source narrower than the thumbnail width', async () => {
     const meta = await sharp(await run('thumbnailPng', redPng)).metadata();
     expect({ width: meta.width, height: meta.height }).toEqual({ width: 2, height: 2 });
+  });
+
+  describe('rasterizeSvg, which is what a pattern fill becomes', () => {
+    // The one op with no raster input at all: an SVG `pattern` has no Figma
+    // equivalent that stays vector, so the handoff renders one tile of it and
+    // hangs the PNG on the node as a tiled IMAGE paint. The two hosts render
+    // that tile through completely different engines — librsvg under sharp,
+    // Chromium's SVG rasteriser through an `<img>` here — so this is the widest
+    // the pipeline gets between Node and browser.
+    //
+    // Neither the pitch nor the phase of a repeat is recoverable from a paint
+    // once it is written, so a host that returned a tile one pixel out, or one
+    // cropped at a different origin, produces a deck that parses, renders, and
+    // is a different pattern. Dimensions are asserted exactly; appearance is
+    // asserted by sampling the four cells the tile has to contain, which is a
+    // fact about the picture rather than about either encoder.
+
+    // The document the handoff builds for an axis-aligned pattern, reduced to
+    // the parts the rasteriser has to honour: a viewBox in user units, a pixel
+    // size that supersamples it 2x, and a fill that is a `url(#…)` reference
+    // rather than the pattern's contents drawn directly. Two periods across at
+    // 10 user units each, with a red square filling the first quarter of every
+    // cell — so at 40x40 the red runs 0..9 and 20..29 on both axes.
+    const TILE_DOC = '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" '
+      + 'viewBox="0 0 20 20"><defs>'
+      + '<pattern id="p" patternUnits="userSpaceOnUse" width="10" height="10">'
+      + '<rect width="5" height="5" fill="#ff0000"/></pattern></defs>'
+      + '<rect width="20" height="20" fill="url(#p)"/></svg>';
+    const SIZE = { width: 40, height: 40 };
+
+    /** RGBA at a pixel, decoded by sharp so both hosts are read the same way. */
+    async function sampled(png) {
+      const { data, info } = await sharp(png).ensureAlpha().raw()
+        .toBuffer({ resolveWithObject: true });
+      const at = (x, y) => [...data.slice((y * info.width + x) * 4, (y * info.width + x) * 4 + 4)];
+      return {
+        size: { width: info.width, height: info.height },
+        // Sampled well inside each cell, so edge antialiasing — which the two
+        // engines are entitled to do differently — cannot reach the assertion.
+        cells: [at(5, 5), at(15, 15), at(25, 25), at(35, 35)],
+      };
+    }
+
+    it('renders a pattern tile the same size and the same picture as sharp', async () => {
+      const fromBrowser = await page.evaluate(async ({ svg, size }) => {
+        const { canvasImageOps } = globalThis.OpenFigBrowser;
+        return [...await canvasImageOps.rasterizeSvg(svg, size)];
+      }, { svg: TILE_DOC, size: SIZE });
+
+      const browserPng = Buffer.from(fromBrowser);
+      const nodePng = Buffer.from(await sharpImageOps.rasterizeSvg(TILE_DOC, SIZE));
+
+      const b = await sampled(browserPng);
+      const n = await sampled(nodePng);
+
+      // Exact, in both hosts. A tile is repeated on a lattice Figma derives
+      // from the image's own pixel dimensions, so one pixel of slack here is a
+      // seam in every repeat across the whole filled region.
+      expect(n.size).toEqual(SIZE);
+      expect(b.size).toEqual(SIZE);
+
+      // The pattern actually tiled: red in cells 1 and 3, nothing in 2 and 4.
+      // A rasteriser that ignored the `url(#p)` reference, or that drew the
+      // pattern's contents once at the origin instead of repeating them, still
+      // returns a 40x40 PNG and would pass the size assertion alone.
+      expect(n.cells).toEqual([[255, 0, 0, 255], [0, 0, 0, 0], [255, 0, 0, 255], [0, 0, 0, 0]]);
+      expect(b.cells).toEqual(n.cells);
+
+      // Not a requirement — `../../lib/core/image-ops.mjs` documents byte
+      // parity as impossible and not a goal. It is here as the test's own
+      // guard: every assertion above would also pass if the page had somehow
+      // handed back sharp's bytes, and then this file would be comparing one
+      // host against itself and reporting parity it never checked.
+      expect(browserPng.equals(nodePng)).toBe(false);
+    }, 60_000);
+
+    it('honours the pixel size it is given over the document\'s own attributes', async () => {
+      // The handoff supersamples: it writes the raster size onto the document
+      // *and* passes it as `size`, and the two agree today. They stop agreeing
+      // the moment a caller renders a fragment it did not author — and the
+      // contract in image-ops.mjs is "exactly width x height", because a tile
+      // that came back at its intrinsic size would repeat at the wrong pitch
+      // rather than fail.
+      const asked = { width: 24, height: 60 };
+      const fromBrowser = await page.evaluate(async ({ svg, size }) => {
+        const { canvasImageOps } = globalThis.OpenFigBrowser;
+        return [...await canvasImageOps.rasterizeSvg(svg, size)];
+      }, { svg: TILE_DOC, size: asked });
+      const nodeMeta = await sharp(Buffer.from(await sharpImageOps.rasterizeSvg(TILE_DOC, asked)))
+        .metadata();
+      const browserMeta = await sharp(Buffer.from(fromBrowser)).metadata();
+      expect({ width: nodeMeta.width, height: nodeMeta.height }).toEqual(asked);
+      expect({ width: browserMeta.width, height: browserMeta.height }).toEqual(asked);
+    }, 60_000);
   });
 });
 

@@ -171,12 +171,67 @@ describe('pattern fills', () => {
   });
 });
 
+describe('a mask', () => {
+  it('does not paint its own contents onto the slide', () => {
+    // A mask defines where another shape shows through. Its children are the
+    // stencil, not artwork, so painting them draws the machinery instead of the
+    // picture — and because a mask is usually the size of the thing it covers,
+    // what lands is typically a full-bleed rectangle over the slide.
+    //
+    // The fixture's mask holds a 333x111 rect, a size used nowhere else here.
+    const stencil = deck.message.nodeChanges.filter(
+      (n) => Math.round(n.size?.x ?? 0) === 333 && Math.round(n.size?.y ?? 0) === 111,
+    );
+    expect(stencil, 'the mask stencil was painted as a node').toEqual([]);
+  });
+
+  it('reports the loss, and the report is true', () => {
+    // The warning existed before this and was false: it claimed masks were
+    // dropped while their contents were being emitted as geometry. A warning
+    // asserting the opposite of what happens is worse than no warning, because
+    // it teaches people to stop reading the rest.
+    const reported = warnings.filter((w) => /masks are not converted and were dropped/.test(w.msg));
+    expect(reported.length, 'the mask loss went unreported').toBeGreaterThan(0);
+  });
+
+  it('is excluded even when the markup has no clip or pattern in it', () => {
+    // Slide 2 carries a mask and neither of the other consumed tags. The guard
+    // that decides whether to scan for consumed spans at all used to be written
+    // out by hand as `clipPath|pattern`, so on markup like this it skipped the
+    // scan and painted the stencil — while slide 1, which has all three tags,
+    // reported success. That is why this case exists separately: a fixture that
+    // always satisfies the guard cannot test the guard.
+    const stencil = deck.message.nodeChanges.filter(
+      (n) => Math.round(n.size?.x ?? 0) === 222 && Math.round(n.size?.y ?? 0) === 77,
+    );
+    expect(stencil, 'the mask stencil was painted on the mask-only slide').toEqual([]);
+    // And its subject still converts.
+    const subject = deck.message.nodeChanges.filter(
+      (n) => Math.round(n.size?.x ?? 0) === 70 && Math.round(n.size?.y ?? 0) === 30,
+    );
+    expect(subject.length, 'the masked shape vanished with its mask').toBeGreaterThan(0);
+  });
+
+  it('still converts the shape that referenced it, unmasked', () => {
+    // Dropping the stencil must not drop the subject. The masked rect is
+    // 90x40 and should be present, simply without its fade.
+    const subject = deck.message.nodeChanges.filter(
+      (n) => Math.round(n.size?.x ?? 0) === 90 && Math.round(n.size?.y ?? 0) === 40,
+    );
+    expect(subject.length, 'the masked shape vanished with its mask').toBeGreaterThan(0);
+  });
+});
+
 describe('the unsupported-construct list', () => {
   it('no longer reports clip paths or pattern fills as dropped', () => {
     // Both were on that list while they really were being dropped. A list that
     // keeps naming things which now convert is a list people learn to skip,
     // and it exists to be believed.
-    const stale = warnings.filter((w) => /not converted and were dropped/.test(w.msg));
+    // Masks are excluded deliberately: they really are dropped, and the case
+    // above asserts that report is now accurate.
+    const stale = warnings
+      .filter((w) => /not converted and were dropped/.test(w.msg))
+      .filter((w) => !/masks/.test(w.msg));
     expect(stale.map((w) => w.msg)).toEqual([]);
   });
 });

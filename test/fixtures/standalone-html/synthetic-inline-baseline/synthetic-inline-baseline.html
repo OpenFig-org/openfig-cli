@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Synthetic Inline Baseline Shift</title>
+<style>
+  html, body { margin: 0; padding: 0; }
+  section {
+    position: absolute;
+    left: 0; top: 0;
+    width: 1920px; height: 1080px;
+    background: #ffffff;
+  }
+  .figure {
+    position: absolute;
+    font-family: monospace;
+    font-size: 64px;
+    line-height: 76px;
+    font-weight: 400;
+    color: rgb(20, 20, 20);
+    white-space: normal;
+  }
+  /* A baseline shift only. Same family, size, weight and colour as the text
+     around it, so the run stays a single text leaf rather than being routed
+     through the rich-text path — which is the case the defect lived in. */
+  .shift-up   { vertical-align: super; }
+  .shift-down { vertical-align: sub; }
+
+  /* Deliberately narrow, with text that genuinely needs two lines. Nothing
+     here may be hugged: the box width is load-bearing. */
+  .wraps {
+    position: absolute;
+    width: 300px;
+    font-family: monospace;
+    font-size: 32px;
+    line-height: 40px;
+    font-weight: 400;
+    color: rgb(20, 20, 20);
+  }
+</style>
+</head>
+<body>
+
+<!--
+  Cases, all on one slide:
+    #plain    control — one line, no inline shift
+    #super    same glyphs with the unit raised; one visual line, but its client
+              rect sits at a different `top` than its siblings'
+    #sub      the same in the other direction
+    #wrapping two real lines in a 300px column; must stay wrappable
+-->
+
+<script type="__bundler/manifest">{}</script>
+<script type="__bundler/template">"<html><head><title>Synthetic Inline Baseline Shift</title></head><body><section data-screen-label='01 Baseline'><div id='plain' class='figure' style='left:100px; top:100px;'>847 TWh</div><div id='super' class='figure' style='left:100px; top:300px;'>847<span class='shift-up'> TWh</span></div><div id='sub' class='figure' style='left:100px; top:500px;'>1.5<span class='shift-down'> degC</span></div><div id='wrapping' class='wraps' style='left:1200px; top:100px;'>Parameter clarity across the measured range</div></section></body></html>"</script>
+
+<script>
+(function () {
+  var raw = document.querySelector('script[type="__bundler/template"]').textContent;
+  var html = JSON.parse(raw);
+  var body = html.replace(/[\s\S]*<body[^>]*>/i, '').replace(/<\/body>[\s\S]*/i, '');
+  document.body.insertAdjacentHTML('afterbegin', body);
+})();
+</script>
+
+</body>
+</html>

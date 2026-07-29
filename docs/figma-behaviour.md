@@ -244,10 +244,22 @@ Two things about undoing it:
 
 Both are pinned in `test/slides/stage-scale-neutralize.test.mjs`.
 
-### `deck-to-fig` blob references do not survive the conversion
+### Blob references are the thing to check after any node-copying transform
 
-`convertDeckToFig` renumbers the blob table without remapping every reference
-into it: one fixture goes from 73 blobs to 1 while node fields still point at
-indices up to 72, another from 245 to 36 with references up to 244. The write
-is refused rather than emitting a file whose vector geometry points at nothing.
-Filed upstream against openfig-core.
+`convertDeckToFig` used to renumber the blob table while remapping only three
+fields — `fillGeometry`, `strokeGeometry` and `vectorNetworkBlob` — and missing
+`derivedTextData.glyphs[].commandsBlob`, the cached glyph outlines and the bulk
+of the references in a text-heavy deck. One fixture went from 73 blobs to 1
+with node fields still pointing at indices up to 72, another from 245 to 36
+with references up to 244.
+
+Nothing in the file looks wrong when this happens. The archive is intact, the
+message parses, every GUID is unique and no parent dangles — the only symptom
+is `Internal error during import`. Worse than a reference pointing at nothing
+is one that still lands in range: it resolves to the wrong blob and renders
+silently as the wrong shape.
+
+Fixed in openfig-core 0.3.8 by remapping every field named `*Blob` in a single
+pass over the finished nodes, which is also why it must be the only pass: a
+field remapped twice reads an output index as a source index.
+`lib/core/validate-deck.mjs` checks this on every write.

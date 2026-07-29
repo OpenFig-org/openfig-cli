@@ -107,21 +107,41 @@ describe('deck-to-fig command', () => {
     logSpy.mockRestore();
   });
 
-  it('refuses to write, because the conversion leaves blob references dangling', async () => {
-    // `convertDeckToFig` renumbers the blob table but only remaps some of the
-    // references into it: just-fonts carries 73 blobs in and 1 out, while node
-    // fields still point at indices up to 72; oil-machinations goes 245 -> 36
-    // with references up to 244. The two index spaces have collided, so the
-    // originals cannot be told from the survivors after the fact.
+  it('writes a file whose every blob reference resolves', async () => {
+    // `convertDeckToFig` used to renumber the blob table while leaving
+    // `derivedTextData.glyphs[].commandsBlob` — the cached glyph outlines, and
+    // the bulk of the references in a text-heavy deck — pointing at source
+    // indices. just-fonts went from 73 blobs to 1 with references up to 72.
+    // References still in range resolved to the wrong blob; the rest pointed
+    // at nothing, which Figma reports as `Internal error during import` and
+    // names nothing about.
     //
-    // A dangling blob reference is exactly the class of corruption Figma
-    // reports as "Internal error during import" and names nothing about, which
-    // is why the write is blocked rather than warned about. Filed upstream;
-    // when it is fixed this becomes a write test again, and the arrangement
-    // assertions below already cover the part that works.
+    // The old test here asserted the output was "a valid .fig file" while
+    // checking only that it re-read and had the frames expected, so it passed
+    // throughout. Counting the references is what actually catches it.
     const outPath = join(workDir, 'out.fig');
-    await expect(run([JUST_FONTS_FIXTURE], { o: outPath })).rejects.toThrow(/blob-out-of-range/);
-    expect(existsSync(outPath)).toBe(false);
+    await run([JUST_FONTS_FIXTURE], { o: outPath });
+    expect(existsSync(outPath)).toBe(true);
+
+    const outputDeck = await FigDeck.fromFile(outPath);
+    expect(outputDeck.header.prelude).toBe('fig-kiwi');
+
+    const blobCount = outputDeck.message.blobs.length;
+    let refs = 0;
+    const outOfRange = [];
+    const walk = (o) => {
+      if (!o || typeof o !== 'object') return;
+      for (const [k, v] of Object.entries(o)) {
+        if (/Blob$/.test(k) && typeof v === 'number') {
+          refs += 1;
+          if (v >= blobCount) outOfRange.push(`${k}=${v}`);
+        } else if (v && typeof v === 'object') walk(v);
+      }
+    };
+    outputDeck.message.nodeChanges.forEach(walk);
+
+    expect(refs, 'no blob references at all — the walk is not reaching them').toBeGreaterThan(50);
+    expect(outOfRange).toEqual([]);
   });
 
   it('names the canvas after the deck and puts one frame per slide on it', async () => {

@@ -87,6 +87,20 @@ describe('Carbon Question standalone HTML → .deck build', () => {
     expect(rotated.length).toBeGreaterThanOrEqual(4);
   });
 
+  it('keeps a figure and its unit on one line', () => {
+    // The unit is a <sub>, so it sits lower than the number beside it while
+    // sharing the line. Counting lines by distinct rect tops made that two
+    // lines, so the run missed the branch that sets noWrap, and Figma — free
+    // to re-wrap a fixed-width box — put "TWh" on its own line on top of the
+    // caption below it. All three figures were misclassified; only the widest
+    // was wide enough for Figma's metrics to actually push it over.
+    for (const figure of ['847 TWh', '1.5 °C', '$420 BN']) {
+      const node = byText(figure);
+      expect(node, `no text node for ${figure}`).toBeTruthy();
+      expect(node.textAutoResize, figure).toBe('WIDTH_AND_HEIGHT');
+    }
+  });
+
   it('never names a font face the family does not provide', () => {
     // Instrument Serif ships one weight and no bold; Space Grotesk ships no
     // italic. A browser fakes both and reports them as real, so these pairs

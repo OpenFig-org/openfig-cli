@@ -133,8 +133,11 @@ darkens it.
 
 The important part is not that it is non-linear in CSS brightness — it is that
 the two are different *kinds* of operation. CSS `brightness(m)` multiplies every
-channel by m, identically at every tone. Figma's exposure lifts shadows hard and
-rolls highlights off against the ceiling.
+channel by m, identically at every tone, then clips values that leave the
+channel range. Figma's exposure lifts shadows hard and rolls highlights off
+against the ceiling. CSS's clipping means brightness does not necessarily
+expand a real photograph's measured spread even though the unclipped operation
+is a gain; the reliable distinction is the shape of the two transfer functions.
 
 Measured on a 32-band ramp at exposure 0.5:
 
@@ -167,6 +170,25 @@ measures the curve; a photograph measures the curve *and* the photograph.
 
 ### What the two together can and cannot reproduce
 
+The exposure mismatch has been isolated on the real slide 7 photograph, with no
+grayscale, contrast, or blend mode. Each host's filtered result was divided by
+its own unfiltered reference first, removing static differences in JPEG colour
+management, crop, and PDF resampling:
+
+| CSS brightness | Figma exposure | mean effect error | spread effect error |
+|---|---|---|---|
+| 1.18 | 0.1034 | -1.9% | **-16.9%** |
+| 1.55 | 0.3292 | -4.0% | **-30.8%** |
+
+The unfiltered Figma and Chromium references agreed to -0.21% in mean and +0.76%
+in spread, so the filtered deltas are not a baseline-rendering mismatch. At
+`brightness(1.55)`, CSS clipping makes the photograph's spread contract by
+about 6.8% (15.73 → 14.66); Figma exposure contracts it by about 35.5%
+(15.86 → 10.23). The earlier shorthand that CSS brightness necessarily
+"expands spread by 1.55×" was therefore wrong for clipped photographic content.
+The measured cause is narrower and stronger: **Figma exposure compresses this
+histogram far more than CSS's linear gain followed by clipping.**
+
 Measured end to end: the fixture converted, evaluated against an approved compatibility reference, and
 compared against the Claude Design export of the same deck.
 
@@ -175,21 +197,28 @@ compared against the Claude Design export of the same deck.
 | portrait crop, `grayscale(1) contrast(1.12) brightness(1.18)` | −3.9% | −3.0% |
 | photo band, `grayscale(1) contrast(1.15) brightness(1.55)` | +1.5% | −15.9% |
 
-Mean luminance converges. Spread does not, and the reason is the difference in
-kind above: CSS `brightness` multiplies, expanding spread, while Figma's exposure
-rolls highlights off, compressing it. Contrast is the only lever that could
-compensate and it is already at the ±0.5 ceiling, so there is no headroom.
+Mean luminance converges. Spread does not. The brightness-only result proves
+that exposure alone can more than account for the residual: its -30.8% isolated
+spread error is larger than the full chain's -15.9%. Grayscale failure is ruled
+out separately by the zero-chroma measurement below. The rest of the chain
+changes the magnitude, but neither it nor an unknown internal paint-filter
+operation order is needed to explain why the residual exists.
 
-**Matching the mean and matching the spread are therefore exclusive** once the
-requested brightness is large. `EXPOSURE_CURVE` anchors on mid-tone, which
-chooses the mean — the right trade for photographic content, but a choice rather
-than a convergence. Tracked as openfig-cli#20.
+Contrast is the remaining native lever that could compensate, and the requested
+`contrast(1.15)` already exceeds Figma's measured maximum slope of 1.115. The
+current `EXPOSURE_CURVE` anchors on mid-tone, choosing a closer mean at the cost
+of spread. Whether a different perceptual objective would choose another anchor
+is still an open product decision rather than a calibration fact. Tracked as
+openfig-cli#20.
 
-*Method:* `scripts/measure-filtered-regions.mjs`. It renders both PDFs to a
-common pixel width rather than a common dpi, because the two exports use
-different page sizes, and finds the slide box by trimming, because the Claude
-Design page is letterboxed. Pointed at the ground truth as both inputs it reads
-0.0%, which is what makes a non-zero reading attributable to the conversion.
+*Method:* `scripts/build-paint-filter-brightness-probe.mjs` and
+`scripts/measure-paint-filter-brightness-probe.mjs` isolate exposure against
+Chromium. `scripts/measure-filtered-regions.mjs` measures the full chain. The
+latter renders both PDFs to a common pixel width rather than a common dpi,
+because the two exports use different page sizes, and finds the slide box by
+trimming, because the Claude Design page is letterboxed. Pointed at the ground
+truth as both inputs it reads 0.0%, which is what makes a non-zero reading
+attributable to the conversion.
 
 ### Contrast clamps at ±0.5, and its range is narrow
 
@@ -230,6 +259,30 @@ a known slope before either is trusted.
 Named `vibrance` in the schema, shown as **Saturation** in the UI. Its effect
 on *mean luminance* is almost nil, so a flat luminance reading is not evidence
 that a field is dead — it has to be checked visually or with a colour metric.
+
+The endpoint used for CSS `grayscale(1)` is verified: `vibrance: -1` fully
+desaturates. A compatibility-reference output of nine saturated colour patches and three
+neutral controls measured:
+
+| vibrance | mean coloured-patch chroma vs reference |
+|---|---|
+| 0 | 1.0000 |
+| -0.25 | 0.6436 |
+| -0.5 | 0.4235 |
+| -0.75 | 0.2200 |
+| -1 | **0.0000** |
+
+At `-1`, every saturated patch exported with exactly equal R, G, and B values;
+maximum residual chroma was 0 and the neutral-control noise floor was also 0.
+Therefore `grayscale(1) → vibrance: -1` is valid and residual colour cannot
+explain the filtered photo's spread deficit. This establishes the full
+desaturation endpoint, not that partial CSS `grayscale(amount)` values follow
+the same curve as partial negative vibrance.
+
+*Method:* `scripts/build-paint-filter-color-probe.mjs` writes the filter
+directly on the paint, bypassing the CSS mapping.
+`scripts/measure-paint-filter-color-probe.mjs` measures per-channel patch means
+from the compatibility-reference output.
 
 `contrast` responds but weakly on mean luminance, because contrast changes
 spread rather than average. It is **not** calibrated; see the open issues.

@@ -93,15 +93,18 @@ describe('a group clipped to a rectangle', () => {
 });
 
 describe('a group clipped to a shape Figma cannot express', () => {
-  it('converts the content unclipped, at full size', () => {
-    // Authored at 200,10 80x60 and translated by (100,100). Unclipped is the
-    // contract; the alternative on offer was the triangle's bounding box,
-    // which is the same numbers here and a lie in general.
+  it('drops the content rather than drawing it outside its bounds', () => {
+    // This was the opposite assertion until a real export disproved it. The
+    // old contract was to convert unclipped, on the reasoning that an
+    // approximated clip is a wrong picture that looks deliberate. In practice
+    // unclipped geometry does not stay near its box: one icon put long strokes
+    // across three neighbouring cards, and a large shape landed over an
+    // unrelated one. A missing element is obvious and attributable; artwork
+    // sprayed across a slide is neither. The loss is reported — see below.
     const purple = deck.message.nodeChanges.find(
       (n) => n.type === 'ROUNDED_RECTANGLE' && n.size?.x === 80 && n.size?.y === 60,
     );
-    expect(purple, 'the triangle-clipped rect did not convert at all').toBeTruthy();
-    expect(box(purple)).toEqual({ x: 300, y: 110, width: 80, height: 60 });
+    expect(purple, 'content under an inexpressible clip reached the deck').toBeFalsy();
   });
 
   it('reports it, naming the clip', () => {

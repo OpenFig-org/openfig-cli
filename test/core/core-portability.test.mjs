@@ -45,9 +45,53 @@ const BUILTINS = new Set([
 // `import x from '…'`, `export … from '…'`, and dynamic `import('…')`.
 const SPECIFIER_RE = /(?:^|[\s;}])(?:import|export)\s[^;]*?from\s*['"]([^'"]+)['"]|(?:^|[^.\w])import\s*\(\s*['"]([^'"]+)['"]\s*\)|(?:^|[\s;}])import\s*['"]([^'"]+)['"]/g;
 
+/**
+ * Blank out comments, keeping line structure so the regex still sees the
+ * boundaries it anchors on.
+ *
+ * Prose is not code, and this scan cannot tell the difference. A doc comment
+ * describing an import, or quoting a phrase containing the word, matched as
+ * though it were one — the whole comment came back as a module specifier and
+ * failed the test with a wall of prose. Skipping comments is also correct
+ * beyond the false positive: a commented-out import is not in the graph.
+ */
+function stripComments(source) {
+  let out = '';
+  let i = 0;
+  while (i < source.length) {
+    const c = source[i];
+    const next = source[i + 1];
+    if (c === '/' && next === '*') {
+      const end = source.indexOf('*/', i + 2);
+      const stop = end === -1 ? source.length : end + 2;
+      // Keep the newlines: `(?:^|[\s;}])` needs the same line starts.
+      out += source.slice(i, stop).replace(/[^\n]/g, ' ');
+      i = stop;
+    } else if (c === '/' && next === '/') {
+      const end = source.indexOf('\n', i);
+      const stop = end === -1 ? source.length : end;
+      out += ' '.repeat(stop - i);
+      i = stop;
+    } else if (c === '"' || c === "'" || c === '`') {
+      // Copy string literals verbatim — a `/*` inside one starts no comment.
+      out += c;
+      i += 1;
+      while (i < source.length && source[i] !== c) {
+        if (source[i] === '\\') { out += source[i]; i += 1; }
+        if (i < source.length) { out += source[i]; i += 1; }
+      }
+      if (i < source.length) { out += source[i]; i += 1; }
+    } else {
+      out += c;
+      i += 1;
+    }
+  }
+  return out;
+}
+
 function specifiersOf(source) {
   const out = [];
-  for (const m of source.matchAll(SPECIFIER_RE)) {
+  for (const m of stripComments(source).matchAll(SPECIFIER_RE)) {
     out.push(m[1] ?? m[2] ?? m[3]);
   }
   return out;

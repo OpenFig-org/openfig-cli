@@ -208,3 +208,46 @@ A slide near **8** mean absolute difference is ordinary antialiasing and
 font-metric divergence. Well above it is worth investigating: that comparison
 is what surfaced a photo reaching the deck unfiltered, on a slide sitting at
 18 where its neighbours sat at 6.
+
+---
+
+## What a Claude Design export does
+
+Not Figma behaviour, but the other half of the conversion, and measured the
+same way.
+
+### The slide may render at a fraction of the size it lays out at
+
+A standalone export can put its slide inside a `deck-stage` custom element
+whose shadow root holds a `div.canvas` carrying `transform: scale(...)`.
+Measured on one export: `<section>` reported an `offsetWidth` of 1920 and a
+`getBoundingClientRect().width` of 1732 — 0.902 — at viewport widths of 1920,
+2128 and 2359 alike. It does not size itself to the viewport, so resizing the
+surface to make the slide fit never converges and never reports a problem.
+
+The failure is quiet in a specific way: `getBoundingClientRect()` sees the
+transform and `getComputedStyle().fontSize` does not, so every coordinate
+shrinks by 10% while every font size stays as authored. Nothing looks broken in
+isolation. The user's description was "printed on a frame that was too small".
+
+Two things about undoing it:
+
+- **The transform is applied after first paint.** Anything that measures
+  earlier — including a fit loop running before fonts load — reads a scale of
+  exactly 1 and finds nothing to do.
+- **An inline override is not enough.** The stage owns that element's style
+  attribute and rewrites `style.transform` on its own schedule, which discards
+  an inline `!important` along with the rest of the declaration. An author rule
+  marked `!important` outranks any inline declaration that is not, so the
+  override belongs in a stylesheet — and in the node's own root, since a rule
+  in the document does not cross a shadow boundary.
+
+Both are pinned in `test/slides/stage-scale-neutralize.test.mjs`.
+
+### `deck-to-fig` blob references do not survive the conversion
+
+`convertDeckToFig` renumbers the blob table without remapping every reference
+into it: one fixture goes from 73 blobs to 1 while node fields still point at
+indices up to 72, another from 245 to 36 with references up to 244. The write
+is refused rather than emitting a file whose vector geometry points at nothing.
+Filed upstream against openfig-core.

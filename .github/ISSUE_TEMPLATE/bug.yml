@@ -1,0 +1,97 @@
+name: Bug
+description: Something converts wrongly, or reports something untrue
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A conversion that produces a wrong deck without saying so is the failure mode this
+        project cares most about, so the useful bug report is one that pins down *what was
+        measured*. A claim with a number behind it can be re-checked; a claim without one
+        has to be rediscovered from scratch.
+
+        You do not need every field. Skip what you genuinely do not know rather than
+        guessing — an honest gap is more useful than a confident wrong answer.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: >
+        Which part of the system. A maintainer applies the matching `area:` label at triage;
+        priority and size live on the backlog board, not here.
+      options:
+        - text-layout — measuring, wrapping, counting lines
+        - images — raster images, embedding, deck size
+        - svg — inline SVG parsing and conversion
+        - paint-filters — Figma paint adjustments and calibration
+        - fonts — family, weight and style resolution
+        - lint — advisory checks that do not change output
+        - browser-host — specific to the in-browser converter
+        - not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happens
+      description: The defect in a sentence or two, before the detail.
+      placeholder: >
+        A figure and its unit are split across two lines in Figma, though the source keeps
+        them together.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: >
+        The command or the steps, and the input. If the input can be reduced to a few lines
+        of HTML, that is worth more than a whole deck.
+      placeholder: |
+        openfig convert-html <file> -o out.deck
+
+        Minimal input:
+        <div>847<span style="vertical-align:super"> TWh</span></div>
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: >
+        What you measured, and how. Node counts, byte sizes, a table of values across a
+        sweep, a screenshot from Figma after import. State the method so the number can be
+        re-taken — "18 mean absolute difference at 192 dpi against the Claude Design PDF"
+        travels; "looks off" does not.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: hosts
+    attributes:
+      label: Which host
+      description: >
+        The Node and browser paths share most code but diverge in image handling and
+        timing, so "both" and "one of them" point at very different causes.
+      options:
+        - Both the CLI and openfig.org
+        - CLI only
+        - openfig.org only
+        - Not checked
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: >
+        Where you suspect it lives, what you ruled out, or a wrong theory you already
+        disproved — a ruled-out cause saves the next person the same detour.
+    validations:
+      required: false

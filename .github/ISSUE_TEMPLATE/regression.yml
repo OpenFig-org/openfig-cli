@@ -1,0 +1,77 @@
+name: Regression
+description: This worked before, and a change broke it
+labels: ["regression"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A regression is a different conversation from a bug: something demonstrably worked,
+        so there is a last-good state to compare against and usually a specific change to
+        find. That makes the two questions below the valuable ones.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: A maintainer applies the matching `area:` label at triage.
+      options:
+        - text-layout — measuring, wrapping, counting lines
+        - images — raster images, embedding, deck size
+        - svg — inline SVG parsing and conversion
+        - paint-filters — Figma paint adjustments and calibration
+        - fonts — family, weight and style resolution
+        - lint — advisory checks that do not change output
+        - browser-host — specific to the in-browser converter
+        - not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What broke
+      description: The change in behaviour, stated as before and after.
+      placeholder: >
+        The same twelve-slide fixture converted to 843 KB and now converts to 3.8 MB.
+    validations:
+      required: true
+
+  - type: input
+    id: last-good
+    attributes:
+      label: Last known good
+      description: >
+        A version, tag, commit or date where it still behaved. An approximate answer is
+        fine and still narrows the search enormously.
+      placeholder: "v0.4.7, or \"before the SVG work landed on 2026-07-28\""
+    validations:
+      required: false
+
+  - type: input
+    id: first-bad
+    attributes:
+      label: First known bad
+      description: Where you first saw it broken, if you know.
+    validations:
+      required: false
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: >
+        The measurement on both sides. Two numbers taken the same way are what turns this
+        from a report into a bisection.
+      placeholder: |
+        843 KB at v0.4.7  ->  3,827,938 bytes at HEAD
+        Same input, same command, both through the Node host.
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: Suspected change, or causes you have already ruled out.
+    validations:
+      required: false

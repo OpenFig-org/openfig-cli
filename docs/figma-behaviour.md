@@ -129,22 +129,75 @@ control is **Exposure**. Mapping CSS `brightness()` onto `brightness` produces
 an image that never brightens, which stays invisible until something else
 darkens it.
 
-### Exposure is not linear in CSS brightness
+### Exposure is a tone curve, not a gain
 
-Measured, as a multiple of the unadjusted image:
+The important part is not that it is non-linear in CSS brightness — it is that
+the two are different *kinds* of operation. CSS `brightness(m)` multiplies every
+channel by m, identically at every tone. Figma's exposure lifts shadows hard and
+rolls highlights off against the ceiling.
 
-| exposure | luminance ratio |
+Measured on a 32-band ramp at exposure 0.5:
+
+| input | 8 | 62 | 124 | 185 | 247 |
+|---|---|---|---|---|---|
+| output | 23 | 151 | 220 | 244 | 254 |
+| ratio | 2.88 | 2.44 | 1.77 | 1.32 | 1.03 |
+
+The per-tone multiplier spans 1.75 at that setting and 6.08 at exposure 1. So no
+single exposure value reproduces a CSS brightness at every tone, and a residual
+error against a browser render is **inherent rather than un-converged**. What can
+be chosen is where the two agree; `EXPOSURE_CURVE` anchors on mid-tone (input 124
+of 255), where photographic content concentrates.
+
+| exposure | mid-tone ratio |
 |---|---|
-| -1 | 0.155 |
-| -0.5 | 0.436 |
-| -0.25 | 0.684 |
+| -1 | 0.129 |
+| -0.5 | 0.379 |
+| -0.25 | 0.629 |
 | 0 | 1.000 |
-| 0.25 | 1.351 |
-| 0.5 | 1.697 |
-| 1 | 2.259 |
+| 0.25 | 1.427 |
+| 0.5 | 1.774 |
+| 1 | 2.024 |
 
-So CSS `brightness(1.55)` is exposure **0.394**, not 0.55. The table lives in
-`element-dispatch.mjs` as `EXPOSURE_CURVE`.
+*Method note:* an earlier table measured mean luminance over a photograph and
+recorded exposure 1 as 2.259. That conflated the curve with the histogram of what
+was measured, and read high or low depending on how much of the image clipped —
+the same setting reads 2.024 at mid-tone and 1.821 as a whole-ramp mean. A ramp
+measures the curve; a photograph measures the curve *and* the photograph.
+
+### Contrast clamps at ±0.5, and its range is narrow
+
+Two facts, both from the same ramp export.
+
+**Values beyond ±0.5 do nothing.** `-1`, `-0.75` and `-0.5` produce
+byte-identical output; so do `0.5`, `0.75` and `1`.
+
+**The reachable range is slope 0.767 to 1.115.**
+
+| contrast | slope | pivot |
+|---|---|---|
+| -0.5 | 0.767 | 112.5 |
+| -0.25 | 0.807 | 112.0 |
+| 0 | 1.000 | — |
+| 0.25 | 1.097 | 100.2 |
+| 0.5 | 1.115 | 99.8 |
+
+Note the pivot: near 100 for positive values and 112 for negative, not the 127.5
+midpoint CSS stretches about. And CSS `contrast(1.15)` asks for slope 1.15, which
+Figma **cannot reach at all** — strong values are clamped to the closest
+reachable setting.
+
+This is why mapping `contrast` as `amount - 1` was wrong twice over: it wrote
+0.15 where the measured slope at 0.15 is about 1.058, and it would write values
+up to 1 that do nothing past 0.5. `CONTRAST_CURVE` in `element-dispatch.mjs` is
+the measured inverse.
+
+*Method note:* mean luminance cannot measure contrast — it moves spread, not
+average, and a full sweep read 69.8, 68.0, 61.3, 62.0, 62.2. Fitting a slope to a
+banded grey ramp measures it directly. `scripts/build-paint-filter-probe.mjs`
+builds the probe and `scripts/measure-paint-filter-probe.mjs` reads the export;
+`test/core/probe-measurement.test.mjs` checks the instrument against ramps with
+a known slope before either is trusted.
 
 ### `vibrance` is Saturation
 

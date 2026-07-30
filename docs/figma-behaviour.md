@@ -456,6 +456,39 @@ font-metric divergence. Well above it is worth investigating: that comparison
 is what surfaced a photo reaching the deck unfiltered, on a slide sitting at
 18 where its neighbours sat at 6.
 
+### But a pixel difference does not measure layout fidelity
+
+**MAE mostly ranks how much text a slide has.** It counts every antialiased glyph
+edge, and the two renderers disagree slightly on every one of them, so a dense
+appendix slide scores worse than a chart slide even when both are correct.
+
+Measured, and worth keeping because it cost a wrong conclusion. A real defect was
+found on the densest slide of a 23-slide deck: a paragraph wrapped one word early
+in Figma, shifting every line below it. Fixed and confirmed by eye — content,
+wrapping and line breaks then matched the design exactly. The slide's MAE did not
+move at all: **10.0 before, 10.0 after.** Of that 10.0, about 1.4 was a two-pixel
+registration offset in the comparison itself, and the rest was glyph rasterisation
+on a slide carrying more text than any other. A control slide with less text sat
+at 2.2 through the same pipeline.
+
+The same reading also produced a false lead. Ranking slides by MAE nominated
+21, 04, 18, 20 and 06 as "worst, probably more to find" — that list is simply the
+five most text-heavy slides. The one genuinely broken slide the user reported
+(a label wrapping onto two lines and colliding with the caption below) sat
+**mid-pack at 2.4**.
+
+So use MAE for what it is good at — a photo that lost its filter, a missing
+element, a shifted block — and not for line breaking or text placement. For those,
+compare the things that actually encode them:
+
+- **wrap points**: the text of each rendered line, or the count of lines per
+  paragraph
+- **text extents**: the ink bounding box of a run against its emitted box
+- **element positions**: node geometry against the design's own coordinates
+
+Those would have flagged the one-word difference immediately and stayed quiet
+about the other 22 slides.
+
 ---
 
 ## What a Claude Design export does

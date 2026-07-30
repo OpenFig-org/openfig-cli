@@ -489,6 +489,47 @@ compare the things that actually encode them:
 Those would have flagged the one-word difference immediately and stayed quiet
 about the other 22 slides.
 
+### Ink bands per element: the instrument that works
+
+Read a column of the render row by row, count dark pixels, and group the runs.
+Each run is one element's ink, so the same slide compared against the design
+gives a per-element error instead of one number for the page.
+
+Proven on the slide that prompted this. Whole-page MAE rated it **2.4,
+"excellent"**, while a display number sat 10px out of place and crowded the label
+under it:
+
+| element | design | before | after |
+|---|---|---|---|
+| title, 52px | 90–129 | 90–130 | 89–129 |
+| pie chart | 304–590 | 304–590 | 304–590 |
+| **80px number** | 624–683 | 634–693 (**+10**) | **624–683** |
+| label, 22/30 | 708–724 | 706–721 (−2) | 708–723 |
+| caption, 22/30 | 816–832 | 814–829 (−2) | 816–831 |
+
+The gap between the number and its label: 25px in the design, 13px before, 25px
+after. Every element within 1px, five of eight exact.
+
+It also predicts. The three errors above were derived from Chromium's ink offset
+within each element box *before* anything was changed — −10px, +2px, +2px — and
+matched the three measured errors. A summary metric cannot do that, because it
+cannot say which element is wrong or by how much.
+
+```js
+// ink rows in a column, grouped into bands
+const { data, info } = await sharp(png).greyscale().raw()
+  .toBuffer({ resolveWithObject: true });
+for (let y = 0; y < info.height; y++) {
+  let ink = 0;
+  for (let x = x0; x < x1; x++) if (data[y * info.width + x] < 190) ink++;
+  rows.push(ink);   // >= 3 is a row with content; runs of them are elements
+}
+```
+
+Pick a column that contains one stack of elements — a full-width scan merges
+everything into one band. Compare the design and the export at the same pixel
+size, and remember the design page may be letterboxed.
+
 ---
 
 ## What a Claude Design export does

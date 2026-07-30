@@ -129,4 +129,29 @@ describe('Carbon Question standalone HTML → .deck build', () => {
       }
     }
   });
+
+  it('renders image filters automatically and retains recoverable sources', () => {
+    const filteredNodes = fd.message.nodeChanges.filter((node) =>
+      node.pluginData?.some((entry) => entry.key === 'css-image-filter'));
+
+    expect(filteredNodes.length).toBeGreaterThan(0);
+    for (const node of filteredNodes) {
+      const images = node.fillPaints?.filter((paint) => paint.type === 'IMAGE') ?? [];
+      const visible = images.filter((paint) => paint.visible !== false);
+      const hidden = images.filter((paint) => paint.visible === false);
+      expect(visible).toHaveLength(1);
+      expect(hidden).toHaveLength(1);
+      expect(visible[0].paintFilter).toBeUndefined();
+      expect(visible[0].image.name).not.toBe(hidden[0].image.name);
+
+      const entry = node.pluginData.find((item) => item.key === 'css-image-filter');
+      const metadata = JSON.parse(entry.value);
+      expect(metadata).toMatchObject({
+        version: 1,
+        renderedImage: visible[0].image.name,
+        sourceImage: hidden[0].image.name,
+      });
+      expect(metadata.css).toMatch(/grayscale\(/);
+    }
+  });
 });

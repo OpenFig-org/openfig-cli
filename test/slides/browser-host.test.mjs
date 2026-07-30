@@ -328,6 +328,7 @@ describe('canvas image ops, the browser replacement for sharp', () => {
   // input is built by sharp and the output is decoded by sharp, so both ends
   // of every assertion sit outside the implementation under test.
   let redPng;
+  let filterProbePng;
 
   beforeAll(async () => {
     // 2x2, pure red, the bottom row fully transparent. Drawn 1:1, so no
@@ -336,6 +337,13 @@ describe('canvas image ops, the browser replacement for sharp', () => {
       255, 0, 0, 255, 255, 0, 0, 255,
       255, 0, 0, 0, 255, 0, 0, 0,
     ]), { raw: { width: 2, height: 2, channels: 4 } }).png().toBuffer();
+    filterProbePng = await sharp(Buffer.from([
+      255, 0, 0, 255,
+      0, 255, 0, 255,
+      0, 0, 255, 255,
+      116, 116, 116, 255,
+      0, 0, 0, 0,
+    ]), { raw: { width: 5, height: 1, channels: 4 } }).png().toBuffer();
   });
 
   /** Run one op in the page and bring the bytes back. */
@@ -368,6 +376,72 @@ describe('canvas image ops, the browser replacement for sharp', () => {
     const px = await pixels(await run('bakeFilter', redPng, { forceWhite: true }));
     expect(px.slice(0, 4)).toEqual([255, 255, 255, 255]);
     expect(px[11]).toBe(0);
+  });
+
+  it('uses the same ordered CSS filter arithmetic as the Node host', async () => {
+    const filter = {
+      css: 'grayscale(1) contrast(.5) brightness(1.5)',
+      ops: [
+        { fn: 'grayscale', amount: 1 },
+        { fn: 'contrast', amount: 0.5 },
+        { fn: 'brightness', amount: 1.5 },
+      ],
+    };
+    const browserPixels = await pixels(await run('bakeFilter', redPng, filter));
+    const nodePixels = await pixels(await sharpImageOps.bakeFilter(redPng, filter));
+
+    expect(browserPixels.slice(0, 4)).toEqual([135, 135, 135, 255]);
+    for (let i = 0; i < browserPixels.length; i += 4) {
+      expect(browserPixels[i + 3]).toBe(nodePixels[i + 3]);
+      // Canvas clears RGB beneath alpha 0 while sharp preserves it. Those
+      // bytes are invisible; compare colour only where a pixel is painted.
+      if (browserPixels[i + 3] > 0) {
+        expect(browserPixels.slice(i, i + 3)).toEqual(nodePixels.slice(i, i + 3));
+      }
+    }
+  });
+
+  it('matches Chromium for every supported CSS colour primitive and a chain', async () => {
+    const filters = [
+      ['grayscale(.5)', [{ fn: 'grayscale', amount: 0.5 }]],
+      ['brightness(1.55)', [{ fn: 'brightness', amount: 1.55 }]],
+      ['contrast(.5)', [{ fn: 'contrast', amount: 0.5 }]],
+      ['invert(.5)', [{ fn: 'invert', amount: 0.5 }]],
+      ['sepia(1)', [{ fn: 'sepia', amount: 1 }]],
+      ['saturate(2)', [{ fn: 'saturate', amount: 2 }]],
+      [
+        'grayscale(1) contrast(1.15) brightness(1.55)',
+        [
+          { fn: 'grayscale', amount: 1 },
+          { fn: 'contrast', amount: 1.15 },
+          { fn: 'brightness', amount: 1.55 },
+        ],
+      ],
+    ];
+
+    for (const [css, ops] of filters) {
+      const baked = await pixels(await run('bakeFilter', filterProbePng, { css, ops }));
+      const native = await page.evaluate(async ({ data, filterCss }) => {
+        const blob = new Blob([new Uint8Array(data)], { type: 'image/png' });
+        const url = URL.createObjectURL(blob);
+        try {
+          const img = new Image();
+          img.src = url;
+          await img.decode();
+          const canvas = new OffscreenCanvas(img.naturalWidth, img.naturalHeight);
+          const ctx = canvas.getContext('2d');
+          ctx.filter = filterCss;
+          ctx.drawImage(img, 0, 0);
+          return [...ctx.getImageData(0, 0, canvas.width, canvas.height).data];
+        } finally {
+          URL.revokeObjectURL(url);
+        }
+      }, { data: [...filterProbePng], filterCss: css });
+
+      // The final transparent control is excluded for the same reason as
+      // above: its RGB bytes are invisible and decoders may clear them.
+      expect(baked.slice(0, 16), css).toEqual(native.slice(0, 16));
+    }
   });
 
   it('thumbnails to 320px wide, with the height sharp would have chosen', async () => {

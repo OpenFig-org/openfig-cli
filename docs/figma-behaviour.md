@@ -359,22 +359,19 @@ operation, but it is **not an access-independent OpenFig solution**. A generated
 deck must not depend on a particular Figma user, library subscription, plugin,
 API session, or remotely hosted effect.
 
-The remaining self-contained options are:
+The self-contained implementation is:
 
-1. **Exact, reversible dual fill — recommended.** Bake the CSS chain into the
-   visible IMAGE paint and keep the untouched source as a second, hidden IMAGE
-   paint on the same node. Store the authored CSS chain and a format version in
-   the node's existing `pluginData` field. Both image hashes live in the deck.
-   The node keeps one geometry, crop, opacity, and blend mode; a user can toggle
-   the fills to recover the original, and OpenFig can re-bake it later. No
-   plugin is required to display or edit the ordinary Figma node. The costs are
-   one extra image payload and no native filter sliders.
-2. **Exact, destructive single fill.** Bake the chain and keep only the result.
-   This is the smallest exact file, but discards the source and should only be
-   an explicit export choice.
-3. **Native editable approximation.** Keep `paintFilter`, with the measured
-   exposure/contrast limits documented above. This is the smallest and most
-   editable option, but cannot promise visual equivalence.
+**Exact, automatic, reversible dual fill.** OpenFig bakes the CSS chain into the
+visible IMAGE paint and keeps the untouched source as a second, hidden IMAGE
+paint on the same node. The authored CSS chain and a format version live in the
+node's existing `pluginData` field. Both image hashes live in the deck.
+
+This is not a user-facing mode or toggle. The deck opens with the exact rendered
+fill already visible and requires no action. The hidden source is an
+implementation detail that lets OpenFig recover and re-bake the image later.
+Keeping both paints on one node also keeps one geometry, crop, opacity, and
+blend mode. No plugin is required to display or edit the ordinary Figma node.
+The costs are one extra image payload and no native filter sliders.
 
 Standard native layer combinations do not add a fourth exact option. Two-copy
 Plus Lighter probes, tested both as stacked image paints and stacked nodes,
@@ -389,9 +386,10 @@ and Shadows to Exposure improved a brightness-ramp fit but did not reproduce it:
 | `brightness(1.55)` | Exposure + Highlights/Shadows | 4.41 | 19 |
 
 Those controls are useful approximation levers, not an exact implementation.
-The product choice can therefore be explicit and access-independent:
-**portable exact** uses the reversible dual fill; **native editable** uses
-`paintFilter` and reports that it is approximate.
+OpenFig therefore applies the reversible dual fill automatically for every
+supported CSS image-filter chain. `paintFilter` remains useful as measured
+format knowledge, but it is not emitted as the visual implementation of those
+chains.
 
 ---
 

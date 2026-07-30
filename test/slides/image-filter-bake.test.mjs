@@ -1,11 +1,8 @@
 /**
- * `bakeImageFilter` bakes CSS `invert(1)` and `brightness(0) invert(1)` into
- * raster bytes. It used to hand `addImage` a path to a `<stem>.<key>.png`
- * cache file it had just written; it now hands over the bytes directly, which
- * is what let `node:fs` and `node:path` leave the element dispatcher.
- *
- * No standalone fixture carries an image filter, so without this the whole
- * function is unexercised.
+ * Image filters are rendered automatically into the visible paint while the
+ * untouched source is retained as an invisible recovery paint. The renderer
+ * hands `addImage` bytes directly, keeping filesystem concerns out of the
+ * element dispatcher.
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -31,17 +28,42 @@ beforeAll(async () => {
 
 afterAll(() => { rmSync(work, { recursive: true, force: true }); });
 
-/** Run one image element through the dispatcher and capture what addImage got. */
-async function bake(filter, src = redPath) {
+/** Run one image element through the dispatcher and capture its image node. */
+async function render(filter, src = redPath) {
   const seen = [];
-  const slide = { addImage: async (source) => { seen.push(source); return {}; } };
+  const originals = [];
+  const node = {
+    fillPaints: [{
+      type: 'IMAGE',
+      visible: true,
+      blendMode: 'NORMAL',
+      image: { name: 'rendered-image' },
+    }],
+  };
+  const slide = {
+    addImage: async (source) => {
+      seen.push(source);
+      return node;
+    },
+    createImagePaint: async (source) => {
+      originals.push(source);
+      return {
+        type: 'IMAGE',
+        visible: true,
+        blendMode: 'NORMAL',
+        image: { name: 'source-image' },
+      };
+    },
+  };
   // `imageOps` is now required rather than defaulted to `sharpImageOps`:
   // the default was a module-scope import that dragged `sharp` — and through
   // it `node:fs` — into the browser bundle whether or not the branch ran.
   const ctx = { resolveMedia: () => src, slideIndex: 1, imageOps: sharpImageOps };
   await applyElement(slide, { type: 'image', src: 'media/red.png', filter, x: 0, y: 0, width: 64, height: 64 }, ctx);
-  return seen[0];
+  return { source: seen[0], originals, node };
 }
+
+const bake = async (filter, src = redPath) => (await render(filter, src)).source;
 
 const pixels = async (bytes) => {
   const { data } = await sharp(bytes).raw().toBuffer({ resolveWithObject: true });
@@ -50,12 +72,17 @@ const pixels = async (bytes) => {
 
 describe('image filter baking', () => {
   it('passes the path straight through when there is no filter', async () => {
-    expect(await bake(undefined)).toBe(redPath);
+    const out = await render(undefined);
+    expect(out.source).toBe(redPath);
+    expect(out.originals).toEqual([]);
+    expect(out.node.fillPaints).toHaveLength(1);
+    expect(out.node.pluginData).toBeUndefined();
   });
 
   it('inverts RGB and preserves alpha, as bytes', async () => {
     const out = await bake({ invert: 1 });
     expect(typeof out).not.toBe('string');
+    expect((await sharp(out).metadata()).format).toBe('png');
     const px = await pixels(out);
     // red → cyan, alpha untouched
     expect(px.slice(0, 4)).toEqual([0, 255, 255, 255]);
@@ -66,6 +93,37 @@ describe('image filter baking', () => {
     const px = await pixels(await bake({ forceWhite: true }));
     expect(px.slice(0, 4)).toEqual([255, 255, 255, 255]);
     expect(px[11]).toBe(0);
+  });
+
+  it('automatically renders a CSS chain and retains the source invisibly', async () => {
+    const filter = {
+      css: 'grayscale(1) contrast(.5) brightness(1.5)',
+      ops: [
+        { fn: 'grayscale', amount: 1 },
+        { fn: 'contrast', amount: 0.5 },
+        { fn: 'brightness', amount: 1.5 },
+      ],
+    };
+    const out = await render(filter);
+
+    expect((await pixels(out.source)).slice(0, 4)).toEqual([135, 135, 135, 255]);
+    expect(out.originals).toEqual([redPath]);
+    expect(out.node.fillPaints).toHaveLength(2);
+    expect(out.node.fillPaints[0]).toMatchObject({ visible: true });
+    expect(out.node.fillPaints[0].paintFilter).toBeUndefined();
+    expect(out.node.fillPaints[1]).toMatchObject({
+      visible: false,
+      image: { name: 'source-image' },
+    });
+
+    const metadata = out.node.pluginData.find((entry) => entry.key === 'css-image-filter');
+    expect(metadata.pluginID).toBe('org.openfig');
+    expect(JSON.parse(metadata.value)).toEqual({
+      version: 1,
+      css: filter.css,
+      renderedImage: 'rendered-image',
+      sourceImage: 'source-image',
+    });
   });
 
   it('caches by source and filter rather than by a file on disk', async () => {

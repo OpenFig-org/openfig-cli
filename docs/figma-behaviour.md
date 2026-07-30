@@ -259,6 +259,74 @@ effect error from -1.90% to +0.09% and spread effect error from -16.86% to
 `paintFilter` values. No pixels are baked and no hosted resource or user action
 is required.
 
+### Five-photo generalization check
+
+The two anchors above were subsequently checked against five CC0 photographs
+chosen to exercise different histograms: a low-key monochrome portrait,
+daylight landscape, night scene, high-dynamic-range interior, and an extremely
+saturated orange flower. Every page placed the CSS pixel target beside the
+original photograph carrying the editable native mapping. Unfiltered control
+pairs were byte-identical after export, so the reported residual is the filter
+translation rather than crop or measurement noise.
+
+| condition | photos | mean absolute mean error | mean absolute spread error |
+|---|---:|---:|---:|
+| unfiltered control | 5 | 0.00% | 0.00% |
+| `brightness(1.18)`, current tone refinement | 5 | 1.83% | 3.06% |
+| same, excluding the saturated flower | 4 | **0.37%** | **0.27%** |
+| `grayscale(1) contrast(1.15) brightness(1.55)` | 5 | 5.52% | 10.69% |
+
+The strong chain remains a structural approximation: every photograph had too
+little spread, from -6.09% to -18.83%, even when its mean was close. This is the
+same native Contrast and Exposure ceiling described above, now observed across
+dark, bright, neutral, and saturated photographs rather than one fixture.
+
+The mild chain generalizes exceptionally well to four photographs, but the
+saturated flower is a real outlier: +7.70% mean, +14.23% spread, and a visible
+shift from saturated orange toward pale red. An Exposure-only candidate improves
+that image to +2.81% mean and -2.68% spread. It is **not** a safe global
+replacement: across all five photographs its mean absolute spread error is
+5.04%, and it loses 7.96% of the landscape's spread and 8.67% of the interior's.
+
+A source-aware choice would combine the four current results with the
+Exposure-only flower result, reducing this set to 0.85% mean error and 0.75%
+spread error. That number is a post-hoc bound, not a production calibration:
+the selector still needs validation across more hues and photographs.
+
+The outlier has a deterministic color-space explanation. CSS `grayscale(1)`
+computes its weighted matrix directly on gamma-encoded RGB. Native full
+desaturation preserves linear-light luminance and encodes the resulting neutral
+value back to sRGB. The existing synthetic color-patch probe therefore produces
+very different gray levels while reaching zero chroma in both cases:
+
+| source patch | CSS gray | native gray | native vs CSS |
+|---|---:|---:|---:|
+| red | 68.2 | 116 | +70.0% |
+| blue | 39.0 | 73 | +87.1% |
+| magenta | 83.2 | 132 | +58.6% |
+| orange | 119.7 | 137 | +14.4% |
+| yellow | 217.0 | 224 | +3.2% |
+
+Across the normalized stock photographs, mean absolute CSS-vs-native grayscale
+difference is 0 to 1.18 levels for the first four and 15.06 for the flower.
+The flower's mean gray is 134.00 under the CSS matrix and 149.06 under the
+native linear-light transform. Those values can be computed from the source
+pixels locally; a future selector does not require an account, hosted renderer,
+plugin, user toggle, or baked replacement image.
+
+The global anchors remain unchanged until that selector is validated. The
+reproducible builders and scorer are
+`scripts/build-paint-filter-stock-probe.mjs` and
+`scripts/measure-paint-filter-stock-probe.mjs`.
+
+Public-domain source record:
+
+- [Bearded man smoking pipe](https://commons.wikimedia.org/wiki/File:Bearded_man_smoking_pipe-3013924.jpg) - CC0 1.0
+- [Landscape, north Euboea, Greece](https://commons.wikimedia.org/wiki/File:Landscape_north_Euboea_Greece.jpg) - CC0 1.0
+- [Snowfall over Brofjorden and Preemraff](https://commons.wikimedia.org/wiki/File:Snowfall_at_night_over_Brofjorden_and_Preemraff_oil_refinery.jpg) - CC0 1.0
+- [Interior of Sainte-Anne-de-Beaupre](https://commons.wikimedia.org/wiki/File:Interior_of_the_Basilica_of_Sainte-Anne-de-Beaupr%C3%A9.jpg) - CC0 1.0
+- [Gazania krebsiana](https://commons.wikimedia.org/wiki/File:Gazania_krebsiana,_Quebec_city,_Quebec,_Canada_131.jpg) - CC0 1.0
+
 ### Contrast clamps at ±0.5, and its range is narrow
 
 Two facts define the native range.

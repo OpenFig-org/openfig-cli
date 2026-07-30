@@ -27,7 +27,11 @@ import { sharpImageOps } from '../../lib/core/image-utils.mjs';
 
 /** The clip resolved for each shape, in document order. */
 const clips = (markup) => parseSvgShapes(markup).shapes.map(
-  (s) => (s.clipUnsupported ? { unsupported: s.clipUnsupported } : (s.clip ?? null)),
+  (s) => (
+    s.clipMissing
+      ? { missing: s.clipMissing }
+      : (s.clipUnsupported ? { unsupported: s.clipUnsupported } : (s.clip ?? null))
+  ),
 );
 
 describe('recognising a rectangular clip', () => {
@@ -121,11 +125,10 @@ describe('resolving the clip in force at a shape', () => {
 
   it('reports a reference to an id that is not there', () => {
     // SVG says an invalid reference means the element does not render at all.
-    // Converting it unclipped and saying so keeps the artwork, which is the
-    // less surprising of two wrong answers, and the warning is what makes it
-    // not silent.
+    // Dropping the content preserves that behavior; keeping the missing id
+    // distinct is what lets the warning identify the actual authoring error.
     expect(clips('<g clip-path="url(#gone)"><rect width="9" height="9"/></g>'))
-      .toEqual([{ unsupported: 'gone' }]);
+      .toEqual([{ missing: 'gone' }]);
   });
 
   it('does not paint the clip rectangle itself', () => {
@@ -204,7 +207,7 @@ describe('deciding whether a pattern has a tile', () => {
  * capability group a caller supplies, and a pattern is the first thing in the
  * pipeline that needs more of it than sizing and thumbnailing.
  */
-describe('emitting a pattern fill', () => {
+describe('emitting clips and pattern fills', () => {
   async function emit(inner, imageOps) {
     const nodes = [];
     const warnings = [];
@@ -234,6 +237,25 @@ describe('emitting a pattern fill', () => {
   const DOTS = '<pattern id="d" patternUnits="userSpaceOnUse" width="10" height="10">'
     + '<circle cx="5" cy="5" r="4" fill="#ff0000"/></pattern>';
 
+  it('distinguishes a missing clip id from a non-rectangular clip', async () => {
+    const missing = await emit(
+      '<g clip-path="url(#gone)"><rect width="9" height="9"/></g>',
+      sharpImageOps,
+    );
+    expect(missing.nodes).toHaveLength(0);
+    expect(missing.warnings.join('\n')).toMatch(/clip path #gone does not exist/);
+    expect(missing.warnings.join('\n')).not.toMatch(/#gone is not a rectangle/);
+
+    const unsupported = await emit(
+      '<clipPath id="wedge"><path d="M0 0 L10 20 L20 0 Z"/></clipPath>'
+      + '<g clip-path="url(#wedge)"><rect width="9" height="9"/></g>',
+      sharpImageOps,
+    );
+    expect(unsupported.nodes).toHaveLength(0);
+    expect(unsupported.warnings.join('\n')).toMatch(/clip path #wedge is not a rectangle/);
+    expect(unsupported.warnings.join('\n')).not.toMatch(/#wedge does not exist/);
+  });
+
   it('hangs the paint on the shape instead of replacing it with a rectangle', async () => {
     // The reason this does not go through `addImage`: a pie wedge filled with
     // a pattern is a path, and emitting an image node in its place would swap
@@ -242,6 +264,46 @@ describe('emitting a pattern fill', () => {
     const { nodes } = await emit(`${DOTS}<path d="M0 0 L50 0 L50 50 Z" fill="url(#d)"/>`, sharpImageOps);
     expect(nodes).toHaveLength(1);
     expect(nodes[0].fillPaints[0]).toMatchObject({ type: 'IMAGE', scaleMode: 'TILE' });
+  });
+
+  it('uses one sampling scale when raster dimensions round differently', async () => {
+    let asked;
+    const imageOps = {
+      ...sharpImageOps,
+      rasterizeSvg: async (_svg, size) => {
+        asked = size;
+        return new Uint8Array([1]);
+      },
+    };
+    const pattern = '<pattern id="p" patternUnits="userSpaceOnUse" width="10.25" height="10">'
+      + '<rect width="5" height="5" fill="#ff0000"/></pattern>';
+    const { nodes } = await emit(
+      `${pattern}<rect width="100" height="100" fill="url(#p)"/>`,
+      imageOps,
+    );
+    expect(asked).toEqual({ width: 21, height: 20 });
+    expect(nodes[0].fillPaints[0].scale).toBe(0.5);
+  });
+
+  it('derives capped tile scale from the shared density, not the shorter axis', async () => {
+    let asked;
+    const imageOps = {
+      ...sharpImageOps,
+      rasterizeSvg: async (_svg, size) => {
+        asked = size;
+        return new Uint8Array([1]);
+      },
+    };
+    const pattern = '<pattern id="p" patternUnits="userSpaceOnUse" width="1000" height="1500">'
+      + '<rect width="500" height="750" fill="#ff0000"/></pattern>';
+    const { nodes } = await emit(
+      `${pattern}<rect width="2000" height="2000" fill="url(#p)"/>`,
+      imageOps,
+    );
+    expect(asked.width).toBe(1365);
+    expect(asked.height).toBe(2048);
+    expect(nodes[0].fillPaints[0].scale).toBeCloseTo(1500 / 2048, 12);
+    expect(nodes[0].fillPaints[0].scale).not.toBeCloseTo(1000 / 1365, 12);
   });
 
   it('reports a host that cannot rasterise, rather than emitting a blank fill', async () => {

@@ -1,13 +1,8 @@
 # What Figma actually does
 
-Observed compatibility behavior for `.deck` files.
-The relevant behavior extends beyond what is
-inferred from documentation — Figma documents almost none of it, and the two
-public APIs (plugin and REST) describe a narrower surface than the file format
-carries.
-
-Each section records the resulting behavior rather than
-trusted.
+Observed compatibility behavior for `.deck` files. Figma's public Plugin and
+REST APIs describe a narrower surface than the file format carries, so this
+document also records relevant file-format behavior.
 
 ---
 
@@ -47,7 +42,7 @@ Figma's published font data.
 `NodeChange.fontVariations` — `{ axisTag, axisName, value }`, where `axisTag`
 is the OpenType tag packed as a uint (`wght` = 2003265652).
 
-Measured, by ink density in a compatibility-reference output:
+Figma applies variable weights continuously:
 
 | written | relative ink |
 |---|---|
@@ -59,7 +54,7 @@ Measured, by ink density in a compatibility-reference output:
 Four distinct, monotonically increasing values: the axis is applied
 **continuously**, not snapped to the nearest named instance.
 
-Three further properties, each measured:
+Three further properties hold:
 
 - **Inert without the axis.** Instrument Serif has no `wght` axis; with and
   without a variation it renders byte-identically. So writing one is safe
@@ -129,12 +124,10 @@ control is **Exposure**. Mapping CSS `brightness()` onto `brightness` produces
 an image that never brightens, which stays invisible until something else
 darkens it.
 
-### Figma-authored exports prove that Color Adjust is self-contained
+### Native Color Adjust is self-contained
 
-A native adjusted image was inspected on 2026-07-29 after changing
-the image's native Color Adjust sliders. The node contained one ordinary IMAGE
-paint over the original 2560×1920 JPEG. Its adjustments were serialized
-directly on that paint:
+A native adjusted image contains one ordinary IMAGE paint over its original
+asset. The adjustments are serialized directly on that paint:
 
 ```json
 {
@@ -155,10 +148,9 @@ library reference, or account-bound resource. The archive contained only the
 original JPEG and its 320×240 thumbnail. The UI label **Saturation** therefore
 maps to the kiwi field `vibrance`.
 
-OpenFig decoded and re-encoded the export without changing any `paintFilter`
-value. This establishes that native Color Adjust is both writable by OpenFig
-and editable after import, while remaining self-contained and independent of
-Figma-hosted shaders.
+OpenFig preserves each `paintFilter` value through a decode/re-encode
+round-trip. Native Color Adjust is therefore writable by OpenFig and editable
+after import while remaining self-contained and independent of hosted shaders.
 
 ### Exposure is a tone curve, not a gain
 
@@ -220,40 +212,44 @@ about 6.8% (15.73 → 14.66); Figma exposure contracts it by about 35.5%
 The measured cause is narrower and stronger: **Figma exposure compresses this
 histogram far more than CSS's linear gain followed by clipping.**
 
-Measured end to end: the fixture converted, evaluated against an approved compatibility reference, and
-compared against the Claude Design export of the same deck.
+On the converted fixture, compared with the design reference:
 
 | region | mean vs design | stdev vs design |
 |---|---|---|
 | portrait crop, `grayscale(1) contrast(1.12) brightness(1.18)` | −3.9% | −3.0% |
 | photo band, `grayscale(1) contrast(1.15) brightness(1.55)` | +1.5% | −15.9% |
 
-Mean luminance converges. Spread does not. The brightness-only result proves
-that exposure alone can more than account for the residual: its -30.8% isolated
-spread error is larger than the full chain's -15.9%. Grayscale failure is ruled
-out separately by the zero-chroma measurement below. The rest of the chain
-changes the magnitude, but neither it nor an unknown internal paint-filter
-operation order is needed to explain why the residual exists.
+These remain useful end-to-end observations, but the slide 7 row is not a
+filter-only measurement. The source uses `object-position: 50% 58%` and a
+directional `mask-image`; the converted node is center-cropped and has no mask.
+The two regions therefore contain different source pixels and alpha coverage.
+That separate conversion gap is tracked as openfig-cli#19. The isolated
+brightness result above remains valid because each host's filtered image was
+normalized against its own unfiltered rendering before comparison.
 
-Contrast is the remaining native lever that could compensate, and the requested
-`contrast(1.15)` already exceeds Figma's measured maximum slope of 1.115. The
-current `EXPOSURE_CURVE` anchors on mid-tone, choosing a closer mean at the cost
-of spread. Whether a different perceptual objective would choose another anchor
-is still an open product decision rather than a calibration fact. Tracked as
-openfig-cli#20.
+Highlights and Shadows provide more native compensation than Contrast alone.
+On a neutral ramp for the complete slide 7 chain, the current mapping
+(`vibrance: -1`, `contrast: 0.5`, `exposure: 0.3292`) and the best tested
+refinement measured:
 
-*Method:* `scripts/build-paint-filter-brightness-probe.mjs` and
-`scripts/measure-paint-filter-brightness-probe.mjs` isolate exposure against
-Chromium. `scripts/measure-filtered-regions.mjs` measures the full chain. The
-latter renders both PDFs to a common pixel width rather than a common dpi,
-because the two exports use different page sizes, and finds the slide box by
-trimming, because the Claude Design page is letterboxed. Pointed at the ground
-truth as both inputs it reads 0.0%, which is what makes a non-zero reading
-attributable to the conversion.
+| native treatment | ramp RMSE | mean vs CSS | spread vs CSS |
+|---|---:|---:|---:|
+| current mapping | 14.61 | +1.26% | −14.45% |
+| add `highlights: 1`, `shadows: -0.75` | **9.43** | **−0.17%** | −6.64% |
+| add `highlights: 1`, `shadows: -1` | 9.59 | −1.13% | **−4.96%** |
+
+The first refinement cuts transfer-curve RMSE by 35% and is the best overall
+curve match tested; the second preserves slightly more spread at the cost of
+mean accuracy. Neither is exact, and this one strong-brightness chain is not
+enough to define a general mapping for every `brightness()` value. It does prove
+that the current native approximation has measurable room to improve without
+baking the image. A production mapping still needs calibration across the
+supported brightness range, followed by end-to-end validation after #17 is
+fixed. Tracked as openfig-cli#20.
 
 ### Contrast clamps at ±0.5, and its range is narrow
 
-Two facts, both from the same ramp export.
+Two facts define the native range.
 
 **Values beyond ±0.5 do nothing.** `-1`, `-0.75` and `-0.5` produce
 byte-identical output; so do `0.5`, `0.75` and `1`.
@@ -278,12 +274,8 @@ This is why mapping `contrast` as `amount - 1` was wrong twice over: it wrote
 up to 1 that do nothing past 0.5. `CONTRAST_CURVE` in `element-dispatch.mjs` is
 the measured inverse.
 
-*Method note:* mean luminance cannot measure contrast — it moves spread, not
-average, and a full sweep read 69.8, 68.0, 61.3, 62.0, 62.2. Fitting a slope to a
-banded grey ramp measures it directly. `scripts/build-paint-filter-probe.mjs`
-builds the probe and `scripts/measure-paint-filter-probe.mjs` reads the export;
-`test/core/probe-measurement.test.mjs` checks the instrument against ramps with
-a known slope before either is trusted.
+Mean luminance does not characterize contrast: contrast moves spread rather
+than average. The relevant quantity here is the fitted transfer-curve slope.
 
 ### `vibrance` is Saturation
 
@@ -292,8 +284,7 @@ on *mean luminance* is almost nil, so a flat luminance reading is not evidence
 that a field is dead — it has to be checked visually or with a colour metric.
 
 The endpoint used for CSS `grayscale(1)` is verified: `vibrance: -1` fully
-desaturates. A compatibility-reference output of nine saturated colour patches and three
-neutral controls measured:
+desaturates. Across saturated colours and neutral controls:
 
 | vibrance | mean coloured-patch chroma vs reference |
 |---|---|
@@ -309,11 +300,6 @@ Therefore `grayscale(1) → vibrance: -1` is valid and residual colour cannot
 explain the filtered photo's spread deficit. This establishes the full
 desaturation endpoint, not that partial CSS `grayscale(amount)` values follow
 the same curve as partial negative vibrance.
-
-*Method:* `scripts/build-paint-filter-color-probe.mjs` writes the filter
-directly on the paint, bypassing the CSS mapping.
-`scripts/measure-paint-filter-color-probe.mjs` measures per-channel patch means
-from the compatibility-reference output.
 
 `contrast` responds but weakly on mean luminance, because contrast changes
 spread rather than average. It is **not** calibrated; see the open issues.
@@ -340,8 +326,7 @@ After a shader has been imported into the file, a plugin can attach it to
 `node.effects` as a `SHADER` effect and assign its editable properties by
 property-definition ID.
 
-A three-operation native effect has the following behavior. It implements the
-CSS primitives directly in sRGB:
+A three-operation shader can implement the CSS primitives directly in sRGB:
 
 ```text
 brightness(a): rgb = clamp(rgb * a)
@@ -349,8 +334,8 @@ contrast(a):   rgb = clamp((rgb - 0.5) * a + 0.5)
 grayscale(a):  rgb = mix(rgb, dot(rgb, [0.2126, 0.7152, 0.0722]), a)
 ```
 
-The shader exposes an Operation dropdown and an Amount slider. Pixel samples
-from Figma matched the equations exactly after byte rounding:
+The shader exposes an Operation dropdown and an Amount slider. Its native
+results match the equations after byte rounding:
 
 | probe | representative Figma result |
 |---|---|
@@ -363,9 +348,9 @@ The last sample also establishes execution order: Figma applies shader effects
 from top to bottom in the Effects list. Writing one shader instance per parsed
 CSS operation therefore preserves CSS's left-to-right chain order.
 
-Figma Design-to-Slides transfer of an effected node into a
-`.deck` preserved both instances, their order, and their control values. The
-public Plugin API and the binary format use different names for the same object:
+Figma Design-to-Slides transfer preserves both instances, their order, and
+their control values. The public Plugin API and binary format use different
+names for the same object:
 
 | public Plugin API | `.deck` kiwi message |
 |---|---|
@@ -374,9 +359,10 @@ public Plugin API and the binary format use different names for the same object:
 | `properties` | `componentPropAssignments` |
 | imported shader metadata | hidden `CODE_COMPONENT` with `codeObjectType: CUSTOM_EFFECT` |
 
-The exported file used a 627-definition kiwi schema; OpenFig's current authored
-schema has 550 definitions and lacks the custom-effect fields. Schema support is
-therefore a concrete implementation task, not an unknown rendering problem.
+Files containing the effect use a 627-definition kiwi schema; OpenFig's current
+authored schema has 550 definitions and lacks the custom-effect fields. Schema
+support is therefore a concrete implementation task, not an unknown rendering
+problem.
 
 There is one decisive distribution constraint. The `.deck` contains the
 versioned shader reference and property definitions, but not the shader source.
@@ -453,13 +439,13 @@ agreement with ourselves.
 
 ## Comparing against the design
 
-`test/fixtures/standalone-html/the-carbon-question/` holds both the standalone
-export and the Claude Design PDF of the same deck. Render both to the same
-pixel dimensions and compare per slide:
+`test/fixtures/standalone-html/the-carbon-question/` holds the standalone
+design source and its design-reference PDF. Compare it with an approved
+compatibility-reference PDF at the same pixel dimensions:
 
 ```
 pdftoppm -r 192 -gray The-Carbon-Question.claude-design.pdf gt   # 720pt page
-pdftoppm -r 72  -gray <compatibility-reference>.pdf fg                      # 1920pt page
+pdftoppm -r 72  -gray <compatibility-reference>.pdf fg           # 1920pt page
 ```
 
 Both DPIs are needed — the pages are different sizes, and rendering both at the
@@ -474,8 +460,7 @@ is what surfaced a photo reaching the deck unfiltered, on a slide sitting at
 
 ## What a Claude Design export does
 
-Not Figma behaviour, but the other half of the conversion, and measured the
-same way.
+Not Figma behavior, but the other half of the conversion.
 
 ### The slide may render at a fraction of the size it lays out at
 

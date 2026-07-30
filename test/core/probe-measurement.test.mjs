@@ -9,9 +9,9 @@
  * touches its mean. The instrument was wrong for the quantity, and nothing said
  * so; the numbers simply looked unhelpful.
  *
- * So before any compatibility reference is measured with this, it is pointed at ramps that
- * have had an exactly known slope applied. If it cannot recover a slope it was
- * given, it cannot be trusted to discover one.
+ * The instrument is therefore checked against ramps with an exactly known
+ * slope. If it cannot recover a slope it was given, it cannot be trusted to
+ * discover one.
  */
 import { describe, it, expect } from 'vitest';
 import { mkdtempSync, rmSync } from 'fs';

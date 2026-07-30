@@ -98,8 +98,8 @@ describe('clamping font-weight to faces the family ships', () => {
   // These two used to assert the opposite — 550 clamped to 700 and 500 to 400,
   // on the grounds that the handoff could only name Regular or Bold. That is
   // still true of the *name*, but a deck now also carries the authored weight
-  // as a `wght` variation, and Figma was measured applying one continuously
-  // along a family's axis. So on a variable family the authored weight is what
+  // as a `wght` variation, and Figma applies it continuously along a family's
+  // axis. So on a variable family the authored weight is what
   // renders, and clamping it here would size the box for a face nobody sees.
   it('leaves a weight alone when the family has an axis that covers it', async () => {
     const el = makeElement('"Space Grotesk", sans-serif', 550);

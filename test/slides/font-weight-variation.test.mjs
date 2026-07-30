@@ -9,12 +9,10 @@
  * authored at 600 written as Bold and 2 at 500 written as Regular.
  *
  * A `wght` font variation buys that fidelity back without touching the name.
- * Measured from native compatibility behavior of a probe deck: Regular + wght 500 and
- * Regular + wght 600 render at distinct, monotonically increasing stem widths
- * between plain Regular and plain Bold, so the axis is applied continuously
- * rather than snapped; the same variation written onto Instrument Serif, which
- * has no weight axis, produced byte-identical ink, so it is inert where it
- * cannot help. A third probe showed it overrides the base style outright and
+ * Regular + wght 500 and Regular + wght 600 render at distinct, monotonically
+ * increasing stem widths between plain Regular and plain Bold, so the axis is
+ * applied continuously rather than snapped. The same variation on Instrument
+ * Serif, which has no weight axis, is inert. It also overrides the base style
  * in both directions — `Bold` + wght 400 is indistinguishable from plain
  * `Regular` — which is what the run-level tests below turn on.
  *

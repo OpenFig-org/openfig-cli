@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * Compare the filtered photo regions in a compatibility-reference output against the Claude
- * Design ground truth.
+ * Compare the filtered photo regions in a compatibility-reference PDF against
+ * the design ground truth.
  *
  * The end-to-end check on the paintFilter calibration. The calibration itself is
  * measured against a ramp (build-paint-filter-probe.mjs), which establishes what
- * Figma's controls do; this establishes whether the *mapping* from CSS lands in
+ * the native controls do; this establishes whether the *mapping* from CSS lands in
  * the right place on a real slide, with a real photograph, under a real blend.
  *
  * Both regions carry `mix-blend-mode: multiply`, so a difference here is the sum
@@ -13,12 +13,12 @@
  * That is deliberate: it is the number a viewer actually sees. When it
  * disagrees with the ramp calibration, the blend is the next suspect.
  *
- * The two PDFs have different page sizes — Claude Design exports 720pt, Figma
- * 1920pt — so each is rendered at the dpi that brings it to the same pixel
+ * The two PDFs have different page sizes — 720pt and 1920pt — so each is
+ * rendered at the dpi that brings it to the same pixel
  * width. Rendering both at one dpi compares different scales and says nothing.
  *
  * Usage:
- *   node scripts/measure-filtered-regions.mjs <compatibility-reference.pdf> [ground-truth.pdf]
+ *   node scripts/measure-filtered-regions.mjs <reference.pdf> [ground-truth.pdf]
  */
 import { execFileSync } from 'child_process';
 import { mkdtempSync, readdirSync, rmSync, existsSync } from 'fs';
@@ -89,10 +89,10 @@ async function meanOfRegion(pngPath, region) {
 }
 
 async function main() {
-  const figma = process.argv[2];
+  const reference = process.argv[2];
   const gt = process.argv[3] ?? DEFAULT_GT;
-  if (!figma) {
-    console.error('usage: measure-filtered-regions.mjs <compatibility-reference.pdf> [ground-truth.pdf]');
+  if (!reference) {
+    console.error('usage: measure-filtered-regions.mjs <reference.pdf> [ground-truth.pdf]');
     process.exit(1);
   }
   if (!existsSync(gt)) {
@@ -102,13 +102,13 @@ async function main() {
 
   const dir = mkdtempSync(join(tmpdir(), 'regions-'));
   try {
-    const figPages = renderPages(figma, dir, 'fg');
+    const referencePages = renderPages(reference, dir, 'ref');
     const gtPages = renderPages(gt, dir, 'gt');
-    console.log(`compatibility reference: ${figPages.length} pages   ground truth: ${gtPages.length} pages\n`);
+    console.log(`reference: ${referencePages.length} pages   ground truth: ${gtPages.length} pages\n`);
 
     const rows = [];
     for (const r of REGIONS) {
-      const fp = figPages[r.slide - 1];
+      const fp = referencePages[r.slide - 1];
       const gp = gtPages[r.slide - 1];
       if (!fp || !gp) {
         rows.push({ slide: r.slide, region: r.name, note: 'page missing' });
@@ -119,15 +119,15 @@ async function main() {
       rows.push({
         slide: r.slide,
         region: r.name,
-        figma: +f.mean.toFixed(1),
+        reference: +f.mean.toFixed(1),
         groundTruth: +g.mean.toFixed(1),
         errorPct: +(((f.mean - g.mean) / g.mean) * 100).toFixed(1),
-        figmaStdev: +f.stdev.toFixed(1),
+        referenceStdev: +f.stdev.toFixed(1),
         gtStdev: +g.stdev.toFixed(1),
       });
     }
     console.table(rows);
-    console.log('errorPct positive = Figma is brighter than the design.');
+    console.log('errorPct positive = the compatibility reference is brighter than the design.');
     console.log('Before this calibration the photo band read 116.7 against 103.1, i.e. +13.2%.');
     console.log('stdev is the contrast check: a large gap there with a small mean gap');
     console.log('means the exposure landed and the contrast did not.');

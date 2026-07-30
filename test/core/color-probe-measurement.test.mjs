@@ -1,9 +1,8 @@
 /**
  * The color-probe instrument checked against images with known chroma.
  *
- * The real answer still comes from Figma's PDF export. These tests establish
- * that the reader and classifier can distinguish full desaturation from
- * residual color before that export is trusted.
+ * These tests establish that the reader and classifier can distinguish full
+ * desaturation from residual color before a reference is trusted.
  */
 import { describe, expect, it } from 'vitest';
 import { mkdtempSync, rmSync } from 'fs';

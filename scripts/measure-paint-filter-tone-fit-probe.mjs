@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Measure the native tone-fitting probe from a compatibility-reference output.
+ * Measure the native tone-fitting probe from a reference PDF.
  *
  * Reports every candidate relative to the matching reference:
  * - SOLO pages use the unfiltered first page.
@@ -10,7 +10,7 @@
  * that matters for issue #20, including the authored multiply blend.
  *
  * Usage:
- *   node scripts/measure-paint-filter-tone-fit-probe.mjs <compatibility-reference.pdf>
+ *   node scripts/measure-paint-filter-tone-fit-probe.mjs <reference.pdf>
  */
 import { execFileSync } from 'child_process';
 import { mkdtempSync, readdirSync, rmSync } from 'fs';
@@ -103,7 +103,7 @@ function relativeRow(step, page, sample, reference) {
 async function main() {
   const pdf = process.argv[2];
   if (!pdf) {
-    console.error('usage: measure-paint-filter-tone-fit-probe.mjs <compatibility-reference.pdf>');
+    console.error('usage: measure-paint-filter-tone-fit-probe.mjs <reference.pdf>');
     process.exit(1);
   }
 

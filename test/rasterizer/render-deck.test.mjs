@@ -1,6 +1,6 @@
 /**
  * .deck (Figma Slides) render quality tests — compare rendered slides against
- * approved compatibility-reference PNGs using SSIM (Structural Similarity Index).
+ * approved compatibility-reference PNGs using SSIM.
  *
  * Fixtures:  test/fixtures/decks/reference/
  * Report:    /tmp/openfig-render-report-deck.html

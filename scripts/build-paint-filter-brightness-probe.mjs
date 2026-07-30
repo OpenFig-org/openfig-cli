@@ -2,7 +2,7 @@
 /**
  * Build the brightness-only isolation probe and its Chromium ground truth.
  *
- * No grayscale, contrast, or blend mode is present. The Figma deck uses the
+ * No grayscale, contrast, or blend mode is present. The native deck uses the
  * production brightness -> exposure mapping; the PNG reference pages use the
  * browser's actual CSS `brightness()` implementation on the same source photo
  * with the same object-fit crop.
@@ -11,9 +11,6 @@
  *   node scripts/build-paint-filter-brightness-probe.mjs \
  *     [-o out.deck] [--ground-truth out-dir]
  *
- * Then use an approved compatibility-reference PDF, and run:
- *   node scripts/measure-paint-filter-brightness-probe.mjs \
- *     <reference.pdf> [ground-truth-dir]
  */
 import { mkdirSync } from 'fs';
 import { resolve } from 'path';
@@ -146,10 +143,6 @@ async function main() {
       + (step.exposure === null ? ' / reference' : ` / exposure ${step.exposure}`),
     );
   }
-  console.log('\nNext: use an approved compatibility-reference PDF, then run');
-  console.log(
-    `  node scripts/measure-paint-filter-brightness-probe.mjs <exported.pdf> ${groundTruthDir}`,
-  );
 }
 
 main().catch((error) => {

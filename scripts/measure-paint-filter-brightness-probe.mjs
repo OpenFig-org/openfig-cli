@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Compare the brightness-only Figma probe against Chromium's CSS rendering.
+ * Compare the brightness-only native probe against Chromium's CSS rendering.
  *
  * Direct errors answer what the viewer sees. Effect errors divide each host by
  * its own unfiltered reference first, removing static differences in JPEG
@@ -79,9 +79,9 @@ function ssimImage(region) {
 }
 
 export function effectErrorPct(filtered, reference, cssFiltered, cssReference) {
-  const figmaEffect = filtered / reference;
+  const nativeEffect = filtered / reference;
   const cssEffect = cssFiltered / cssReference;
-  return ((figmaEffect / cssEffect) - 1) * 100;
+  return ((nativeEffect / cssEffect) - 1) * 100;
 }
 
 async function main() {
@@ -104,50 +104,50 @@ async function main() {
 
   const tempDir = mkdtempSync(join(tmpdir(), 'brightness-measure-'));
   try {
-    execFileSync('pdftoppm', ['-png', '-r', '72', pdf, join(tempDir, 'figma')], {
+    execFileSync('pdftoppm', ['-png', '-r', '72', pdf, join(tempDir, 'native')], {
       stdio: 'pipe',
     });
     const pages = readdirSync(tempDir)
-      .filter((file) => file.startsWith('figma') && file.endsWith('.png'))
+      .filter((file) => file.startsWith('native') && file.endsWith('.png'))
       .sort();
     if (pages.length !== PROBE_STEPS.length) {
       throw new Error(
-        `expected ${PROBE_STEPS.length} Figma pages, got ${pages.length}`,
+        `expected ${PROBE_STEPS.length} reference pages, got ${pages.length}`,
       );
     }
 
-    const figma = [];
+    const native = [];
     const css = [];
     for (const [index, page] of pages.entries()) {
-      figma.push(await readPhotoRegion(join(tempDir, page)));
+      native.push(await readPhotoRegion(join(tempDir, page)));
       css.push(await readPhotoRegion(join(groundTruthDir, groundTruthFilename(index))));
     }
 
     const rows = PROBE_STEPS.map((step, index) => {
-      const f = figma[index];
+      const f = native[index];
       const c = css[index];
       return {
         brightness: step.brightness,
         exposure: step.exposure ?? 0,
-        figmaMean: +f.mean.toFixed(2),
+        nativeMean: +f.mean.toFixed(2),
         cssMean: +c.mean.toFixed(2),
         meanVsCssPct: +(((f.mean / c.mean) - 1) * 100).toFixed(2),
-        figmaStdev: +f.stdev.toFixed(2),
+        nativeStdev: +f.stdev.toFixed(2),
         cssStdev: +c.stdev.toFixed(2),
         stdevVsCssPct: +(((f.stdev / c.stdev) - 1) * 100).toFixed(2),
         meanEffectErrorPct: +effectErrorPct(
           f.mean,
-          figma[0].mean,
+          native[0].mean,
           c.mean,
           css[0].mean,
         ).toFixed(2),
         spreadEffectErrorPct: +effectErrorPct(
           f.stdev,
-          figma[0].stdev,
+          native[0].stdev,
           c.stdev,
           css[0].stdev,
         ).toFixed(2),
-        figmaClippedHighPct: +f.clippedHighPct.toFixed(2),
+        nativeClippedHighPct: +f.clippedHighPct.toFixed(2),
         cssClippedHighPct: +c.clippedHighPct.toFixed(2),
         ssim: +ssim(ssimImage(f), ssimImage(c)).mssim.toFixed(4),
       };

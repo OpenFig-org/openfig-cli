@@ -2,9 +2,8 @@
  * The CSS-to-Figma filter mappings, pinned against the measurements they came
  * from.
  *
- * Both were calibrated from a compatibility-reference output of a 32-band grey ramp
- * (`scripts/build-paint-filter-probe.mjs`), and both measurements contained a
- * surprise that arithmetic would have missed:
+ * Both are pinned to the observed native transfer functions, and both contain
+ * behavior that arithmetic alone would have missed:
  *
  * **Contrast clamps at ±0.5.** Values of -1, -0.75 and -0.5 produce
  * byte-identical output, as do 0.5, 0.75 and 1. The old mapping wrote

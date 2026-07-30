@@ -86,8 +86,7 @@ node bin/cli.mjs convert-html \
     -o /tmp/probe.deck
 ```
 
-Compare `/tmp/probe.deck` with the approved native reference, paste the same paragraphs into a fresh
-Figma deck at the same widths as a control, and compare wrap points.
+Compare `/tmp/probe.deck` with the approved native wrap-point reference.
 
 When `convert-html --dry-run` lands (Phase 2 task 2.2), run with that
 flag instead — it writes the intermediate manifest without emitting a

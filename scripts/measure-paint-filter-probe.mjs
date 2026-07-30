@@ -14,7 +14,7 @@
  * value there.
  *
  * Usage:
- *   node scripts/measure-paint-filter-probe.mjs <exported.pdf>
+ *   node scripts/measure-paint-filter-probe.mjs <reference.pdf>
  */
 import { execFileSync } from 'child_process';
 import { mkdtempSync, readdirSync, rmSync } from 'fs';

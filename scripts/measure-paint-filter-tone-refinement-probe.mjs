@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Rank the combined native tone-control candidates from a compatibility-reference output.
+ * Rank the combined native tone-control candidates from a reference PDF.
  *
  * Page 1 is the Chromium CSS target. Page 2 is the current native mapping.
  * Remaining pages vary shadows, highlights, and exposure.

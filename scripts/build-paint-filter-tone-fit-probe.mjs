@@ -17,8 +17,6 @@
  *
  * Usage:
  *   node scripts/build-paint-filter-tone-fit-probe.mjs [-o out.deck]
- *
- * Then use an approved compatibility-reference PDF.
  */
 import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';

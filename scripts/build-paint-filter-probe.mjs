@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
- * Build a probe deck that measures Figma's `paintFilter` transfer functions.
+ * Build a probe deck for native `paintFilter` transfer functions.
  *
  * Why a grey ramp rather than a photograph. The previous calibration measured
- * *mean luminance* from a compatibility-reference output. That works for exposure, which moves
+ * *mean luminance* from reference output. That works for exposure, which moves
  * the mean directly, and fails for contrast, which changes the spread of the
  * histogram while leaving the mean nearly fixed — the sweep read 69.8, 68.0,
  * 61.3, 62.0, 62.2, which says almost nothing about what contrast did.
@@ -21,8 +21,6 @@
  * Usage:
  *   node scripts/build-paint-filter-probe.mjs [-o out.deck]
  *
- * Then: use an approved compatibility-reference PDF, and run
- * scripts/measure-paint-filter-probe.mjs against it.
  */
 import { writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -103,8 +101,6 @@ async function main() {
   console.log(`wrote ${outPath}`);
   console.log(`  ${plan.length} slides: 1 reference, ${CONTRAST_VALUES.length} contrast, ${EXPOSURE_VALUES.length} exposure`);
   console.log('  ramp: 32 bands, levels 8..247');
-  console.log('\nNext: use an approved compatibility-reference PDF, then');
-  console.log(`  node scripts/measure-paint-filter-probe.mjs <exported.pdf>`);
 }
 
 main().catch((err) => {

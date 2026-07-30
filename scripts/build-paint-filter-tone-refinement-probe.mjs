@@ -13,8 +13,6 @@
  *
  * Usage:
  *   node scripts/build-paint-filter-tone-refinement-probe.mjs [-o out.deck]
- *
- * Then use an approved compatibility-reference PDF.
  */
 import { execFileSync } from 'child_process';
 import {

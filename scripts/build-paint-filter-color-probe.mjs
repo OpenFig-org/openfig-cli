@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Build a minimal probe for Figma's `paintFilter.vibrance` field.
+ * Build a minimal probe for the native `paintFilter.vibrance` field.
  *
  * The production mapping currently assumes CSS `grayscale(1)` is equivalent
  * to `paintFilter.vibrance = -1`. That assumption cannot be tested with the
@@ -8,13 +8,11 @@
  *
  * Each slide here carries the same saturated/neutral PNG and at most one
  * `vibrance` value. The filter is written directly onto the image paint,
- * bypassing the CSS mapping so this measures Figma rather than our converter.
+ * bypassing the CSS mapping so it isolates native behavior from our converter.
  *
  * Usage:
  *   node scripts/build-paint-filter-color-probe.mjs [-o out.deck]
  *
- * Then use an approved compatibility-reference PDF, and run:
- *   node scripts/measure-paint-filter-color-probe.mjs <exported.pdf>
  */
 import { writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -97,8 +95,6 @@ async function main() {
   console.log(`wrote ${outPath}`);
   console.log(`  ${PROBE_STEPS.length} slides: reference plus four negative vibrance values`);
   console.log(`  ${PATCHES.length} patches: 9 saturated, 3 neutral controls`);
-  console.log('\nNext: use an approved compatibility-reference PDF, then run');
-  console.log('  node scripts/measure-paint-filter-color-probe.mjs <exported.pdf>');
 }
 
 main().catch((error) => {

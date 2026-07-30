@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Measure the compatibility-reference output of the paint-filter vibrance probe.
+ * Measure a reference PDF of the paint-filter vibrance probe.
  *
  * Chroma is `max(R,G,B) - min(R,G,B)`. A truly gray pixel has chroma zero,
  * regardless of which grayscale luminance formula produced it. Neutral patches

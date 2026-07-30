@@ -8,7 +8,7 @@ perceptual similarity metric. Scores range 0-1 where 1 = identical.
 ### How it works
 
 1. Render a slide to PNG at 1920x1080
-2. Load the reference PNG (provided as an approved compatibility reference)
+2. Load the approved compatibility-reference PNG
 3. Downscale reference to 1920x1080 via sharp
 4. Compute SSIM between rendered and reference (both as raw RGBA buffers)
 5. Assert score meets the per-slide threshold
@@ -26,7 +26,7 @@ Reference PNGs live alongside the deck in a same-named directory:
 
 ```
 decks/reference/oil-machinations/
-  page-1.png   ← Figma export, 1920x1080 (1x) or 4000x2250 (2x)
+  page-1.png   ← approved compatibility reference
   page-2.png
   ...
 decks/reference/just-fonts/
@@ -95,12 +95,11 @@ Open in browser: `file:///tmp/openfig-render-report.html`
 
 ## Adding a New Reference Deck
 
-1. Create or obtain the deck in Figma
-2. Use approved compatibility-reference PNGs
-3. Save the `.deck` file to `decks/reference/`
-4. Save the PNGs to `decks/reference/<deck-name>/page-N.png`
-5. Add a test case in `render.test.mjs` with conservative initial thresholds
-6. Run tests, note actual SSIM scores, adjust thresholds upward
+1. Obtain an approved reference deck and its compatibility-reference PNGs
+2. Save the `.deck` file to `decks/reference/`
+3. Save the PNGs to `decks/reference/<deck-name>/page-N.png`
+4. Add a test case in `render.test.mjs` with conservative initial thresholds
+5. Run tests, note actual SSIM scores, adjust thresholds upward
 
 ## Known Limitations Affecting SSIM
 

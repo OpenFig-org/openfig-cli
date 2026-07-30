@@ -32,7 +32,7 @@ beforeAll(async () => {
 afterAll(() => { rmSync(work, { recursive: true, force: true }); });
 
 /** Run one image element through the dispatcher and capture its image node. */
-async function render(filter, src = redPath) {
+async function render(filter, src = redPath, element = {}) {
   const seen = [];
   const originals = [];
   const warnings = [];
@@ -42,6 +42,10 @@ async function render(filter, src = redPath) {
       visible: true,
       blendMode: 'NORMAL',
       image: { name: 'rendered-image' },
+      imageScaleMode: 'FILL',
+      transform: { m00: 1, m01: 0, m02: 0, m10: 0, m11: 1, m12: 0 },
+      originalImageWidth: 200,
+      originalImageHeight: 100,
     }],
   };
   const slide = {
@@ -68,7 +72,16 @@ async function render(filter, src = redPath) {
     imageOps: sharpImageOps,
     warn: (message) => warnings.push(message),
   };
-  await applyElement(slide, { type: 'image', src: 'media/red.png', filter, x: 0, y: 0, width: 64, height: 64 }, ctx);
+  await applyElement(slide, {
+    type: 'image',
+    src: 'media/red.png',
+    filter,
+    x: 0,
+    y: 0,
+    width: 64,
+    height: 64,
+    ...element,
+  }, ctx);
   return { source: seen[0], originals, warnings, node };
 }
 
@@ -86,6 +99,24 @@ describe('image filter handoff', () => {
     expect(out.originals).toEqual([]);
     expect(out.node.fillPaints).toHaveLength(1);
     expect(out.node.pluginData).toBeUndefined();
+  });
+
+  it('maps a non-centered cover position to the native crop window', async () => {
+    const out = await render(undefined, redPath, {
+      objectFit: 'cover',
+      objectPosition: '25% 50%',
+    });
+    expect(out.node.fillPaints[0]).toMatchObject({
+      imageScaleMode: 'STRETCH',
+      transform: {
+        m00: 0.5,
+        m01: 0,
+        m02: 0.125,
+        m10: 0,
+        m11: 1,
+        m12: 0,
+      },
+    });
   });
 
   it('inverts RGB and preserves alpha, as bytes', async () => {

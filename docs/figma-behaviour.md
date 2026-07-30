@@ -219,11 +219,16 @@ On the converted fixture, compared with the design reference:
 | portrait crop, `grayscale(1) contrast(1.12) brightness(1.18)` | −3.9% | −3.0% |
 | photo band, `grayscale(1) contrast(1.15) brightness(1.55)` | +1.5% | −15.9% |
 
-These remain useful end-to-end observations, but the slide 7 row is not a
-filter-only measurement. The source uses `object-position: 50% 58%` and a
-directional `mask-image`; the converted node is center-cropped and has no mask.
-The two regions therefore contain different source pixels and alpha coverage.
-That separate conversion gap is tracked as openfig-cli#19. The isolated
+These remain useful historical end-to-end observations, but the slide 7 row
+was not a filter-only measurement. At the time, the source's
+`object-position: 50% 58%` and directional `mask-image` were dropped, so the two
+regions contained different source pixels and alpha coverage.
+
+The converter now writes the percentage position as the native image crop
+transform and represents a single linear `mask-image` as an editable ALPHA mask
+with gradient stops. The original image bytes and `paintFilter` remain editable.
+The slide 7 residual therefore needs to be measured again; the old `+1.5% /
+−15.9%` pair should not be treated as the post-fix result. The isolated
 brightness result above remains valid because each host's filtered image was
 normalized against its own unfiltered rendering before comparison.
 

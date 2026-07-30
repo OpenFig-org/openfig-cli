@@ -27,10 +27,17 @@ let workDir;
 let outPath;
 let fd;
 let slide2Svg;
+let slide7Svg;
 let slide10Svg;
 
 const textNodes = () => fd.message.nodeChanges.filter((n) => n.type === 'TEXT');
 const byText = (s) => textNodes().find((n) => n.textData?.characters === s);
+const nodesOnSlide = (number) => {
+  const nodes = [];
+  const slide = fd.getSlide(number);
+  fd.walkTree(`${slide.guid.sessionID}:${slide.guid.localID}`, (node) => nodes.push(node));
+  return nodes;
+};
 
 beforeAll(async () => {
   workDir = mkdtempSync(join(tmpdir(), 'carbon-html-'));
@@ -38,6 +45,7 @@ beforeAll(async () => {
   await convertStandaloneHtml(HTML_PATH, outPath, { scratchDir: join(workDir, 'build') });
   fd = await FigDeck.fromDeckFile(outPath);
   slide2Svg = slideToSvg(fd, fd.getSlide(2));
+  slide7Svg = slideToSvg(fd, fd.getSlide(7));
   slide10Svg = slideToSvg(fd, fd.getSlide(10));
 }, 120_000);
 
@@ -146,5 +154,54 @@ describe('Carbon Question standalone HTML → .deck build', () => {
       expect(images[0].paintFilter.contrast).toBeGreaterThan(0);
       expect(node.pluginData).toBeUndefined();
     }
+  });
+
+  it('keeps the slide 7 object-position as an editable native crop', () => {
+    const imageNode = nodesOnSlide(7).find((node) =>
+      node.size?.x === 1920
+      && node.size?.y === 300
+      && node.fillPaints?.some((paint) => paint.type === 'IMAGE'));
+    expect(imageNode).toBeTruthy();
+
+    const paint = imageNode.fillPaints.find((candidate) => candidate.type === 'IMAGE');
+    expect(paint.imageScaleMode).toBe('STRETCH');
+    expect(paint.paintFilter).toBeTruthy();
+
+    // The plugin API calls this mode CROP; Slides stores it as STRETCH plus a
+    // normalized source window. This photo is cropped vertically. The 58%
+    // object-position consumes 58% of that vertical overflow rather than the
+    // 50% a centered fill would consume.
+    const visibleHeight = (paint.originalImageWidth / paint.originalImageHeight) / (1920 / 300);
+    expect(paint.transform.m00).toBeCloseTo(1, 6);
+    expect(paint.transform.m11).toBeCloseTo(visibleHeight, 6);
+    expect(paint.transform.m12).toBeCloseTo((1 - visibleHeight) * 0.58, 6);
+    expect(paint.transform.m12).not.toBeCloseTo((1 - visibleHeight) * 0.5, 3);
+  });
+
+  it('keeps the slide 7 fade as an editable native alpha mask', () => {
+    const nodes = nodesOnSlide(7);
+    const mask = nodes.find((node) => node.mask === true);
+    expect(mask).toMatchObject({
+      type: 'ROUNDED_RECTANGLE',
+      maskType: 'ALPHA',
+      size: { x: 1920, y: 300 },
+    });
+
+    const paint = mask.fillPaints?.[0];
+    expect(paint?.type).toBe('GRADIENT_LINEAR');
+    expect(paint.stops.map((stop) => stop.position)).toEqual([
+      0,
+      expect.closeTo(0.58, 6),
+      1,
+    ]);
+    expect(paint.stops.map((stop) => stop.color.a)).toEqual([1, 1, 0]);
+
+    const image = nodes.find((node) =>
+      node.fillPaints?.some((candidate) => candidate.type === 'IMAGE')
+      && node.size?.y === 300);
+    expect(image.parentIndex.guid).toEqual(mask.parentIndex.guid);
+    expect(mask.parentIndex.position.localeCompare(image.parentIndex.position)).toBeLessThan(0);
+    expect(slide7Svg).toContain('mask-type:alpha');
+    expect(slide7Svg).toContain('mask="url(#alpha-mask-');
   });
 });

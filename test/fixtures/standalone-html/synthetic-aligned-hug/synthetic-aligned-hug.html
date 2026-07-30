@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Synthetic aligned text</title>
+<style>
+  html, body { margin: 0; padding: 0; }
+  section { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; background: #ffffff; }
+</style>
+</head>
+<body>
+
+<script type="__bundler/manifest">{}</script>
+<script type="__bundler/template">"<html><head><title>Synthetic aligned text</title></head><body><section data-screen-label='01 Aligned'><div id='tight' style=\"position:absolute; left:200px; top:200px; text-align:center; font-family:monospace; font-size:22px; line-height:30px; font-weight:700; color:rgb(20,20,20);\">SATISFIED OR VERY SATISFIED</div><div id='below' style=\"position:absolute; left:200px; top:250px; text-align:center; font-family:monospace; font-size:22px; line-height:30px; color:rgb(20,20,20);\">Average rating 4.02 / 5</div><div id='cell' style=\"position:absolute; left:1000px; top:200px; width:400px; text-align:right; font-family:monospace; font-size:22px; line-height:30px; color:rgb(20,20,20);\">312</div><div id='wide' style=\"position:absolute; left:1000px; top:300px; width:400px; text-align:center; font-family:monospace; font-size:22px; line-height:30px; color:rgb(20,20,20);\">276</div></section></body></html>"</script>
+
+<script>
+(function () {
+  var raw = document.querySelector('script[type="__bundler/template"]').textContent;
+  var html = JSON.parse(raw);
+  var body = html.replace(/[\s\S]*<body[^>]*>/i, '').replace(/<\/body>[\s\S]*/i, '');
+  document.body.insertAdjacentHTML('afterbegin', body);
+})();
+</script>
+
+</body>
+</html>

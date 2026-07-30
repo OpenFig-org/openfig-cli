@@ -152,8 +152,30 @@ describe('Carbon Question standalone HTML → .deck build', () => {
       });
       expect(images[0].paintFilter.exposure).toBeGreaterThan(0);
       expect(images[0].paintFilter.contrast).toBeGreaterThan(0);
+      expect(images[0].paintFilter.highlights).toBeGreaterThan(0);
+      expect(images[0].paintFilter.shadows).toBeLessThan(0);
       expect(node.pluginData).toBeUndefined();
     }
+  });
+
+  it('writes interpolated and strong brightness tone fits into the deck', () => {
+    const filteredPaintOnSlide = (number) => nodesOnSlide(number)
+      .flatMap((node) => node.fillPaints ?? [])
+      .find((paint) => paint.type === 'IMAGE' && paint.paintFilter)
+      ?.paintFilter;
+
+    // Slide 1 requests brightness(1.45), between the two calibration anchors.
+    expect(filteredPaintOnSlide(1)).toMatchObject({
+      exposure: expect.closeTo(0.2637, 4),
+      highlights: expect.closeTo(0.8784, 4),
+      shadows: expect.closeTo(-0.5878, 4),
+    });
+    // Slide 7 lands exactly on the strong brightness(1.55) anchor.
+    expect(filteredPaintOnSlide(7)).toMatchObject({
+      exposure: expect.closeTo(0.3292, 4),
+      highlights: expect.closeTo(1, 4),
+      shadows: expect.closeTo(-0.75, 4),
+    });
   });
 
   it('keeps the slide 7 object-position as an editable native crop', () => {

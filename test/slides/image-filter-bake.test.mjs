@@ -11,7 +11,7 @@ import sharp from 'sharp';
 import {
   applyElement,
   contrastForCss,
-  exposureForBrightness,
+  toneAdjustmentsForBrightness,
 } from '../../lib/slides/handoff/element-dispatch.mjs';
 import { sharpImageOps } from '../../lib/core/image-utils.mjs';
 
@@ -155,7 +155,7 @@ describe('image filter handoff', () => {
     expect(out.node.fillPaints[0].paintFilter).toEqual({
       vibrance: -1,
       contrast: contrastForCss(0.5),
-      exposure: exposureForBrightness(1.5),
+      ...toneAdjustmentsForBrightness(1.5),
     });
     expect(out.node.pluginData).toBeUndefined();
   });
@@ -174,7 +174,7 @@ describe('image filter handoff', () => {
     expect(out.source).toBe(redPath);
     expect(out.node.fillPaints[0].paintFilter).toEqual({
       vibrance: -0.25,
-      exposure: exposureForBrightness(1.32),
+      ...toneAdjustmentsForBrightness(1.32),
     });
   });
 

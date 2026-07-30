@@ -2,10 +2,11 @@
 /**
  * Build the brightness-only isolation probe and its Chromium ground truth.
  *
- * No grayscale, contrast, or blend mode is present. The native deck uses the
- * production brightness -> exposure mapping; the PNG reference pages use the
+ * No grayscale, contrast, or blend mode is present. The native deck isolates
+ * the Exposure leg of the production mapping; the PNG reference pages use the
  * browser's actual CSS `brightness()` implementation on the same source photo
- * with the same object-fit crop.
+ * with the same object-fit crop. Production additionally uses the separately
+ * calibrated Highlights/Shadows refinement.
  *
  * Usage:
  *   node scripts/build-paint-filter-brightness-probe.mjs \

@@ -191,14 +191,14 @@ async function main() {
       },
     ]);
 
-    console.log('\nBest photo mean/spread matches (crop and mask still differ):');
+    console.log('\nHistorical photo-region matches (probe predates native crop/mask support):');
     console.table(
       [...candidates]
         .sort((a, b) => a.photoStatsScore - b.photoStatsScore)
         .slice(0, 12),
     );
 
-    console.log('\nBest transfer-curve matches (crop and mask independent):');
+    console.log('\nBest transfer-curve matches (independent of crop and mask):');
     console.table(
       [...candidates]
         .sort((a, b) => a.rampRmse - b.rampRmse)

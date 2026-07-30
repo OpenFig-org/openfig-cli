@@ -193,23 +193,18 @@ measures the curve; a photograph measures the curve *and* the photograph.
 
 ### What the two together can and cannot reproduce
 
-The exposure mismatch has been isolated on the real slide 7 photograph, with no
-grayscale, contrast, or blend mode. Each host's filtered result was divided by
-its own unfiltered reference first, removing static differences in JPEG colour
-management, crop, and PDF resampling:
+The exposure mismatch also appears with no grayscale, contrast, or blend mode:
 
-| CSS brightness | Figma exposure | mean effect error | spread effect error |
+| CSS brightness | native Exposure | mean effect error | spread effect error |
 |---|---|---|---|
 | 1.18 | 0.1034 | -1.9% | **-16.9%** |
 | 1.55 | 0.3292 | -4.0% | **-30.8%** |
 
-The unfiltered Figma and Chromium references agreed to -0.21% in mean and +0.76%
-in spread, so the filtered deltas are not a baseline-rendering mismatch. At
-`brightness(1.55)`, CSS clipping makes the photograph's spread contract by
-about 6.8% (15.73 → 14.66); Figma exposure contracts it by about 35.5%
+At `brightness(1.55)`, CSS clipping makes the photograph's spread contract by
+about 6.8% (15.73 → 14.66); native Exposure contracts it by about 35.5%
 (15.86 → 10.23). The earlier shorthand that CSS brightness necessarily
 "expands spread by 1.55×" was therefore wrong for clipped photographic content.
-The measured cause is narrower and stronger: **Figma exposure compresses this
+The relevant cause is narrower and stronger: **native Exposure compresses this
 histogram far more than CSS's linear gain followed by clipping.**
 
 On the converted fixture, compared with the design reference:
@@ -224,16 +219,14 @@ was not a filter-only measurement. At the time, the source's
 `object-position: 50% 58%` and directional `mask-image` were dropped, so the two
 regions contained different source pixels and alpha coverage.
 
-The converter now writes the percentage position as the native image crop
+The converter writes the percentage position as the native image crop
 transform and represents a single linear `mask-image` as an editable ALPHA mask
 with gradient stops. The original image bytes and `paintFilter` remain editable.
-The slide 7 residual therefore needs to be measured again; the old `+1.5% /
-−15.9%` pair should not be treated as the post-fix result. The isolated
-brightness result above remains valid because each host's filtered image was
-normalized against its own unfiltered rendering before comparison.
+The old `+1.5% / −15.9%` pair therefore should not be treated as the current
+residual.
 
 Highlights and Shadows provide more native compensation than Contrast alone.
-On a neutral ramp for the complete slide 7 chain, the current mapping
+For the complete strong-brightness chain, the previous mapping
 (`vibrance: -1`, `contrast: 0.5`, `exposure: 0.3292`) and the best tested
 refinement measured:
 
@@ -245,12 +238,26 @@ refinement measured:
 
 The first refinement cuts transfer-curve RMSE by 35% and is the best overall
 curve match tested; the second preserves slightly more spread at the cost of
-mean accuracy. Neither is exact, and this one strong-brightness chain is not
-enough to define a general mapping for every `brightness()` value. It does prove
-that the current native approximation has measurable room to improve without
-baking the image. A production mapping still needs calibration across the
-supported brightness range, followed by end-to-end validation after #19 is
-fixed. Tracked as openfig-cli#20.
+mean accuracy.
+
+The production mapping uses two brightening anchors:
+
+| CSS brightness | Exposure | Highlights | Shadows | reason |
+|---|---:|---:|---:|---|
+| 1.18 | 0.1000 | 0.55 | -0.15 | mild brightness fit |
+| 1.55 | 0.3292 | 1.00 | -0.75 | best complete-chain fit |
+
+Values between identity, 1.18, and 1.55 are linearly interpolated. Above 1.55,
+Highlights and Shadows clamp at the strong anchor while the calibrated Exposure
+curve continues; brightness at or below 1 keeps the pre-existing Exposure-only
+path. This makes the refinement automatic and bounded rather than applying the
+slide 7 values to every image.
+
+On the isolated photograph at the mild anchor, the extra controls move mean
+effect error from -1.90% to +0.09% and spread effect error from -16.86% to
+-3.05%. The output is still one original IMAGE paint with editable
+`paintFilter` values. No pixels are baked and no hosted resource or user action
+is required.
 
 ### Contrast clamps at ±0.5, and its range is narrow
 
@@ -306,8 +313,8 @@ explain the filtered photo's spread deficit. This establishes the full
 desaturation endpoint, not that partial CSS `grayscale(amount)` values follow
 the same curve as partial negative vibrance.
 
-`contrast` responds but weakly on mean luminance, because contrast changes
-spread rather than average. It is **not** calibrated; see the open issues.
+`contrast` responds weakly on mean luminance because contrast changes spread
+rather than average. Its slope mapping is calibrated above.
 
 ### Blend modes are a 1:1 rename of CSS
 
@@ -398,21 +405,21 @@ legacy alpha-mask operations `invert(1)` and `brightness(0) invert(1)` remain
 raster fallbacks because Figma exposes no equivalent adjustment.
 
 Standard native layer combinations do not add a fourth exact option. Two-copy
-Plus Lighter probes, tested both as stacked image paints and stacked nodes,
-produced ramp pixels identical to the unfiltered reference. Adding Highlights
-and Shadows to Exposure improved a brightness-ramp fit but did not reproduce it:
+Plus Lighter arrangements, as stacked image paints or stacked nodes, leave the
+ramp unchanged. Adding Highlights and Shadows to Exposure improves a
+brightness-only ramp but does not reproduce it:
 
-| CSS target | native treatment | ramp MAE | maximum channel error |
+| CSS target | treatment | ramp MAE | maximum channel error |
 |---|---|---:|---:|
 | `brightness(1.18)` | Exposure only | 7.13 | 27 |
-| `brightness(1.18)` | Exposure + Highlights/Shadows | 2.53 | 15 |
+| `brightness(1.18)` | best brightness-only tone fit | 2.53 | 15 |
 | `brightness(1.55)` | Exposure only | 13.84 | 30 |
-| `brightness(1.55)` | Exposure + Highlights/Shadows | 4.41 | 19 |
+| `brightness(1.55)` | best brightness-only tone fit | 4.41 | 19 |
 
-Those controls are useful approximation levers, not an exact implementation.
-They are nevertheless the product implementation because they preserve the
-original asset and Figma-native editability. Automatic reversible dual-fill
-baking is not the default and should not be presented as the portable solution.
+Those controls are approximation levers, not an exact implementation. They are
+the product implementation because they preserve the original asset and native
+editability. Automatic reversible dual-fill baking is not the default and
+should not be presented as the portable solution.
 
 ---
 

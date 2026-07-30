@@ -25,8 +25,10 @@
  */
 import { describe, it, expect } from 'vitest';
 import {
+  BRIGHTNESS_TONE_REFINEMENT,
   contrastForCss,
   exposureForBrightness,
+  toneAdjustmentsForBrightness,
   CONTRAST_CURVE,
   EXPOSURE_CURVE,
 } from '../../lib/slides/handoff/element-dispatch.mjs';
@@ -109,6 +111,51 @@ describe('exposure', () => {
       expect(e).toBeGreaterThan(EXPOSURE_CURVE[i][0] - 1e-6);
       expect(e).toBeLessThan(EXPOSURE_CURVE[i + 1][0] + 1e-6);
     }
+  });
+});
+
+describe('editable brightness tone refinement', () => {
+  it('leaves brightness darkening on the calibrated Exposure curve', () => {
+    for (const brightness of [0, 0.25, 0.5, 0.9, 1]) {
+      expect(toneAdjustmentsForBrightness(brightness)).toEqual({
+        exposure: exposureForBrightness(brightness),
+      });
+    }
+  });
+
+  it('reproduces both measured brightening fits', () => {
+    expect(toneAdjustmentsForBrightness(1.18)).toEqual({
+      exposure: 0.1,
+      highlights: 0.55,
+      shadows: -0.15,
+    });
+    expect(toneAdjustmentsForBrightness(1.55)).toEqual({
+      exposure: 0.3292,
+      highlights: 1,
+      shadows: -0.75,
+    });
+  });
+
+  it('interpolates monotonically and clamps the extra controls', () => {
+    const seq = [1, 1.05, 1.18, 1.3, 1.55, 1.8, 5]
+      .map(toneAdjustmentsForBrightness);
+    for (let i = 1; i < seq.length; i++) {
+      expect(seq[i].exposure).toBeGreaterThanOrEqual(seq[i - 1].exposure);
+      expect(seq[i].highlights ?? 0).toBeGreaterThanOrEqual(
+        seq[i - 1].highlights ?? 0,
+      );
+      expect(seq[i].shadows ?? 0).toBeLessThanOrEqual(seq[i - 1].shadows ?? 0);
+    }
+    expect(seq.at(-1)).toMatchObject({ highlights: 1, shadows: -0.75 });
+    expect(seq.at(-1).exposure).toBeLessThanOrEqual(1);
+  });
+
+  it('records identity plus the two measured calibration anchors', () => {
+    expect(BRIGHTNESS_TONE_REFINEMENT).toEqual([
+      [1, 0, 0, 0],
+      [1.18, -0.0034, 0.55, -0.15],
+      [1.55, 0, 1, -0.75],
+    ]);
   });
 });
 

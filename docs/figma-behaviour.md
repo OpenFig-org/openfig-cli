@@ -129,6 +129,37 @@ control is **Exposure**. Mapping CSS `brightness()` onto `brightness` produces
 an image that never brightens, which stays invisible until something else
 darkens it.
 
+### Figma-authored exports prove that Color Adjust is self-contained
+
+A native adjusted image was inspected on 2026-07-29 after changing
+the image's native Color Adjust sliders. The node contained one ordinary IMAGE
+paint over the original 2560×1920 JPEG. Its adjustments were serialized
+directly on that paint:
+
+```json
+{
+  "paintFilter": {
+    "exposure": 0.23,
+    "contrast": -0.15,
+    "vibrance": 0.43,
+    "temperature": 0,
+    "tint": 0.20,
+    "highlights": 0.32,
+    "shadows": -0.39
+  }
+}
+```
+
+There was no adjusted image asset, second fill, shader ID, effect, plugin data,
+library reference, or account-bound resource. The archive contained only the
+original JPEG and its 320×240 thumbnail. The UI label **Saturation** therefore
+maps to the kiwi field `vibrance`.
+
+OpenFig decoded and re-encoded the export without changing any `paintFilter`
+value. This establishes that native Color Adjust is both writable by OpenFig
+and editable after import, while remaining self-contained and independent of
+Figma-hosted shaders.
+
 ### Exposure is a tone curve, not a gain
 
 The important part is not that it is non-linear in CSS brightness — it is that
@@ -359,19 +390,21 @@ operation, but it is **not an access-independent OpenFig solution**. A generated
 deck must not depend on a particular Figma user, library subscription, plugin,
 API session, or remotely hosted effect.
 
-The self-contained implementation is:
+The access-independent, editable implementation is Figma's native
+`paintFilter`. OpenFig keeps the untouched source as the node's single IMAGE
+paint and writes calibrated Exposure, Contrast, and Saturation values onto it.
+The deck opens already adjusted, and a designer can continue editing those
+values in Figma's standard Color Adjust panel. No plugin, library, shader,
+second image payload, or user action is required.
 
-**Exact, automatic, reversible dual fill.** OpenFig bakes the CSS chain into the
-visible IMAGE paint and keeps the untouched source as a second, hidden IMAGE
-paint on the same node. The authored CSS chain and a format version live in the
-node's existing `pluginData` field. Both image hashes live in the deck.
-
-This is not a user-facing mode or toggle. The deck opens with the exact rendered
-fill already visible and requires no action. The hidden source is an
-implementation detail that lets OpenFig recover and re-bake the image later.
-Keeping both paints on one node also keeps one geometry, crop, opacity, and
-blend mode. No plugin is required to display or edit the ordinary Figma node.
-The costs are one extra image payload and no native filter sliders.
+This deliberately prioritizes post-conversion editability over byte-identical
+CSS rendering. Figma's transfer functions and fixed adjustment pipeline cannot
+preserve every CSS curve or arbitrary operation order. OpenFig maps
+`brightness()`, `contrast()`, `grayscale()`, and `saturate()` to the closest
+native controls. A chain containing an operation with no native field, such as
+`sepia()`, is reported instead of silently baking the photograph. The two
+legacy alpha-mask operations `invert(1)` and `brightness(0) invert(1)` remain
+raster fallbacks because Figma exposes no equivalent adjustment.
 
 Standard native layer combinations do not add a fourth exact option. Two-copy
 Plus Lighter probes, tested both as stacked image paints and stacked nodes,
@@ -386,10 +419,9 @@ and Shadows to Exposure improved a brightness-ramp fit but did not reproduce it:
 | `brightness(1.55)` | Exposure + Highlights/Shadows | 4.41 | 19 |
 
 Those controls are useful approximation levers, not an exact implementation.
-OpenFig therefore applies the reversible dual fill automatically for every
-supported CSS image-filter chain. `paintFilter` remains useful as measured
-format knowledge, but it is not emitted as the visual implementation of those
-chains.
+They are nevertheless the product implementation because they preserve the
+original asset and Figma-native editability. Automatic reversible dual-fill
+baking is not the default and should not be presented as the portable solution.
 
 ---
 

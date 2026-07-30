@@ -1,15 +1,18 @@
 /**
- * Image filters are rendered automatically into the visible paint while the
- * untouched source is retained as an invisible recovery paint. The renderer
- * hands `addImage` bytes directly, keeping filesystem concerns out of the
- * element dispatcher.
+ * Image filters use the original image and Figma's native editable Color
+ * Adjust fields whenever possible. The two legacy mask transforms that have
+ * no native equivalent still exercise the raster fallback.
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import sharp from 'sharp';
-import { applyElement } from '../../lib/slides/handoff/element-dispatch.mjs';
+import {
+  applyElement,
+  contrastForCss,
+  exposureForBrightness,
+} from '../../lib/slides/handoff/element-dispatch.mjs';
 import { sharpImageOps } from '../../lib/core/image-utils.mjs';
 
 let work;
@@ -32,6 +35,7 @@ afterAll(() => { rmSync(work, { recursive: true, force: true }); });
 async function render(filter, src = redPath) {
   const seen = [];
   const originals = [];
+  const warnings = [];
   const node = {
     fillPaints: [{
       type: 'IMAGE',
@@ -58,9 +62,14 @@ async function render(filter, src = redPath) {
   // `imageOps` is now required rather than defaulted to `sharpImageOps`:
   // the default was a module-scope import that dragged `sharp` — and through
   // it `node:fs` — into the browser bundle whether or not the branch ran.
-  const ctx = { resolveMedia: () => src, slideIndex: 1, imageOps: sharpImageOps };
+  const ctx = {
+    resolveMedia: () => src,
+    slideIndex: 1,
+    imageOps: sharpImageOps,
+    warn: (message) => warnings.push(message),
+  };
   await applyElement(slide, { type: 'image', src: 'media/red.png', filter, x: 0, y: 0, width: 64, height: 64 }, ctx);
-  return { source: seen[0], originals, node };
+  return { source: seen[0], originals, warnings, node };
 }
 
 const bake = async (filter, src = redPath) => (await render(filter, src)).source;
@@ -70,7 +79,7 @@ const pixels = async (bytes) => {
   return [...data];
 };
 
-describe('image filter baking', () => {
+describe('image filter handoff', () => {
   it('passes the path straight through when there is no filter', async () => {
     const out = await render(undefined);
     expect(out.source).toBe(redPath);
@@ -95,7 +104,7 @@ describe('image filter baking', () => {
     expect(px[11]).toBe(0);
   });
 
-  it('automatically renders a CSS chain and retains the source invisibly', async () => {
+  it('keeps a CSS chain native, self-contained and editable', async () => {
     const filter = {
       css: 'grayscale(1) contrast(.5) brightness(1.5)',
       ops: [
@@ -106,24 +115,51 @@ describe('image filter baking', () => {
     };
     const out = await render(filter);
 
-    expect((await pixels(out.source)).slice(0, 4)).toEqual([135, 135, 135, 255]);
-    expect(out.originals).toEqual([redPath]);
-    expect(out.node.fillPaints).toHaveLength(2);
+    expect(out.source).toBe(redPath);
+    expect((await pixels(out.source)).slice(0, 4)).toEqual([255, 0, 0, 255]);
+    expect(out.originals).toEqual([]);
+    expect(out.warnings).toEqual([]);
+    expect(out.node.fillPaints).toHaveLength(1);
     expect(out.node.fillPaints[0]).toMatchObject({ visible: true });
-    expect(out.node.fillPaints[0].paintFilter).toBeUndefined();
-    expect(out.node.fillPaints[1]).toMatchObject({
-      visible: false,
-      image: { name: 'source-image' },
+    expect(out.node.fillPaints[0].paintFilter).toEqual({
+      vibrance: -1,
+      contrast: contrastForCss(0.5),
+      exposure: exposureForBrightness(1.5),
+    });
+    expect(out.node.pluginData).toBeUndefined();
+  });
+
+  it('combines repeated native operations before calibrating the controls', async () => {
+    const out = await render({
+      css: 'saturate(1.5) grayscale(.5) brightness(1.1) brightness(1.2)',
+      ops: [
+        { fn: 'saturate', amount: 1.5 },
+        { fn: 'grayscale', amount: 0.5 },
+        { fn: 'brightness', amount: 1.1 },
+        { fn: 'brightness', amount: 1.2 },
+      ],
     });
 
-    const metadata = out.node.pluginData.find((entry) => entry.key === 'css-image-filter');
-    expect(metadata.pluginID).toBe('org.openfig');
-    expect(JSON.parse(metadata.value)).toEqual({
-      version: 1,
-      css: filter.css,
-      renderedImage: 'rendered-image',
-      sourceImage: 'source-image',
+    expect(out.source).toBe(redPath);
+    expect(out.node.fillPaints[0].paintFilter).toEqual({
+      vibrance: -0.25,
+      exposure: exposureForBrightness(1.32),
     });
+  });
+
+  it('warns rather than baking a chain with no editable native equivalent', async () => {
+    const filter = {
+      css: 'sepia(1)',
+      ops: [{ fn: 'sepia', amount: 1 }],
+    };
+    const out = await render(filter);
+
+    expect(out.source).toBe(redPath);
+    expect(out.node.fillPaints[0].paintFilter).toBeUndefined();
+    expect(out.node.fillPaints).toHaveLength(1);
+    expect(out.warnings).toEqual([
+      'image filter "sepia(1)" has no editable Figma equivalent',
+    ]);
   });
 
   it('caches by source and filter rather than by a file on disk', async () => {

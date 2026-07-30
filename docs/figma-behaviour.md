@@ -291,10 +291,12 @@ spread rather than average. It is **not** calibrated; see the open issues.
 
 `BlendMode` covers MULTIPLY, SCREEN, OVERLAY, DARKEN, LIGHTEN, COLOR_DODGE,
 COLOR_BURN, HARD_LIGHT, SOFT_LIGHT, DIFFERENCE, EXCLUSION, HUE, SATURATION,
-COLOR, LUMINOSITY — the same operations CSS `mix-blend-mode` has. Only
-`plus-lighter` and `plus-darker` have no counterpart.
+COLOR, and LUMINOSITY — the same operations CSS `mix-blend-mode` has. The schema
+also names `LINEAR_DODGE` and `LINEAR_BURN`, but they are not safe aliases for
+CSS `plus-lighter` and `plus-darker`: the additive image probes below rendered
+unchanged. The converter therefore leaves those two CSS modes unmapped.
 
-### Custom shaders are the exact editable path
+### Custom shaders prove capability, not portable delivery
 
 Figma does support programmable image effects. They are a separate feature from
 the native **Color adjust** panel, which is why the limits above do not describe
@@ -345,31 +347,51 @@ The exported file used a 627-definition kiwi schema; OpenFig's current authored
 schema has 550 definitions and lacks the custom-effect fields. Schema support is
 therefore a concrete implementation task, not an unknown rendering problem.
 
-There is one distribution constraint. The `.deck` contains the versioned shader
-reference and property definitions, but not the shader source. The hidden
-`CODE_COMPONENT` had no `sourceCode` or `blobRef`, and the archive contained no
-shader file. This agrees with Figma's API contract: a shader must be owned by the
-user or available through a subscribed library before it can be imported.
+There is one decisive distribution constraint. The `.deck` contains the
+versioned shader reference and property definitions, but not the shader source.
+The hidden `CODE_COMPONENT` had no `sourceCode` or `blobRef`, and the archive
+contained no shader file. This agrees with Figma's API contract: a shader must
+be owned by the user or available through a subscribed library before it can be
+imported.
 
-That makes the product options:
+Therefore the shader proves that Figma's renderer is capable of the exact
+operation, but it is **not an access-independent OpenFig solution**. A generated
+deck must not depend on a particular Figma user, library subscription, plugin,
+API session, or remotely hosted effect.
 
-1. Publish a project-owned shader and teach OpenFig to emit the custom-effect
-   resource and ordered assignments. This is exact and editable, but requires a
-   stable library distribution path and an import test by a recipient without
-   creator-library access.
-2. Keep native `paintFilter` as the portable editable fallback. It remains an
-   approximation for CSS brightness and strong contrast.
-3. Offer explicit full-chain baking for users who prefer portable pixel fidelity
-   over native editability.
-4. Preserve a hidden source image plus OpenFig filter metadata beside a baked
-   visible image. This is reversible through OpenFig, but not through Figma's
-   native Color adjust controls, and increases file size.
+The remaining self-contained options are:
 
-The recommended sequence is to keep the native fallback, validate a
-project-owned shader with a recipient who lacks creator-library access, then add
-custom-effect serialization behind capability detection. Automatic baking
-should not silently replace an editable image; if added, it should be an
-explicit fidelity choice with a warning.
+1. **Exact, reversible dual fill — recommended.** Bake the CSS chain into the
+   visible IMAGE paint and keep the untouched source as a second, hidden IMAGE
+   paint on the same node. Store the authored CSS chain and a format version in
+   the node's existing `pluginData` field. Both image hashes live in the deck.
+   The node keeps one geometry, crop, opacity, and blend mode; a user can toggle
+   the fills to recover the original, and OpenFig can re-bake it later. No
+   plugin is required to display or edit the ordinary Figma node. The costs are
+   one extra image payload and no native filter sliders.
+2. **Exact, destructive single fill.** Bake the chain and keep only the result.
+   This is the smallest exact file, but discards the source and should only be
+   an explicit export choice.
+3. **Native editable approximation.** Keep `paintFilter`, with the measured
+   exposure/contrast limits documented above. This is the smallest and most
+   editable option, but cannot promise visual equivalence.
+
+Standard native layer combinations do not add a fourth exact option. Two-copy
+Plus Lighter probes, tested both as stacked image paints and stacked nodes,
+produced ramp pixels identical to the unfiltered reference. Adding Highlights
+and Shadows to Exposure improved a brightness-ramp fit but did not reproduce it:
+
+| CSS target | native treatment | ramp MAE | maximum channel error |
+|---|---|---:|---:|
+| `brightness(1.18)` | Exposure only | 7.13 | 27 |
+| `brightness(1.18)` | Exposure + Highlights/Shadows | 2.53 | 15 |
+| `brightness(1.55)` | Exposure only | 13.84 | 30 |
+| `brightness(1.55)` | Exposure + Highlights/Shadows | 4.41 | 19 |
+
+Those controls are useful approximation levers, not an exact implementation.
+The product choice can therefore be explicit and access-independent:
+**portable exact** uses the reversible dual fill; **native editable** uses
+`paintFilter` and reports that it is approximate.
 
 ---
 

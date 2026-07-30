@@ -244,7 +244,7 @@ mean accuracy. Neither is exact, and this one strong-brightness chain is not
 enough to define a general mapping for every `brightness()` value. It does prove
 that the current native approximation has measurable room to improve without
 baking the image. A production mapping still needs calibration across the
-supported brightness range, followed by end-to-end validation after #17 is
+supported brightness range, followed by end-to-end validation after #19 is
 fixed. Tracked as openfig-cli#20.
 
 ### Contrast clamps at ±0.5, and its range is narrow

@@ -294,6 +294,83 @@ COLOR_BURN, HARD_LIGHT, SOFT_LIGHT, DIFFERENCE, EXCLUSION, HUE, SATURATION,
 COLOR, LUMINOSITY — the same operations CSS `mix-blend-mode` has. Only
 `plus-lighter` and `plus-darker` have no counterpart.
 
+### Custom shaders are the exact editable path
+
+Figma does support programmable image effects. They are a separate feature from
+the native **Color adjust** panel, which is why the limits above do not describe
+the full rendering model.
+
+The public Plugin API exposes shaders through
+[`listAvailableShaders`](https://developers.figma.com/docs/plugins/api/properties/figma-listavailableshaders/)
+and [`importShaderById`](https://developers.figma.com/docs/plugins/api/Shader/).
+After a shader has been imported into the file, a plugin can attach it to
+`node.effects` as a `SHADER` effect and assign its editable properties by
+property-definition ID.
+
+A three-operation native effect has the following behavior. It implements the
+CSS primitives directly in sRGB:
+
+```text
+brightness(a): rgb = clamp(rgb * a)
+contrast(a):   rgb = clamp((rgb - 0.5) * a + 0.5)
+grayscale(a):  rgb = mix(rgb, dot(rgb, [0.2126, 0.7152, 0.0722]), a)
+```
+
+The shader exposes an Operation dropdown and an Amount slider. Pixel samples
+from Figma matched the equations exactly after byte rounding:
+
+| probe | representative Figma result |
+|---|---|
+| 50% grayscale of red | `(155, 27, 27)` |
+| 150% brightness of `(116, 116, 116)` | `(174, 174, 174)` |
+| 50% contrast of black / white | `(64, 64, 64)` / `(191, 191, 191)` |
+| 50% contrast, then 150% brightness of `(116, 116, 116)` | `(183, 183, 183)` |
+
+The last sample also establishes execution order: Figma applies shader effects
+from top to bottom in the Effects list. Writing one shader instance per parsed
+CSS operation therefore preserves CSS's left-to-right chain order.
+
+Figma Design-to-Slides transfer of an effected node into a
+`.deck` preserved both instances, their order, and their control values. The
+public Plugin API and the binary format use different names for the same object:
+
+| public Plugin API | `.deck` kiwi message |
+|---|---|
+| effect type `SHADER` | `EffectType.CUSTOM` |
+| shader `id` | `customEffectId.assetRef` |
+| `properties` | `componentPropAssignments` |
+| imported shader metadata | hidden `CODE_COMPONENT` with `codeObjectType: CUSTOM_EFFECT` |
+
+The exported file used a 627-definition kiwi schema; OpenFig's current authored
+schema has 550 definitions and lacks the custom-effect fields. Schema support is
+therefore a concrete implementation task, not an unknown rendering problem.
+
+There is one distribution constraint. The `.deck` contains the versioned shader
+reference and property definitions, but not the shader source. The hidden
+`CODE_COMPONENT` had no `sourceCode` or `blobRef`, and the archive contained no
+shader file. This agrees with Figma's API contract: a shader must be owned by the
+user or available through a subscribed library before it can be imported.
+
+That makes the product options:
+
+1. Publish a project-owned shader and teach OpenFig to emit the custom-effect
+   resource and ordered assignments. This is exact and editable, but requires a
+   stable library distribution path and an import test by a recipient without
+   creator-library access.
+2. Keep native `paintFilter` as the portable editable fallback. It remains an
+   approximation for CSS brightness and strong contrast.
+3. Offer explicit full-chain baking for users who prefer portable pixel fidelity
+   over native editability.
+4. Preserve a hidden source image plus OpenFig filter metadata beside a baked
+   visible image. This is reversible through OpenFig, but not through Figma's
+   native Color adjust controls, and increases file size.
+
+The recommended sequence is to keep the native fallback, validate a
+project-owned shader with a recipient who lacks creator-library access, then add
+custom-effect serialization behind capability detection. Automatic baking
+should not silently replace an editable image; if added, it should be an
+explicit fidelity choice with a warning.
+
 ---
 
 ## Diagnosing an import that fails

@@ -17,6 +17,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { prepareForMeasurement } from '../../lib/slides/core/measurement-surface.mjs';
+import { NAMEABLE_WEIGHTS } from '../../lib/slides/font-normalize.mjs';
 
 /** A stub realm: a font set, and elements with computed styles. */
 function makeRealm(fonts, elements) {
@@ -170,5 +171,33 @@ describe('clamping font-weight to faces the family ships', () => {
     const el = makeElement('"Helvetica Neue", sans-serif', 700);
     await runClamp([{ family: 'Space Grotesk', weight: '400' }], [el]);
     expect(el.applied['font-weight']).toBeUndefined();
+  });
+});
+
+describe('NAMEABLE_WEIGHTS coupling', () => {
+  it('is the vocabulary the clamp and the handoff share', () => {
+    // Canary: widening mapFontStyle's vocabulary must widen this list too.
+    expect(NAMEABLE_WEIGHTS).toEqual([400, 700]);
+  });
+
+  it('threads through prepareForMeasurement into the clamp', async () => {
+    // A family with 300 and 400 but no 700. With the default vocabulary
+    // ([400, 700]) a bold request clamps to 400. With a widened vocabulary
+    // that includes 300, it should clamp to 300 instead — proving the
+    // weights passed in are what the clamp actually uses.
+    const el = makeElement('"Buda", serif', 700);
+    const realm = makeRealm([face('Buda', 300), face('Buda', 400)], [el]);
+    const surface = {
+      waitForSelector: async () => {},
+      evaluate: async (fn, arg) => fn({ realm, arg }),
+      loadWebFont: async () => {},
+      settle: async () => {},
+    };
+    await prepareForMeasurement(
+      surface,
+      { webFontPreload: false, log: () => {} },
+      { nameableWeights: [300, 400, 700] },
+    );
+    expect(el.applied['font-weight']).toBe('400');
   });
 });

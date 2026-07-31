@@ -288,16 +288,11 @@ that image to +2.81% mean and -2.68% spread. It is **not** a safe global
 replacement: across all five photographs its mean absolute spread error is
 5.04%, and it loses 7.96% of the landscape's spread and 8.67% of the interior's.
 
-A source-aware choice would combine the four current results with the
-Exposure-only flower result, reducing this set to 0.85% mean error and 0.75%
-spread error. That number is a post-hoc bound, not a production calibration:
-the selector still needs validation across more hues and photographs.
-
-The outlier has a deterministic color-space explanation. CSS `grayscale(1)`
-computes its weighted matrix directly on gamma-encoded RGB. Native full
-desaturation preserves linear-light luminance and encodes the resulting neutral
-value back to sRGB. The existing synthetic color-patch probe therefore produces
-very different gray levels while reaching zero chroma in both cases:
+The outlier has a deterministic color-space signal. CSS `grayscale(1)` computes
+its weighted matrix directly on gamma-encoded RGB. Native full desaturation
+preserves linear-light luminance and encodes the resulting neutral value back
+to sRGB. The existing synthetic color-patch probe therefore produces very
+different gray levels while reaching zero chroma in both cases:
 
 | source patch | CSS gray | native gray | native vs CSS |
 |---|---:|---:|---:|
@@ -310,14 +305,77 @@ very different gray levels while reaching zero chroma in both cases:
 Across the normalized stock photographs, mean absolute CSS-vs-native grayscale
 difference is 0 to 1.18 levels for the first four and 15.06 for the flower.
 The flower's mean gray is 134.00 under the CSS matrix and 149.06 under the
-native linear-light transform. Those values can be computed from the source
-pixels locally; a future selector does not require an account, hosted renderer,
-plugin, user toggle, or baked replacement image.
+native linear-light transform. Bright red and magenta photographs show that
+the whole-image difference alone is not a safe selector: their large difference
+does not mean that removing the native Highlights correction improves them.
 
-The global anchors remain unchanged until that selector is validated. The
-reproducible builders and scorer are
+### Eleven-photo source-aware validation
+
+The production selector therefore measures where the difference occurs, not
+only how large it is. It decodes an aspect-preserving sample no larger than
+64 pixels on its longest side and compares the CSS gamma-encoded grayscale
+value with linear-light luminance. Each absolute per-pixel difference is
+weighted continuously by the CSS gray level: no contribution below level 96,
+full contribution at level 160, and a linear fade between them. Transparent
+pixels are weighted by alpha.
+
+That highlight-weighted difference predicts when the native Highlights
+correction will amplify a source-color mismatch. Ordinary photographs and the
+dark red and magenta sources measure 0–0.81 levels; blue sky measures 2.37,
+mixed bright colors 3.61, and the bright saturated flower 8.97. OpenFig maps
+that signal continuously from zero risk at 2 levels to full risk at 6 levels.
+A complementary whole-image band handles a large difference concentrated
+below highlights: it fades from zero at 15 levels to full at 22, gated by the
+inverse highlight risk. This separates the magenta source at 23 levels from the
+next non-highlight source at 9.15 without testing its hue or identity.
+
+For color-preserving brightening, the risk attenuates the extra Exposure
+correction, Highlights, and Shadows toward the calibrated Exposure-only
+treatment. It is not a binary image classification:
+
+- zero risk retains the established global tone fit;
+- intermediate risk blends continuously between the two fits;
+- full risk uses Exposure only;
+- strong below-highlight risk adds the measured bounded Exposure/Shadow
+  correction while retaining Highlights;
+- partial grayscale scales the source influence by the color that remains;
+- full grayscale keeps the existing complete-chain calibration.
+
+If source decoding fails, conversion falls back to the established global tone
+fit. Analysis changes only the numeric `paintFilter`; the original image stays
+the node's one IMAGE asset. There is no baked replacement, second image,
+network request, hosted resource, user toggle, or post-import step. The same
+64-pixel analysis and thresholds run in the Node and browser conversion hosts.
+
+The selector was checked on eleven CC0 photographs spanning neutral scenes,
+dark and bright histograms, skin, red, blue, magenta, green, and mixed
+saturated colors. Unmodified control pairs were identical, establishing zero
+crop or comparison noise.
+
+| condition | photos | mean absolute mean error | mean absolute spread error | mean RMSE | mean SSIM | worst RMSE |
+|---|---:|---:|---:|---:|---:|---:|
+| unmodified control | 11 | 0.00% | 0.00% | 0.00 | 1.0000 | 0.00 |
+| previous global mapping | 11 | 2.29% | 2.80% | 13.41 | 0.9908 | 48.29 |
+| automatic source-aware mapping | 11 | **1.04%** | **1.24%** | **11.61** | **0.9926** | **35.32** |
+| Exposure-only everywhere | 11 | 2.55% | 7.75% | 11.90 | 0.9888 | 35.32 |
+
+On the saturated flower, source-aware mapping moves mean/spread error from
+`+7.70% / +14.23%` to `+2.81% / -2.68%`. On mixed bright colors it moves
+`+3.30% / +6.00%` to `+1.93% / +0.53%`; blue sky improves modestly. The red,
+green, skin, and four neutral photographs retain the global mapping, avoiding
+the regressions an Exposure-only global policy causes. The below-highlight path
+moves magenta from `+7.96% / -3.41%` to `-0.88% / -2.89%`.
+
+Every automatic result is inside the validation gate: the worst absolute mean
+discrepancy is 2.81% and the worst absolute spread discrepancy is 3.80%, both
+below 5%. This remains a calibrated approximation rather than pixel identity;
+the native transfer functions still cannot express the CSS operation exactly.
+
+The reproducible builders and scorer are
 `scripts/build-paint-filter-stock-probe.mjs` and
-`scripts/measure-paint-filter-stock-probe.mjs`.
+`scripts/measure-paint-filter-stock-probe.mjs`. The source-aware mode includes
+the unmodified controls, previous global mapping, automatic selector, and
+Exposure-only comparison.
 
 Public-domain source record:
 
@@ -326,6 +384,12 @@ Public-domain source record:
 - [Snowfall over Brofjorden and Preemraff](https://commons.wikimedia.org/wiki/File:Snowfall_at_night_over_Brofjorden_and_Preemraff_oil_refinery.jpg) - CC0 1.0
 - [Interior of Sainte-Anne-de-Beaupre](https://commons.wikimedia.org/wiki/File:Interior_of_the_Basilica_of_Sainte-Anne-de-Beaupr%C3%A9.jpg) - CC0 1.0
 - [Gazania krebsiana](https://commons.wikimedia.org/wiki/File:Gazania_krebsiana,_Quebec_city,_Quebec,_Canada_131.jpg) - CC0 1.0
+- [Blooming red flower](https://commons.wikimedia.org/wiki/File:Blooming_red_flower.jpg) - CC0 1.0
+- [Blue sky image](https://commons.wikimedia.org/wiki/File:Blue_sky_image.jpg) - CC0 1.0
+- [Magenta color rose](https://commons.wikimedia.org/wiki/File:Magenta_color_rose.jpg) - CC0 1.0
+- [Green leaves 1](https://commons.wikimedia.org/wiki/File:Green_leaves_1.jpg) - CC0 1.0
+- [Portrait (90606475)](https://commons.wikimedia.org/wiki/File:Portrait_(90606475).jpeg) - CC0 1.0
+- [Colorful Bell Peppers](https://commons.wikimedia.org/wiki/File:Colorful_Bell_Peppers_(Unsplash).jpg) - CC0 1.0
 
 ### Contrast clamps at ±0.5, and its range is narrow
 

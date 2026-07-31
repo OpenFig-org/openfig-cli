@@ -329,6 +329,7 @@ describe('canvas image ops, the browser replacement for sharp', () => {
   // of every assertion sit outside the implementation under test.
   let redPng;
   let filterProbePng;
+  let analysisProbePng;
 
   beforeAll(async () => {
     // 2x2, pure red, the bottom row fully transparent. Drawn 1:1, so no
@@ -344,6 +345,21 @@ describe('canvas image ops, the browser replacement for sharp', () => {
       116, 116, 116, 255,
       0, 0, 0, 0,
     ]), { raw: { width: 5, height: 1, channels: 4 } }).png().toBuffer();
+    const analysisPixels = Buffer.alloc(96 * 48 * 4);
+    for (let y = 0; y < 48; y++) {
+      for (let x = 0; x < 96; x++) {
+        const offset = (y * 96 + x) * 4;
+        analysisPixels[offset] = x < 32 ? 255 : Math.round((x / 95) * 255);
+        analysisPixels[offset + 1] = x >= 32 && x < 64
+          ? 255
+          : Math.round((y / 47) * 180);
+        analysisPixels[offset + 2] = x >= 64 ? 255 : 24;
+        analysisPixels[offset + 3] = y < 40 ? 255 : Math.round((47 - y) * 255 / 7);
+      }
+    }
+    analysisProbePng = await sharp(analysisPixels, {
+      raw: { width: 96, height: 48, channels: 4 },
+    }).png().toBuffer();
   });
 
   /** Run one op in the page and bring the bytes back. */
@@ -364,6 +380,22 @@ describe('canvas image ops, the browser replacement for sharp', () => {
 
   it('reports intrinsic dimensions', async () => {
     expect(await run('imageSize', redPng)).toEqual({ width: 2, height: 2 });
+  });
+
+  it('agrees with Node on the downsampled source-colour profile', async () => {
+    const browser = await run('analyzeSourceColor', analysisProbePng);
+    const node = await sharpImageOps.analyzeSourceColor(analysisProbePng);
+
+    expect(browser).toMatchObject({
+      width: 64,
+      height: 32,
+      samples: 2048,
+    });
+    expect(browser.sampleWeight).toBeCloseTo(node.sampleWeight, 0);
+    expect(browser.cssLinearLumaDelta)
+      .toBeCloseTo(node.cssLinearLumaDelta, 1);
+    expect(browser.highlightCssLinearLumaDelta)
+      .toBeCloseTo(node.highlightCssLinearLumaDelta, 1);
   });
 
   it('inverts RGB and preserves alpha', async () => {

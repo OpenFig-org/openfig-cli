@@ -11,22 +11,49 @@ import sharp from 'sharp';
 import {
   applyElement,
   contrastForCss,
+  exposureForBrightness,
   toneAdjustmentsForBrightness,
 } from '../../lib/slides/handoff/element-dispatch.mjs';
 import { sharpImageOps } from '../../lib/core/image-utils.mjs';
 
 let work;
 let redPath;
+let neutralPath;
+let brightOrangePath;
 
 beforeAll(async () => {
   work = mkdtempSync(join(tmpdir(), 'image-filter-bake-'));
   redPath = join(work, 'red.png');
+  neutralPath = join(work, 'neutral.png');
+  brightOrangePath = join(work, 'bright-orange.png');
   // 2×2, pure red, half of it transparent.
   const rgba = Buffer.from([
     255, 0, 0, 255, 255, 0, 0, 255,
     255, 0, 0, 0, 255, 0, 0, 0,
   ]);
   writeFileSync(redPath, await sharp(rgba, { raw: { width: 2, height: 2, channels: 4 } }).png().toBuffer());
+  writeFileSync(
+    neutralPath,
+    await sharp({
+      create: {
+        width: 2,
+        height: 2,
+        channels: 4,
+        background: { r: 116, g: 116, b: 116, alpha: 1 },
+      },
+    }).png().toBuffer(),
+  );
+  writeFileSync(
+    brightOrangePath,
+    await sharp({
+      create: {
+        width: 2,
+        height: 2,
+        channels: 4,
+        background: { r: 255, g: 128, b: 0, alpha: 1 },
+      },
+    }).png().toBuffer(),
+  );
 });
 
 afterAll(() => { rmSync(work, { recursive: true, force: true }); });
@@ -174,8 +201,34 @@ describe('image filter handoff', () => {
     expect(out.source).toBe(redPath);
     expect(out.node.fillPaints[0].paintFilter).toEqual({
       vibrance: -0.25,
-      ...toneAdjustmentsForBrightness(1.32),
+      // Pure red is saturated below the highlight band, so the retained 75%
+      // of its color receives the continuous dark-color correction.
+      ...toneAdjustmentsForBrightness(1.32, { darkColorRisk: 0.75 }),
     });
+  });
+
+  it('uses Exposure-only for fully source-risky color brightening', async () => {
+    const out = await render({
+      css: 'brightness(1.18)',
+      ops: [{ fn: 'brightness', amount: 1.18 }],
+    }, brightOrangePath);
+
+    expect(out.source).toBe(brightOrangePath);
+    expect(out.node.fillPaints[0].paintFilter).toEqual({
+      exposure: exposureForBrightness(1.18),
+    });
+  });
+
+  it('keeps the measured tone refinement for a neutral source', async () => {
+    const out = await render({
+      css: 'brightness(1.18)',
+      ops: [{ fn: 'brightness', amount: 1.18 }],
+    }, neutralPath);
+
+    expect(out.source).toBe(neutralPath);
+    expect(out.node.fillPaints[0].paintFilter).toEqual(
+      toneAdjustmentsForBrightness(1.18),
+    );
   });
 
   it('warns rather than baking a chain with no editable native equivalent', async () => {

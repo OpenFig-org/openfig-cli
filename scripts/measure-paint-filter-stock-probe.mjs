@@ -8,7 +8,7 @@
  *
  * Usage:
  *   node scripts/measure-paint-filter-stock-probe.mjs reference.pdf \
- *     [--json results.json]
+ *     [--json results.json] [--without-control]
  */
 import { execFileSync } from 'child_process';
 import {
@@ -148,8 +148,11 @@ async function main() {
   }
   const jsonPath = option('--json', '');
   const mode = option('--mode', 'generalization');
-  const profiles = profilesForMode(mode);
-  const plan = probePlanForMode(mode);
+  const withoutControl = process.argv.includes('--without-control');
+  const profiles = profilesForMode(mode)
+    .filter((profile) => !withoutControl || profile.id !== 'control');
+  const plan = probePlanForMode(mode)
+    .filter(({ profile }) => !withoutControl || profile.id !== 'control');
   const scratch = mkdtempSync(join(tmpdir(), 'paint-filter-stock-measure-'));
   try {
     execFileSync(

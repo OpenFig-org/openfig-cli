@@ -24,6 +24,10 @@ import { basename, join, resolve } from 'path';
 import sharp from 'sharp';
 import { sharpImageOps } from '../lib/core/image-utils.mjs';
 import {
+  sourceColorRisk,
+  sourceDarkColorRisk,
+} from '../lib/core/image-analysis.mjs';
+import {
   contrastForCss,
   exposureForBrightness,
   toneAdjustmentsForBrightness,
@@ -79,6 +83,73 @@ export const STOCK_SOURCES = [
       'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Gazania_krebsiana%2C_Quebec_city%2C_Quebec%2C_Canada_131.jpg/1920px-Gazania_krebsiana%2C_Quebec_city%2C_Quebec%2C_Canada_131.jpg',
     sourcePage:
       'https://commons.wikimedia.org/wiki/File:Gazania_krebsiana,_Quebec_city,_Quebec,_Canada_131.jpg',
+  },
+].map((source) => ({
+  ...source,
+  license: 'CC0 1.0',
+  attributionRequired: false,
+}));
+
+/**
+ * Additional CC0 photographs for the source-aware selector. Keep the original
+ * five above stable so the historical 15-page measurements remain
+ * reproducible; this wider set is selected only by `--mode source-aware`.
+ */
+export const SOURCE_AWARE_SOURCES = [
+  ...STOCK_SOURCES,
+  {
+    id: 'red',
+    label: 'Saturated red flower',
+    filename: 'red.jpg',
+    downloadUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/3/3d/Blooming_red_flower.jpg',
+    sourcePage:
+      'https://commons.wikimedia.org/wiki/File:Blooming_red_flower.jpg',
+  },
+  {
+    id: 'blue',
+    label: 'Blue sky',
+    filename: 'blue.jpg',
+    downloadUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/f/f0/Blue_sky_image.jpg',
+    sourcePage:
+      'https://commons.wikimedia.org/wiki/File:Blue_sky_image.jpg',
+  },
+  {
+    id: 'magenta',
+    label: 'Magenta rose',
+    filename: 'magenta.jpg',
+    downloadUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/1/10/Magenta_color_rose.jpg',
+    sourcePage:
+      'https://commons.wikimedia.org/wiki/File:Magenta_color_rose.jpg',
+  },
+  {
+    id: 'green',
+    label: 'Green foliage',
+    filename: 'green.jpg',
+    downloadUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Green_leaves_1.jpg/1280px-Green_leaves_1.jpg',
+    sourcePage:
+      'https://commons.wikimedia.org/wiki/File:Green_leaves_1.jpg',
+  },
+  {
+    id: 'skin',
+    label: 'Natural skin tones',
+    filename: 'skin.jpg',
+    downloadUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Portrait_%2890606475%29.jpeg/1280px-Portrait_%2890606475%29.jpeg',
+    sourcePage:
+      'https://commons.wikimedia.org/wiki/File:Portrait_(90606475).jpeg',
+  },
+  {
+    id: 'mixed',
+    label: 'Mixed saturated colors',
+    filename: 'mixed.jpg',
+    downloadUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Colorful_Bell_Peppers_%28Unsplash%29.jpg/1280px-Colorful_Bell_Peppers_%28Unsplash%29.jpg',
+    sourcePage:
+      'https://commons.wikimedia.org/wiki/File:Colorful_Bell_Peppers_(Unsplash).jpg',
   },
 ].map((source) => ({
   ...source,
@@ -151,15 +222,89 @@ export const COLOR_SAFE_PROFILES = [
   },
 ];
 
+export const SOURCE_AWARE_PROFILES = [
+  {
+    id: 'control',
+    label: 'Control - unmodified source',
+    ops: [],
+    paintFilter: null,
+  },
+  {
+    id: 'global-baseline',
+    label: 'Previous global mapping - brightness(1.18)',
+    ops: [{ fn: 'brightness', amount: MILD_BRIGHTNESS }],
+    paintFilter: toneAdjustmentsForBrightness(MILD_BRIGHTNESS),
+  },
+  {
+    id: 'source-aware',
+    label: 'Automatic source-aware mapping - brightness(1.18)',
+    ops: [{ fn: 'brightness', amount: MILD_BRIGHTNESS }],
+    sourceAware: true,
+  },
+  {
+    id: 'exposure-only',
+    label: 'Exposure-only comparison - brightness(1.18)',
+    ops: [{ fn: 'brightness', amount: MILD_BRIGHTNESS }],
+    paintFilter: {
+      exposure: exposureForBrightness(MILD_BRIGHTNESS),
+    },
+  },
+];
+
+/**
+ * Focused calibration grid for the remaining magenta mean-luminance outlier.
+ * These are research profiles, not production branches: the winning numeric
+ * treatment must still be derived from a source signal before it can ship.
+ */
+export const MAGENTA_REFINEMENT_PROFILES = [
+  ...[0.05, 0.06, 0.07, 0.08, 0.09, 0.10].map((exposure) => ({
+    id: `e-${exposure.toFixed(2)}-s-0.15`,
+    label: `Magenta refinement - E ${exposure.toFixed(2)} H 0.55 S -0.15`,
+    ops: [{ fn: 'brightness', amount: MILD_BRIGHTNESS }],
+    paintFilter: { exposure, highlights: 0.55, shadows: -0.15 },
+  })),
+  ...[0.06, 0.07, 0.08, 0.09].map((exposure) => ({
+    id: `e-${exposure.toFixed(2)}-s-0.30`,
+    label: `Magenta refinement - E ${exposure.toFixed(2)} H 0.55 S -0.30`,
+    ops: [{ fn: 'brightness', amount: MILD_BRIGHTNESS }],
+    paintFilter: { exposure, highlights: 0.55, shadows: -0.30 },
+  })),
+  ...[0.07, 0.08].map((exposure) => ({
+    id: `e-${exposure.toFixed(2)}-s-0.45`,
+    label: `Magenta refinement - E ${exposure.toFixed(2)} H 0.55 S -0.45`,
+    ops: [{ fn: 'brightness', amount: MILD_BRIGHTNESS }],
+    paintFilter: { exposure, highlights: 0.55, shadows: -0.45 },
+  })),
+];
+
 export function profilesForMode(mode) {
   if (mode === 'generalization') return PROFILES;
   if (mode === 'color-safe') return COLOR_SAFE_PROFILES;
+  if (mode === 'source-aware') return SOURCE_AWARE_PROFILES;
+  if (mode === 'magenta-refinement') return MAGENTA_REFINEMENT_PROFILES;
+  throw new Error(`unknown probe mode ${mode}`);
+}
+
+export function sourcesForMode(mode) {
+  if (mode === 'source-aware') return SOURCE_AWARE_SOURCES;
+  if (mode === 'magenta-refinement') {
+    return [SOURCE_AWARE_SOURCES.find((source) => source.id === 'magenta')];
+  }
+  if (mode === 'generalization' || mode === 'color-safe') return STOCK_SOURCES;
   throw new Error(`unknown probe mode ${mode}`);
 }
 
 export function probePlanForMode(mode) {
   return profilesForMode(mode).flatMap((profile) =>
-    STOCK_SOURCES.map((source) => ({ profile, source })));
+    sourcesForMode(mode).map((source) => ({ profile, source })));
+}
+
+export function paintFilterForProfile(profile, sourceProfile = null) {
+  if (!profile.sourceAware) return profile.paintFilter ?? null;
+  return toneAdjustmentsForBrightness(MILD_BRIGHTNESS, {
+    colorRisk: sourceColorRisk(sourceProfile),
+    darkColorRisk: sourceDarkColorRisk(sourceProfile),
+  });
 }
 
 function option(name, fallback) {
@@ -214,7 +359,7 @@ function imagePaint(node) {
   return paint;
 }
 
-async function addPair(slide, normalized, target, profile) {
+async function addPair(slide, normalized, target, profile, paintFilter) {
   await slide.addImage(
     { bytes: target, mime: profile.ops.length ? 'image/png' : 'image/jpeg' },
     {
@@ -231,8 +376,8 @@ async function addPair(slide, normalized, target, profile) {
       scaleMode: 'STRETCH',
     },
   );
-  if (profile.paintFilter) {
-    imagePaint(native).paintFilter = { ...profile.paintFilter };
+  if (paintFilter) {
+    imagePaint(native).paintFilter = { ...paintFilter };
   }
 }
 
@@ -242,25 +387,39 @@ async function main() {
   const assetsDirectory = assetsArg ? resolve(assetsArg) : '';
   const mode = option('--mode', 'generalization');
   const profiles = profilesForMode(mode);
+  const sources = sourcesForMode(mode);
   const plan = probePlanForMode(mode);
   const normalized = new Map();
+  const sourceProfiles = new Map();
 
-  for (const source of STOCK_SOURCES) {
-    normalized.set(
-      source.id,
-      await normalizedPhoto(await sourceBytes(source, assetsDirectory)),
+  for (const source of sources) {
+    const photo = await normalizedPhoto(
+      await sourceBytes(source, assetsDirectory),
     );
+    normalized.set(source.id, photo);
+    if (mode === 'source-aware') {
+      sourceProfiles.set(
+        source.id,
+        await sharpImageOps.analyzeSourceColor(photo),
+      );
+    }
   }
 
   const deck = await Deck.create({
     name: mode === 'generalization'
       ? 'OpenFig editable paint-filter stock-photo probe'
-      : 'OpenFig color-safe paint-filter refinement probe',
+      : mode === 'color-safe'
+        ? 'OpenFig color-safe paint-filter refinement probe'
+        : mode === 'source-aware'
+          ? 'OpenFig source-aware paint-filter validation probe'
+          : 'OpenFig magenta paint-filter refinement probe',
   });
   for (const [index, { profile, source }] of plan.entries()) {
     const slide = deck.addBlankSlide();
     const photo = normalized.get(source.id);
     const target = await cssTarget(photo, profile);
+    const sourceProfile = sourceProfiles.get(source.id);
+    const paintFilter = paintFilterForProfile(profile, sourceProfile);
 
     slide.addText(
       `${String(index + 1).padStart(2, '0')}  ${source.label}`,
@@ -285,6 +444,23 @@ async function main() {
         color: { r: 0.25, g: 0.25, b: 0.25 },
       },
     );
+    if (sourceProfile) {
+      slide.addText(
+        `source signal ${sourceProfile.cssLinearLumaDelta.toFixed(2)} levels`
+          + ` · highlight signal ${sourceProfile.highlightCssLinearLumaDelta.toFixed(2)}`
+          + ` · risk ${(sourceColorRisk(sourceProfile) * 100).toFixed(0)}%`
+          + ` · dark risk ${(sourceDarkColorRisk(sourceProfile) * 100).toFixed(0)}%`
+          + ` · ${JSON.stringify(paintFilter)}`,
+        {
+          x: 110,
+          y: 178,
+          width: 1700,
+          font: 'Inter',
+          fontSize: 17,
+          color: { r: 0.38, g: 0.38, b: 0.38 },
+        },
+      );
+    }
     slide.addText(
       'CSS pixel target',
       {
@@ -307,7 +483,7 @@ async function main() {
         color: { r: 0.2, g: 0.2, b: 0.2 },
       },
     );
-    await addPair(slide, photo, target, profile);
+    await addPair(slide, photo, target, profile, paintFilter);
     slide.addText(
       `Source: ${basename(new URL(source.sourcePage).pathname)} · ${source.license} · Wikimedia Commons`,
       {
@@ -323,10 +499,14 @@ async function main() {
 
   await deck.save(outPath);
   console.log(`wrote ${outPath}`);
-  console.log(`  ${plan.length} slides: ${STOCK_SOURCES.length} CC0 photos × ${profiles.length} profiles`);
+  console.log(`  ${plan.length} slides: ${sources.length} CC0 photos × ${profiles.length} profiles`);
   for (const profile of profiles) {
     console.log(`  ${profile.id}: ${profile.label}`);
-    console.log(`    ${JSON.stringify(profile.paintFilter ?? {})}`);
+    console.log(
+      profile.sourceAware
+        ? '    source-dependent editable paintFilter'
+        : `    ${JSON.stringify(profile.paintFilter ?? {})}`,
+    );
   }
 }
 

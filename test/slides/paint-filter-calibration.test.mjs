@@ -136,6 +136,34 @@ describe('editable brightness tone refinement', () => {
     });
   });
 
+  it('continuously attenuates refinement toward Exposure-only for color risk', () => {
+    expect(toneAdjustmentsForBrightness(1.18, { colorRisk: 0.5 })).toEqual({
+      exposure: 0.1017,
+      highlights: 0.275,
+      shadows: -0.075,
+    });
+    expect(toneAdjustmentsForBrightness(1.18, { colorRisk: 1 })).toEqual({
+      exposure: exposureForBrightness(1.18),
+    });
+  });
+
+  it('adds the measured dark-color correction continuously', () => {
+    expect(toneAdjustmentsForBrightness(1.18, {
+      darkColorRisk: 0.5,
+    })).toEqual({
+      exposure: 0.085,
+      highlights: 0.55,
+      shadows: -0.225,
+    });
+    expect(toneAdjustmentsForBrightness(1.18, {
+      darkColorRisk: 1,
+    })).toEqual({
+      exposure: 0.07,
+      highlights: 0.55,
+      shadows: -0.3,
+    });
+  });
+
   it('interpolates monotonically and clamps the extra controls', () => {
     const seq = [1, 1.05, 1.18, 1.3, 1.55, 1.8, 5]
       .map(toneAdjustmentsForBrightness);

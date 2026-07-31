@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Synthetic source-aware image filter</title>
+<style>
+  html, body { margin: 0; padding: 0; }
+  section {
+    position: absolute;
+    left: 0; top: 0;
+    width: 1920px; height: 1080px;
+    background: #ffffff;
+  }
+  img {
+    position: absolute;
+    top: 180px;
+    width: 480px;
+    height: 640px;
+    object-fit: cover;
+    filter: brightness(1.18);
+  }
+</style>
+</head>
+<body>
+
+<!--
+  Three generated 4x4 PNGs exercise the complete standalone-export path.
+  Bright saturated orange should attenuate the editable tone refinement to
+  Exposure-only; dark saturated magenta should receive the source-aware
+  exposure/shadow correction; neutral gray should keep the global fit. All
+  original assets must remain byte-identical.
+-->
+<script type="__bundler/manifest">{"orange-source":{"mime":"image/png","data":"iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAEklEQVR4nGP438DwHxkzkC4AAFBPJ+HrAPilAAAAAElFTkSuQmCC"},"magenta-source":{"mime":"image/png","data":"iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAEklEQVR4nGP4z/D/PzJmIF0AAFJGL9GxFZDvAAAAAElFTkSuQmCC"},"neutral-source":{"mime":"image/png","data":"iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAEklEQVR4nGMoKSn5j4wZSBcAAPTYJbFsJBCwAAAAAElFTkSuQmCC"}}</script>
+<script type="__bundler/template">"<html><head><title>Synthetic source-aware image filter</title></head><body><section data-screen-label='01 Source aware'><img id='orange' src='orange-source' alt='orange' style='left:120px'><img id='magenta' src='magenta-source' alt='magenta' style='left:720px'><img id='neutral' src='neutral-source' alt='neutral' style='left:1320px'></section></body></html>"</script>
+
+<script>
+(function () {
+  var raw = document.querySelector('script[type="__bundler/template"]').textContent;
+  var html = JSON.parse(raw);
+  var body = html.replace(/[\s\S]*<body[^>]*>/i, '').replace(/<\/body>[\s\S]*/i, '');
+  document.body.insertAdjacentHTML('afterbegin', body);
+
+  var assets = JSON.parse(document.querySelector('script[type="__bundler/manifest"]').textContent);
+  Object.keys(assets).forEach(function (uuid) {
+    var bin = atob(assets[uuid].data);
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    var url = URL.createObjectURL(new Blob([bytes], { type: assets[uuid].mime }));
+    var image = document.querySelector('img[src="' + uuid + '"]');
+    if (image) image.src = url;
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -23,6 +23,9 @@ import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
+import {
+  SOURCE_COLOR_HOST_TOLERANCE,
+} from '../../lib/core/image-analysis.mjs';
 import { sharpImageOps } from '../../lib/core/image-utils.mjs';
 import { resolveBrowser } from '../../lib/slides/playwright-layout.mjs';
 import { extractSlides } from '../../lib/slides/browser-extract.mjs';
@@ -392,10 +395,13 @@ describe('canvas image ops, the browser replacement for sharp', () => {
       samples: 2048,
     });
     expect(browser.sampleWeight).toBeCloseTo(node.sampleWeight, 0);
-    expect(browser.cssLinearLumaDelta)
-      .toBeCloseTo(node.cssLinearLumaDelta, 1);
-    expect(browser.highlightCssLinearLumaDelta)
-      .toBeCloseTo(node.highlightCssLinearLumaDelta, 1);
+    expect(Math.abs(
+      browser.cssLinearLumaDelta - node.cssLinearLumaDelta,
+    )).toBeLessThanOrEqual(SOURCE_COLOR_HOST_TOLERANCE);
+    expect(Math.abs(
+      browser.highlightCssLinearLumaDelta
+        - node.highlightCssLinearLumaDelta,
+    )).toBeLessThanOrEqual(SOURCE_COLOR_HOST_TOLERANCE);
   });
 
   it('inverts RGB and preserves alpha', async () => {

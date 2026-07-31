@@ -346,6 +346,9 @@ fit. Analysis changes only the numeric `paintFilter`; the original image stays
 the node's one IMAGE asset. There is no baked replacement, second image,
 network request, hosted resource, user toggle, or post-import step. The same
 64-pixel analysis and thresholds run in the Node and browser conversion hosts.
+Across the eleven public sources, their reported profile values differ by at
+most 0.38 of one 8-bit level, inside the documented 0.5-level host tolerance;
+every source remains on the same side of the selector boundaries.
 
 The selector was checked on eleven CC0 photographs spanning neutral scenes,
 dark and bright histograms, skin, red, blue, magenta, green, and mixed

@@ -258,6 +258,24 @@ describe('contrast validation', () => {
     expect(contrastWarnings.length).toBe(1);
   });
 
+  it('treats a zero-opacity fill as transparent and inherits from parent', () => {
+    // FlexContainer frames get { opacity: 0, visible: true } by default.
+    // Text inside must compare against the slide, not the transparent black.
+    const container = makeNode('FRAME', 'transparent container', slideGuid, {
+      fillPaints: [solidPaint(0, 0, 0, { opacity: 0 })],
+    });
+    // Dark text: good against white slide (~12.6:1), bad against black (~1.7:1).
+    const text = makeNode('TEXT', 'dark text', container.guid, {
+      fillPaints: [solidPaint(0.2, 0.2, 0.2)],
+    });
+    injectNode(fd, container);
+    injectNode(fd, text);
+    fd.rebuildMaps();
+
+    const warnings = validate();
+    expect(warnings.filter(w => w.includes('contrast ratio'))).toEqual([]);
+  });
+
   it('follows INSTANCE → SYMBOL and carries the background through', () => {
     // Place a dark frame on the slide, then an INSTANCE inside it whose
     // SYMBOL contains white text. The text should compare against the dark

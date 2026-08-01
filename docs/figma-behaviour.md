@@ -1,8 +1,13 @@
-# What Figma actually does
+# Deck compatibility notes
 
 Observed compatibility behavior for `.deck` files. Figma's public Plugin and
 REST APIs describe a narrower surface than the file format carries, so this
 document also records relevant file-format behavior.
+
+*Method.* Everything below is observed from files this project writes and
+reads: OpenFig generates a `.deck`, round-trips it, and measures the exported
+result. Schema and API details come from Figma's published documentation and
+from the structures the files carry themselves.
 
 ---
 
@@ -19,8 +24,8 @@ Consequence: a deck must never name a face the family lacks. Instrument Serif
 ships one weight; `Instrument Serif Bold` is not a font. Space Grotesk ships no
 italic.
 
-*Measured:* Figma's own replacement dropdown offers only the styles a family
-has — Regular and Italic for Instrument Serif, no Bold.
+*Observed:* the replacement dropdown offers only the styles a family has —
+Regular and Italic for Instrument Serif, no Bold.
 
 ### A weight in Google Fonts is not a named instance in Figma
 
@@ -28,7 +33,7 @@ Google serves Space Grotesk at 300, 400, 500, 600 and 700. Figma's font picker
 offers Light, Regular, Medium and Bold for it — **no SemiBold**. So Google's
 weight list cannot be used to decide which style names are safe to write.
 
-Figma's own font-file archive shows the same thing across families: some expose
+The same pattern holds across families in the published font data: some expose
 the full nine-step ladder, others four or five, and the count comes from the
 font's own named instances rather than any fixed scheme.
 
@@ -102,11 +107,75 @@ A bare `~` is a legitimate position and appears on the canvas in working decks.
 
 ---
 
+## Vector networks (`vectorNetworkBlob`)
+
+`vectorData.vectorNetworkBlob` is the editable vector network: vertices,
+segments carrying bezier tangent deltas, and regions grouping segment indices
+into closed loops. Figma does not document the binary format; the layout below
+is verified byte-exact on Figma-authored blobs (17 across 6 files, format
+versions 101 and 106). It applies to `.fig` and `.deck` alike.
+
+```
+header   12B : vertexCount  segmentCount  regionCount        (u32 × 3)
+vertex   12B : handleMirroring(u32)  x(f32)  y(f32)
+segment  28B : word0(u32)  startVertex(u32)  tsx(f32)  tsy(f32)
+              endVertex(u32)  tex(f32)  tey(f32)
+region       : packed(u32)  numLoops(u32)
+               per loop: segCount(u32) + segIndex(u32) × segCount
+```
+
+`packed` decodes as `windingRule = packed & 1` and `styleID = packed >> 1`; in
+every reference region `packed === 1`.
+
+### Curve-ness is in the tangents, not a type field
+
+The segment's leading `word0` is `0` on curved and straight segments alike —
+verified on a deliberately straight 64-byte fixture and on curved segments
+throughout. Same value, opposite geometry, so it cannot be a segment type. A
+segment is straight **iff all four tangent components are zero**; otherwise it
+is a cubic. The rasterizer once classified on that word and flattened every
+curve into a polygon wherever the vector network was the only geometry
+(stroke-only nodes). Pinned by `test/rasterizer/decode-vnb.test.mjs`.
+
+### The vertex word is handle-mirroring, not padding
+
+The vertex's leading word is Figma's handle-mirroring mode; observed values are
+`0` and `1`. It does not affect rendered geometry, but it is not padding — a
+byte-identical round-trip of `curvy-squiggle.fig` failed at 13 of 16 vertex
+slots until the value was preserved verbatim. openfig's own encoder once wrote
+`4` here, a value Figma never emits.
+
+### A rotated layout looks correct until you round-trip it
+
+openfig's original encoder wrote a one-word rotation of this layout: a 16-byte
+header, vertices as `[x, y, mirroring]`, segments as `[startVertex, …, type]`,
+and a per-region trailing word. The extra header word and the field rotation
+cancel, so x/y and tangents land at **identical absolute offsets** under both
+layouts. Decoded coordinates look right, the byte count comes out exact, and
+even a geometry comparison against a trusted oracle agrees — none of these can
+distinguish the layouts. Two things can: a blob with `regionCount == 0` (its
+total size then pins the header at 12 bytes), and a byte-identical
+decode→re-encode round-trip. The round-trip is the acceptance criterion
+openfig-core now holds the format to (17/17), because it needs no theory of what
+each field means — only that we put back what we found.
+
+*Method note:* the rotated layout was a durability cliff, not a rendering bug.
+The format is undocumented; Figma has every incentive to stay compatible with
+bytes its own libraries write and none to preserve anything else. A single scan
+for the value `4` separated openfig-written files from Figma-written ones, and
+the region block was worse than a fingerprint — it was a structure Figma would
+misparse on import. "No harm observed today" is the weakest available guarantee
+for an undocumented format; byte-identical round-tripping is the one that holds
+even where the format is not fully understood.
+
+---
+
 ## Image paints
 
 ### `paintFilter` is read; `filterColorAdjust` is ignored
 
-`Paint` carries both. Sweeping `exposure` from -1 to 1 through each:
+`Paint` carries both. Round-tripping a deck with `exposure` swept from -1 to 1
+through each field:
 
 | field | luminance across the sweep |
 |---|---|
@@ -162,7 +231,7 @@ against the ceiling. CSS's clipping means brightness does not necessarily
 expand a real photograph's measured spread even though the unclipped operation
 is a gain; the reliable distinction is the shape of the two transfer functions.
 
-Measured on a 32-band ramp at exposure 0.5:
+Measured on an exported 32-band ramp deck at exposure 0.5:
 
 | input | 8 | 62 | 124 | 185 | 247 |
 |---|---|---|---|---|---|

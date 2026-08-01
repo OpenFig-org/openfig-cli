@@ -282,9 +282,39 @@ paths are filled with the stroke color.
 ### VNB Fallback
 
 When neither `fillGeometry` nor `strokeGeometry` exists, the renderer falls back
-to decoding `vectorData.vectorNetworkBlob` — a binary format storing vertices,
-bezier segments, and regions. See `memory/reference_vnb_format.md` for the full
-binary layout.
+to decoding `vectorData.vectorNetworkBlob` (VNB) — the editable vector network.
+This is the only geometry source for stroke-only vector nodes, so a decoding bug
+here renders those nodes as the wrong shape.
+
+The blob is little-endian, layout verified byte-exact on Figma-authored blobs:
+
+```
+header   12B : vertexCount(u32)  segmentCount(u32)  regionCount(u32)
+vertex   12B : handleMirroring(u32)  x(f32)  y(f32)
+segment  28B : word0(u32)  startVertex(u32)  tsx(f32)  tsy(f32)
+              endVertex(u32)  tex(f32)  tey(f32)
+region       : packed(u32)  numLoops(u32)
+               per loop: segCount(u32)  segIndex(u32) × segCount
+```
+
+- `packed` = `styleID<<1 | windingRule` (`windingRule = packed & 1`,
+  `styleID = packed >> 1`).
+- The vertex's leading word is Figma's **handle-mirroring** mode (observed `0`
+  and `1`). It does not affect geometry.
+- The segment's leading `word0` is `0` throughout Figma output; its meaning is
+  unknown and it is never read.
+
+**Curve classification is by tangents, not a type field.** A segment is a
+straight line iff all four tangent components are zero
+(`tsx === 0 && tsy === 0 && tex === 0 && tey === 0`); otherwise it is a cubic
+whose control points are the endpoints offset by their tangents. There is no
+segment-type word — `word0` is `0` on curved and straight segments alike, so a
+decoder that classifies on it flattens every curve into a line. That was a real
+bug in `decodeVnb` (fixed); it is pinned by `test/rasterizer/decode-vnb.test.mjs`.
+
+This layout matches the encoder in `openfig-core` (`parseVectorNetworkBlob` /
+`encodeVectorNetwork`; see `openfig-core/docs/vector.md`), which reproduces
+Figma-authored blobs byte-for-byte.
 
 ## INSTANCE Nodes (Symbol Resolution)
 

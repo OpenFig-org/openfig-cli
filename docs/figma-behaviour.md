@@ -147,7 +147,7 @@ slots until the value was preserved verbatim. openfig's own encoder once wrote
 
 ### A rotated layout looks correct until you round-trip it
 
-openfig's original encoder wrote a one-word rotation of this layout: a 16-byte
+openfig's original encoders wrote a one-word rotation of this layout: a 16-byte
 header, vertices as `[x, y, mirroring]`, segments as `[startVertex, …, type]`,
 and a per-region trailing word. The extra header word and the field rotation
 cancel, so x/y and tangents land at **identical absolute offsets** under both
@@ -158,6 +158,21 @@ total size then pins the header at 12 bytes), and a byte-identical
 decode→re-encode round-trip. The round-trip is the acceptance criterion
 openfig-core now holds the format to (17/17), because it needs no theory of what
 each field means — only that we put back what we found.
+
+There are **two** emitters, and both now write the layout above. `openfig-core`'s
+`encodeVectorNetworkBlob` is the library API; `_buildVectorNetworkBlob` in
+`lib/slides/api-core.mjs` is the one every `.deck` this CLI produces actually goes
+through, and it builds vector networks independently rather than calling into
+openfig-core. Fixing only the library would have left every user-facing deck
+carrying the old fingerprint, so the two are pinned separately:
+`test/slides/vector-network-layout.test.mjs` holds this package's emitter to the
+layout, and openfig-core's round-trip test holds the library's.
+
+Note that byte-exact consumption alone does not pin the field order — a rotated
+vertex record has the same 12-byte stride and still consumes the blob exactly.
+That test also asserts the decoded coordinates span a real bounding box, which is
+what a rotation actually breaks: it reads an integer word where a float belongs
+and the geometry collapses.
 
 *Method note:* the rotated layout was a durability cliff, not a rendering bug.
 The format is undocumented; Figma has every incentive to stay compatible with

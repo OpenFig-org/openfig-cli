@@ -5,6 +5,21 @@ All notable changes to `openfig-cli` are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **Curved vector paths rendered as straight-line polygons wherever a node's only geometry was its `vectorNetworkBlob`.** The rasterizer classified a segment as a straight line by reading a word out of the segment record and testing it against zero. In Figma-authored blobs that word is `0` on curved segments too, so the curvature was discarded and the path collapsed to a polygon with the correct endpoints. A segment is straight if and only if all four bezier tangent components are zero — there is no segment-type field. This affected stroke-only vectors, which carry neither `fillGeometry` nor `strokeGeometry`, in both `.deck` and `.fig`. It went unnoticed because openfig's own emitter wrote a non-zero value in that word, so the old rule happened to classify openfig-produced geometry correctly and no fixture exposed it.
+
+### Changed
+
+- **Emitted `vectorNetworkBlob` bytes now match the layout Figma itself writes.** `_buildVectorNetworkBlob` previously wrote a one-word rotation of that layout — a 16-byte header, vertices as `[x, y, mirroring]`, segments as `[startVertex, …, type]`, and a per-region trailing word — plus the constant `4` in the mirroring and type slots, a value that appears in none of the reference blobs. The rotation cancels for coordinates, so files opened and rendered correctly, but the structure was distinguishable from Figma's own on inspection and the region block would not have read back the same way. Output is now a 12-byte header, `[handleMirroring, x, y]` vertices, `[word0, startVertex, tsx, tsy, endVertex, tex, tey]` segments, and regions as `[styleID<<1|windingRule, numLoops, (segCount, indices)…]`. Rendering is unaffected: the rasterizer reference reports are pixel-identical.
+
+### Added
+
+- **Conformance tests for the vector network binary format.** `test/slides/vector-network-layout.test.mjs` holds the deck emitter to Figma's layout, and `test/rasterizer/decode-vnb.test.mjs` pins curve classification. Both build blobs deliberately rather than reading fixtures, because no fixture reaches these paths with Figma-authored geometry. Byte-exact consumption alone does not pin the field order — a rotated record has the same stride and still consumes the blob exactly — so the layout test also asserts that decoded coordinates span a real bounding box, which is what a rotation actually breaks.
+- `docs/figma-behaviour.md` documents the verified format, why byte accounting and geometry comparison both fail to discriminate rotated layouts, and which of the two emitters produces user-facing decks.
+
 ## [0.5.1] - 2026-07-27
 
 ### Fixed

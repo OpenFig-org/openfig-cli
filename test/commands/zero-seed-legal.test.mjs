@@ -1,6 +1,6 @@
 /**
  * Legal assertion tests — ensure decks produced by the zero-seed pipeline
- * contain no Figma-authored theme content (strings, node names, VARIABLE_SET
+ * contain no reference theme content (strings, node names, VARIABLE_SET
  * nodes) extracted from a real Figma Slides document.
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -96,7 +96,7 @@ describe('zero-seed deck — legal assertions', () => {
     expect(styleNames).toEqual(expect.arrayContaining(['Heading', 'Body', 'Caption']));
   });
 
-  it('does not contain Figma-authored named TEXT styles under Internal Only Canvas', async () => {
+  it('does not contain reference named TEXT styles under Internal Only Canvas', async () => {
     const fd = await FigDeck.fromDeckFile(deckPath);
     const internal = fd.message.nodeChanges.find(
       n => n.type === 'CANVAS' && n.name === 'Internal Only Canvas',

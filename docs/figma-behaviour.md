@@ -112,7 +112,7 @@ A bare `~` is a legitimate position and appears on the canvas in working decks.
 `vectorData.vectorNetworkBlob` is the editable vector network: vertices,
 segments carrying bezier tangent deltas, and regions grouping segment indices
 into closed loops. Figma does not document the binary format; the layout below
-is verified byte-exact on Figma-authored blobs (43 across 7 files, format
+is verified byte-exact on reference blobs (43 across 7 files, format
 versions 101 and 106). It applies to `.fig` and `.deck` alike.
 
 ```
@@ -190,7 +190,7 @@ and the geometry collapses.
 *Method note:* the rotated layout was a durability cliff, not a rendering bug.
 The format is undocumented; Figma has every incentive to stay compatible with
 bytes its own libraries write and none to preserve anything else. A single scan
-for the value `4` separated openfig-written files from Figma-written ones, and
+for the value `4` separated openfig-written files from reference ones, and
 the region block was worse than a fingerprint — it was a structure Figma would
 misparse on import. "No harm observed today" is the weakest available guarantee
 for an undocumented format; byte-identical round-tripping is the one that holds

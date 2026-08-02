@@ -286,7 +286,7 @@ to decoding `vectorData.vectorNetworkBlob` (VNB) — the editable vector network
 This is the only geometry source for stroke-only vector nodes, so a decoding bug
 here renders those nodes as the wrong shape.
 
-The blob is little-endian, layout verified byte-exact on Figma-authored blobs:
+The blob is little-endian, layout verified byte-exact on reference blobs:
 
 ```
 header   12B : vertexCount(u32)  segmentCount(u32)  regionCount(u32)
@@ -314,7 +314,7 @@ bug in `decodeVnb` (fixed); it is pinned by `test/rasterizer/decode-vnb.test.mjs
 
 This layout matches the encoder in `openfig-core` (`parseVectorNetworkBlob` /
 `encodeVectorNetwork`; see `openfig-core/docs/vector.md`), which reproduces
-Figma-authored blobs byte-for-byte.
+reference blobs byte-for-byte.
 
 ## INSTANCE Nodes (Symbol Resolution)
 

@@ -4,14 +4,14 @@
  * decodeVnb is the only geometry source for stroke-only vector nodes — those with
  * neither fillGeometry nor strokeGeometry. It previously classified a segment as a
  * straight line by reading a word out of the segment record and testing it against
- * zero. In Figma-authored blobs that word is 0 on curved segments too, so curves
+ * zero. In reference blobs that word is 0 on curved segments too, so curves
  * collapsed into straight-line polygons.
  *
  * The correct rule: a segment is straight if and only if all four bezier tangent
  * components are zero.
  *
  * These blobs are hand-built rather than taken from a fixture, deliberately. No deck
- * fixture reaches this path with Figma-authored geometry: openfig's own converter
+ * fixture reaches this path with reference geometry: openfig's own converter
  * writes a non-zero value in that word, so the old rule happened to classify its
  * output correctly and no rendering difference was observable. Only a blob shaped
  * like Figma's — curved tangents alongside word0 === 0 — exercises the regression.
@@ -27,7 +27,7 @@ import { decodeVnb } from '../../lib/rasterizer/svg-builder.mjs';
  *   segment 28B : word0, startVertex, tsx(f32), tsy(f32), endVertex, tex(f32), tey(f32)
  *   region      : packed(styleID<<1|winding), numLoops, then per loop: segCount, indices
  *
- * word0 is written as 0 throughout, matching Figma-authored output — this is the
+ * word0 is written as 0 throughout, matching reference output — this is the
  * value that made the old classification rule fail.
  */
 function buildVnb({ vertices, segments, regions }) {

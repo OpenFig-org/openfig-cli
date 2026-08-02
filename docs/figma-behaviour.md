@@ -112,12 +112,12 @@ A bare `~` is a legitimate position and appears on the canvas in working decks.
 `vectorData.vectorNetworkBlob` is the editable vector network: vertices,
 segments carrying bezier tangent deltas, and regions grouping segment indices
 into closed loops. Figma does not document the binary format; the layout below
-is verified byte-exact on Figma-authored blobs (17 across 6 files, format
+is verified byte-exact on Figma-authored blobs (43 across 7 files, format
 versions 101 and 106). It applies to `.fig` and `.deck` alike.
 
 ```
 header   12B : vertexCount  segmentCount  regionCount        (u32 × 3)
-vertex   12B : handleMirroring(u32)  x(f32)  y(f32)
+vertex   12B : styleID(u32)  x(f32)  y(f32)
 segment  28B : word0(u32)  startVertex(u32)  tsx(f32)  tsy(f32)
               endVertex(u32)  tex(f32)  tey(f32)
 region       : packed(u32)  numLoops(u32)
@@ -137,13 +137,26 @@ is a cubic. The rasterizer once classified on that word and flattened every
 curve into a polygon wherever the vector network was the only geometry
 (stroke-only nodes). Pinned by `test/rasterizer/decode-vnb.test.mjs`.
 
-### The vertex word is handle-mirroring, not padding
+### The vertex word is a styleOverrideTable index, not padding
 
-The vertex's leading word is Figma's handle-mirroring mode; observed values are
-`0` and `1`. It does not affect rendered geometry, but it is not padding — a
-byte-identical round-trip of `curvy-squiggle.fig` failed at 13 of 16 vertex
+The vertex's leading word is a `styleID` — an index into the node's
+`vectorData.styleOverrideTable`, where `0` means "no override". Observed values
+are `0`, `1` and `2`. It does not affect rendered geometry, but it is not padding
+— a byte-identical round-trip of `curvy-squiggle.fig` failed at 13 of 16 vertex
 slots until the value was preserved verbatim. openfig's own encoder once wrote
 `4` here, a value Figma never emits.
+
+It was read as a handle-mirroring enum for a long time, and that reading was
+untestable against real-world files: the only non-zero value anywhere in the
+corpus was `1`, and `VectorMirror.ANGLE` is also `1`. Adding a fixture with 26,491
+more segments did not help, because the field simply never varied. A purpose-made
+file settled it — three pen-tool points with the middle vertex given a corner
+radius of 20 — whose vertices read `[0, 2, 1]` against a table entry
+`{styleID: 2, cornerRadius: 20}`.
+
+The general lesson, which cost most of a session: **a field that is constant
+across all your evidence cannot be identified by gathering more of it.** Author
+the smallest input that forces it to vary.
 
 ### A rotated layout looks correct until you round-trip it
 
@@ -156,7 +169,7 @@ even a geometry comparison against a trusted oracle agrees — none of these can
 distinguish the layouts. Two things can: a blob with `regionCount == 0` (its
 total size then pins the header at 12 bytes), and a byte-identical
 decode→re-encode round-trip. The round-trip is the acceptance criterion
-openfig-core now holds the format to (17/17), because it needs no theory of what
+openfig-core now holds the format to (43/43), because it needs no theory of what
 each field means — only that we put back what we found.
 
 There are **two** emitters, and both now write the layout above. `openfig-core`'s

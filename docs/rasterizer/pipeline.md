@@ -290,7 +290,7 @@ The blob is little-endian, layout verified byte-exact on Figma-authored blobs:
 
 ```
 header   12B : vertexCount(u32)  segmentCount(u32)  regionCount(u32)
-vertex   12B : handleMirroring(u32)  x(f32)  y(f32)
+vertex   12B : styleID(u32)  x(f32)  y(f32)
 segment  28B : word0(u32)  startVertex(u32)  tsx(f32)  tsy(f32)
               endVertex(u32)  tex(f32)  tey(f32)
 region       : packed(u32)  numLoops(u32)

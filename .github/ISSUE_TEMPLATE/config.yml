@@ -4,9 +4,9 @@ contact_links:
     url: https://github.com/orgs/OpenFig-org/projects/1
     about: >
       Priority, Status and Size live on the project board; type and area live as labels on
-      the issue. Please do not add priority labels — they drift from the board within a week.
-  - name: Measured Figma behaviour
+      the issue. Please do not add priority labels, since they drift from the board within a week.
+  - name: Deck compatibility notes
     url: https://github.com/OpenFig-org/openfig-cli/blob/main/docs/figma-behaviour.md
     about: >
-      What Figma actually does with a .deck, established by measurement rather than
-      documentation. Worth checking before filing — the surprising behaviour may be known.
+      How .deck files behave in practice, recorded from round-tripping OpenFig's own
+      output. Worth checking before filing, since the surprising behaviour may be known.

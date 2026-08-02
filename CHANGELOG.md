@@ -5,15 +5,21 @@ All notable changes to `openfig-cli` are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.6.0] - 2026-08-02
 
 ### Fixed
 
+- **Contrast lint compared every text node against the slide background instead of what is actually painted behind it.** Light text on a dark card was measured against the white slide and flagged as low-contrast — up to 37 false warnings on a single fixture. The check now carries an effective background through the tree walk and resolves the nearest painted ancestor. Solid fills update the comparison colour; image and gradient fills suppress the check for their subtree, since there is no meaningful ratio against a non-uniform backdrop. (#7)
+- **Zero-opacity fills were treated as opaque black by the contrast lint.** `FlexContainer` frames default to `{ opacity: 0, visible: true }` fills, which overrode the real slide background for every descendant text node — the main source of the false warnings above. Paints with `opacity === 0` are now skipped so the parent background shows through.
+- **A bold request could resolve onto a weight the family does not ship.** `mapFontStyle` and the measurement surface each encoded the same two-weight vocabulary independently and had already drifted: the clamp picked a weight the handoff then wrote as `"Bold"`, naming a face that does not exist. Both now derive from a single `NAMEABLE_WEIGHTS` constant in `font-normalize.mjs`. (#8)
 - **Curved vector paths rendered as straight-line polygons wherever a node's only geometry was its `vectorNetworkBlob`.** The rasterizer classified a segment as a straight line by reading a word out of the segment record and testing it against zero. In Figma-authored blobs that word is `0` on curved segments too, so the curvature was discarded and the path collapsed to a polygon with the correct endpoints. A segment is straight if and only if all four bezier tangent components are zero — there is no segment-type field. This affected stroke-only vectors, which carry neither `fillGeometry` nor `strokeGeometry`, in both `.deck` and `.fig`. It went unnoticed because openfig's own emitter wrote a non-zero value in that word, so the old rule happened to classify openfig-produced geometry correctly and no fixture exposed it.
 
 ### Changed
 
-- **Emitted `vectorNetworkBlob` bytes now match the layout Figma itself writes.** `_buildVectorNetworkBlob` previously wrote a one-word rotation of that layout — a 16-byte header, vertices as `[x, y, mirroring]`, segments as `[startVertex, …, type]`, and a per-region trailing word — plus the constant `4` in the mirroring and type slots, a value that appears in none of the reference blobs. The rotation cancels for coordinates, so files opened and rendered correctly, but the structure was distinguishable from Figma's own on inspection and the region block would not have read back the same way. Output is now a 12-byte header, `[handleMirroring, x, y]` vertices, `[word0, startVertex, tsx, tsy, endVertex, tex, tey]` segments, and regions as `[styleID<<1|windingRule, numLoops, (segCount, indices)…]`. Rendering is unaffected: the rasterizer reference reports are pixel-identical.
+- **Emitted `vectorNetworkBlob` bytes now match the layout Figma itself writes.** `_buildVectorNetworkBlob` previously wrote a one-word rotation of that layout — a 16-byte header, vertices as `[x, y, mirroring]`, segments as `[startVertex, …, type]`, and a per-region trailing word — plus the constant `4` in the mirroring and type slots, a value that appears in none of the reference blobs. The rotation cancels for coordinates, so files opened and rendered correctly, but the structure was distinguishable from Figma's own on inspection and the region block would not have read back the same way. Output is now a 12-byte header, `[styleID, x, y]` vertices, `[word0, startVertex, tsx, tsy, endVertex, tex, tey]` segments, and regions as `[styleID<<1|windingRule, numLoops, (segCount, indices)…]`. Rendering is unaffected: the rasterizer reference reports are pixel-identical.
+- **Vector network and path-command encoding now come from `openfig-core`.** This package carried its own `vectorNetworkBlob` encoder, its own decoder, and a byte-for-byte duplicate of `encodeCommandsBlob`. That duplication is what allowed a wrong layout to live in one copy while the other was right — each looked self-consistent because it only ever round-tripped against itself. `lib/slides/api-core.mjs` now contains no raw byte manipulation at all, and `decodeVnb` is a thin adapter that scales coordinates and emits path commands. Verified equivalent before removal: emitted bytes identical across filled, multi-subpath and open stroked paths, and rendering unchanged at 0 of 2,073,600 pixels.
+- **`decodeVnb` returns `null` when a blob will not parse.** Previously it stopped mid-walk and emitted whatever it had read. Geometry that cannot be accounted for byte-for-byte now falls through to the caller's placeholder rather than being rendered half-read.
+- **Requires `openfig-core` ^0.4.1**, up from ^0.3.8 — for the aligned encoder, the corrected sub-path grouping, and the `emitRegions` option that open stroked paths need.
 
 ### Added
 
@@ -190,6 +196,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Pre-`convert-html` baseline. Earlier 0.3.x versions are not catalogued
 here; see `git log --tags='*0.3.*'` for the full history.
 
+[0.6.0]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.6.0
 [0.5.1]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.5.1
 [0.5.0]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.5.0
 [0.4.7]: https://github.com/OpenFig-org/openfig-cli/releases/tag/npm-v0.4.7

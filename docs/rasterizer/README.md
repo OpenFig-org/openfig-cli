@@ -48,16 +48,20 @@ remaining sub-1% delta is rasterizer noise that no human can see.
 ## Quick Start
 
 ```javascript
-import { FigDeck } from 'openfig/lib/fig-deck.mjs';
-import { renderDeck, registerFont } from 'openfig/lib/rasterizer/deck-rasterizer.mjs';
+import { FigDeck } from 'openfig-cli/deck';
+import { nid } from 'openfig-cli/node-helpers';
+import { frameToSvg, svgToPng } from 'openfig-cli/rasterizer';
 
-const deck = await FigDeck.fromDeckFile('slides.deck');
+const fig = await FigDeck.fromDeckFile('design.fig');
+const page = fig.getPages()[0];
+const frame = fig.getChildren(nid(page))
+  .find(node => node.type === 'FRAME');
 
-// Optional: register custom fonts before rendering
-registerFont('/path/to/CustomFont.woff2');
-
-const slides = await renderDeck(deck, { scale: 0.5 }); // 960x540 thumbnails
-for (const { index, png } of slides) {
-  writeFileSync(`slide-${index}.png`, png);
-}
+const svg = frameToSvg(fig, frame);
+const png = await svgToPng(svg, { scale: 1 });
+writeFileSync('frame.svg', svg);
+writeFileSync('frame.png', png);
 ```
+
+`openfig-cli/rasterizer` is the supported package boundary for frame SVG and
+PNG export. Internal files under `lib/rasterizer/` are not public entry points.

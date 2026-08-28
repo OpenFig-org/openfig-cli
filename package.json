@@ -14,6 +14,7 @@
     "./node-helpers": "./lib/core/node-helpers.mjs",
     "./image-helpers": "./lib/core/image-helpers.mjs",
     "./deep-clone": "./lib/core/deep-clone.mjs",
+    "./rasterizer": "./lib/rasterizer/api.mjs",
     "./mcp-server": "./mcp-server.mjs",
     "./package.json": "./package.json"
   },

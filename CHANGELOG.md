@@ -5,6 +5,12 @@ All notable changes to `openfig-cli` are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **A supported `openfig-cli/rasterizer` package boundary for Figma Design frame export.** Consumers can import `frameToSvg` and `svgToPng` without reaching into `lib/rasterizer` internals.
+
 ## [0.6.0] - 2026-08-02
 
 ### Fixed
